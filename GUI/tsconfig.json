@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+      "lib": ["es2020", "DOM"],
+      "module": "commonjs",
+      "target": "es6",
+      "noImplicitAny": true,
+      "outDir": "build",
+      "sourceMap": true,   
+      "declaration": false,
+      "moduleResolution": "node"
+  },
+  "exclude": ["webpack*", "dist", "build"],
+}
