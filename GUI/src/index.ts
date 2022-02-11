@@ -45,9 +45,10 @@ function createSerialWindow() {
     serialWindow = new BrowserWindow({
         width: 400,
         height: 300,
-        title: 'Serial Connect'
+        title: 'Serial Connect',
     });
     serialWindow.loadURL(`file://${__dirname}/serial.html`);
+    serial_communicate(serialWindow);    
 }
 
 // Template for menu
