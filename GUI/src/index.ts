@@ -3,13 +3,13 @@ import * as SerialPort from "serialport"
 import * as path from 'path';
 
 // Initializes windows as main windows.
-let mainWinow;
-let serialWindow;
+let mainWinow : BrowserWindow;
+let serialWindow : BrowserWindow;
 
 
 app.on('ready', () => {
     console.log('App is ready');
-    const win = new BrowserWindow({
+    mainWinow = new BrowserWindow({
         width: 600,
         height: 400,
         webPreferences: {
@@ -20,8 +20,8 @@ app.on('ready', () => {
     }); 
 
     const indexHTML = path.join(__dirname + '/index.html');
-    win.loadFile(indexHTML).then(() => {
-        serial_communicate(win);
+    mainWinow.loadFile(indexHTML).then(() => {
+        serial_communicate(mainWinow);
     }).catch(e => console.error(e));
 
     // Builds menu template and renders it in the main window
@@ -48,7 +48,7 @@ function createSerialWindow() {
         title: 'Serial Connect',
     });
     serialWindow.loadURL(`file://${__dirname}/serial.html`);
-    serial_communicate(serialWindow);    
+    serial_communicate(serialWindow);
 }
 
 // Template for menu
@@ -62,6 +62,11 @@ const menuTemplate = [
                 label: 'Quit',
                 accelerator: 'ctrl+Q',
                 click() { app.quit(); }
+            },
+            {
+                label: 'Debug',
+                accelerator: 'F12',
+                click() { mainWinow.webContents.openDevTools() }
             }
         ]
     },
