@@ -46,6 +46,11 @@ function createSerialWindow() {
         width: 400,
         height: 300,
         title: 'Serial Connect',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+        }
     });
     serialWindow.loadURL(`file://${__dirname}/serial.html`);
     serial_communicate(serialWindow);
