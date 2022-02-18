@@ -1,12 +1,11 @@
-import { app, BrowserWindow, Menu } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import * as SerialPort from "serialport"
 import * as path from 'path';
-import { mainMenu as makeMainMenu, mainWindowTemplate, serialMenu as makeSerialMenu, serialWindowTemplate } from './menuTemplate';
-
+import { makeMainMenu, makeSerialMenu } from './menuTemplate';
 // Initializes windows as main windows.
 let mainWindow : BrowserWindow;
 let serialWindow : BrowserWindow;
-
+let serial_port : SerialPort;
 
 app.on('ready', () => {
     console.log('App is ready');
@@ -21,9 +20,7 @@ app.on('ready', () => {
     }); 
 
     const indexHTML = path.join(__dirname + '/index.html');
-    mainWindow.loadFile(indexHTML).then(() => {
-        serial_communicate(mainWindow);
-    }).catch(e => console.error(e));
+    mainWindow.loadFile(indexHTML);
     // Builds menu template and renders it in the main window
     mainWindow.setMenu(makeMainMenu(mainWindow));
 });
@@ -37,9 +34,6 @@ function serial_communicate(window: BrowserWindow){
         const ports = await SerialPort.list();
         window.webContents.send("serial", JSON.stringify(ports));
     }, 1000);
-    // const port = new SerialPort("COM3");
-    // const msg = port.read(128);
-    // window.webContents.send("serial", msg);
 }
 
 // Creates Serial Connect Window
@@ -58,5 +52,15 @@ export function createSerialWindow() {
     serialWindow.setMenu(makeSerialMenu(serialWindow));
     serial_communicate(serialWindow);
 }
+
+ipcMain.on('connect', (evt, message) => {
+    console.log(`Connecting to serial port ${message}`);
+    serial_port = new SerialPort(message);
+    const parser = new SerialPort.parsers.Delimiter({delimiter:'\n'});
+    serial_port.pipe(parser);
+    parser.on('data', data=>{
+        mainWindow.webContents.send('serial', data.toString());
+    });
+});
 
 

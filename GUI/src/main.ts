@@ -9,9 +9,8 @@ let led = false;
 
 // led_button.addEventListener("click", ()=>{
 ipcRenderer.on("serial",(event, message)=>{
-    led_status.innerHTML = message;
-    // led = !led;
-    // const text = led ? "ON" : "OFF";
-    // led_status.innerHTML = text;
-    // // port.write(text);
+    const m = JSON.parse(message);
+
+    led_status.innerHTML = m.altitude;
+
 });

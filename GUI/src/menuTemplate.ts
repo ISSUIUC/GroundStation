@@ -1,11 +1,11 @@
 import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from 'electron';
 import { createSerialWindow } from './index';
 
-export function serialMenu(window: BrowserWindow) {
+export function makeSerialMenu(window: BrowserWindow) {
     return Menu.buildFromTemplate(serialWindowTemplate(window));
 }
 
-export function mainMenu(window: BrowserWindow) {
+export function makeMainMenu(window: BrowserWindow) {
     return Menu.buildFromTemplate(mainWindowTemplate(window));
 }
 

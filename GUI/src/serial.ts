@@ -4,12 +4,17 @@ import * as SerialPort from "serialport"
 const scan_drop = <HTMLSelectElement>document.getElementById('ScanDrop');
 const led_status = document.getElementById('led_status');
 const baud_drop = <HTMLSelectElement>document.getElementById('BaudDrop');
+const connect = <HTMLButtonElement>document.getElementById('Connect')
 
 
-
-
-let ScanDropMessage;
+let ScanDropMessage : [{path : string}];
 let set = false;
+
+connect.addEventListener('click', ()=> {
+    let i = scan_drop.selectedIndex;
+    if(i <= 0) return;
+    ipcRenderer.send('connect', scan_drop.options[i].value)
+})
 
 // scan_drop.add(new Option("Text", "Value"));
 // led_button.addEventListener("click", ()=>{
