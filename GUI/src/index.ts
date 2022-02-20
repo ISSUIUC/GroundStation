@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, Menu } from 'electron';
 import * as SerialPort from "serialport"
 import * as path from 'path';
 import { makeMainMenu, makeSerialMenu } from './menuTemplate';
@@ -6,6 +6,7 @@ import { makeMainMenu, makeSerialMenu } from './menuTemplate';
 let mainWindow : BrowserWindow;
 let serialWindow : BrowserWindow;
 let serial_port : SerialPort;
+const isMac = process.platform === 'darwin';
 
 app.on('ready', () => {
     console.log('App is ready');
@@ -23,6 +24,10 @@ app.on('ready', () => {
     mainWindow.loadFile(indexHTML);
     // Builds menu template and renders it in the main window
     mainWindow.setMenu(makeMainMenu(mainWindow));
+    if (isMac) {
+        Menu.setApplicationMenu(makeMainMenu(mainWindow));
+    }
+
 });
 
 
@@ -53,13 +58,15 @@ export function createSerialWindow() {
     serial_communicate(serialWindow);
 }
 
-ipcMain.on('connect', (evt, message) => {
+ipcMain.on('connect', (evt, message, baud) => {
     console.log(`Connecting to serial port ${message}`);
+    let baudrate = parseInt(baud);
+    // serial_port = new SerialPort(message, {baudRate : baudrate});
     serial_port = new SerialPort(message);
     const parser = new SerialPort.parsers.Delimiter({delimiter:'\n'});
     serial_port.pipe(parser);
     parser.on('data', data=>{
-        mainWindow.webContents.send('serial', data.toString());
+        mainWindow.webContents.send('connection', data.toString());
     });
 });
 

@@ -1,5 +1,6 @@
 import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from 'electron';
 import { createSerialWindow } from './index';
+const isMac = process.platform === 'darwin';
 
 export function makeSerialMenu(window: BrowserWindow) {
     return Menu.buildFromTemplate(serialWindowTemplate(window));

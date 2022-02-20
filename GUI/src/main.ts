@@ -8,9 +8,9 @@ document.body.appendChild(led_status);
 let led = false;
 
 // led_button.addEventListener("click", ()=>{
-ipcRenderer.on("serial",(event, message)=>{
+ipcRenderer.on("connection",(event, message)=>{
     const m = JSON.parse(message);
 
-    led_status.innerHTML = m.altitude;
+    led_status.innerHTML = message;
 
 });
