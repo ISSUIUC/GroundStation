@@ -1,0 +1,82 @@
+/* Styling for the body of the app */
+body {
+    background-color: rgb(12, 34, 102);
+}
+ 
+/* Styling for heading of the app */
+h1 {
+    font-size: 45px;
+    text-align: center;
+    font-family: "Causten", "Futura", monospace;
+    color: rgb(255, 255, 255);
+}
+
+div {
+    
+}
+
+/* Styling for the ON button */
+.button1 {
+    display: inline-block;
+    padding: 15px 25px;
+    font-size: 35px;
+    text-align: center;
+    outline: none;
+    color: rgb(255, 255, 255);
+    background-color:rgb(76, 175, 80);
+    border: none;
+    border-radius: 15px;
+    width: 40%;
+    margin:auto;
+    display:grid;
+  }
+ 
+/* Button press effect for ON button */
+.button1:active {
+  box-shadow: 0 5px rgb(104, 99, 99);
+  transform: translateY(4px);
+}
+ 
+/* Hover effect for ON button */
+.button1:hover {background-color: rgb(62, 142, 65)}
+ 
+/* Styling for OFF button */
+.button2 {
+    display: inline-block;
+    padding: 15px 25px;
+    font-size: 35px;
+    text-align: center;
+    outline: none;
+    color: rgb(255, 255, 255);
+    background-color:rgb(207, 85, 85);
+    border: none;
+    border-radius: 15px;
+    width: 20%;
+    margin:auto;
+    display:grid;
+}
+ 
+/* Button press effect for OFF button */
+.button2:active {
+  box-shadow: 0 5px rgb(104, 99, 99);
+  transform: translateY(4px);
+}
+ 
+/* Hover effect for OFF button */  
+.button2:hover {background-color: rgb(179, 44, 44)}
+ 
+/* Styling for Close button */
+.button3 {
+  padding: 8px 25px;
+  font-size: 20px;
+  text-align: center;
+  outline: none;
+  color: rgb(255, 255, 255);
+  background-color:rgb(179, 44, 44);
+  border: none;
+  width: 6%;
+  margin:auto;
+  display:grid;
+  float: right;
+}
+

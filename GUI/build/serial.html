@@ -1,28 +1,49 @@
+<link rel="stylesheet" type="text/css" href="serial.css">
+
 <head>
 </head>
+
 <body>
     <h1>
         Serial Connect
     </h1>
     <table>
-        <tr><td><button id="Scan">Scan</button></td></tr>
-        <tr><td>
+        <tr>
+            <td><button id="Scan" class="button2">Scan</button></td>
+            <td>
+                <select id="ScanDrop" name="ScanDrop" id="ScanDrop">
+                    <option value="0">Select Device</option>
+                </select>
+            </td>
+        </tr>
+        <!-- <tr><td>
             <select id="ScanDrop" name="ScanDrop" id="ScanDrop">
             <option value="0">Select Device</option>
             </select>
-        </td></tr>
-        <tr><td><button id="Baud">Baud</button></td></tr>
-        <tr><td><select name="BaudDrop" id="BaudDrop">
+        </td></tr> -->
+        <tr>
+            <td><button id="Baud" class="button2">Baud</button></td>
+            <td><select name="BaudDrop" id="BaudDrop">
+                    <option value="0">Select Baud Rate</option>
+                    <option value="1200">1200</option>
+                    <option value="2400">2400</option>
+                    <option value="4800">4800</option>
+                    <option value="9600">9600</option>
+                    <option value="19200">19,200</option>
+                </select></td>
+        </tr>
+        <!-- <tr><td><select name="BaudDrop" id="BaudDrop">
             <option value="0">Select Baud Rate</option>
             <option value="1200">1200</option>
             <option value="2400">2400</option>
             <option value="4800">9600</option>
             <option value="9600">9600</option>
             <option value="19200">19,200</option>
-            </select></td></tr>
+            </select></td></tr> -->
     </table>
-    <button id="Connect">Connect</button>
+    <button id="Connect" class="button1">Connect</button>
+    <button id="Disconnect" class="button3">Disconnect</button>
     <script>
         require("./serial.js")
     </script>
- </body>
+</body>

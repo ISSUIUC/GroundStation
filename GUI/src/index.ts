@@ -44,8 +44,8 @@ function serial_communicate(window: BrowserWindow){
 // Creates Serial Connect Window
 export function createSerialWindow() {
     serialWindow = new BrowserWindow({
-        width: 400,
-        height: 300,
+        width: 500,
+        height: 400,
         title: 'Serial Connect',
         webPreferences: {
             nodeIntegration: true,
@@ -67,6 +67,14 @@ ipcMain.on('connect', (evt, message, baud) => {
     serial_port.pipe(parser);
     parser.on('data', data=>{
         mainWindow.webContents.send('connection', data.toString());
+    });
+});
+
+ipcMain.on('disconnect', (evt, message, baud) => {
+    console.log(`Disconnecting from serial port ${message}`);
+    // serial_port = new SerialPort(message, {baudRate : baudrate});
+    serial_port.close(function (err) {
+        console.log('port closed', err);
     });
 });
 
