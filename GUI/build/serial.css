@@ -186,7 +186,7 @@ select {
     text-align: center;
     outline: none;
     color: rgb(240, 228, 228);
-    background-color:rgb(245, 121, 121);
+    background-color:rgb(121, 175, 245);
     border: none;
     border-radius: 15px;
     width: 100%;
@@ -201,7 +201,7 @@ select {
 }
  
 /* Hover effect for Scan button */  
-.button2:hover {background-color: rgb(179, 44, 44)}
+.button2:hover {background-color: rgb(44, 80, 179)}
 
 /* Styling for Disconnect button */
 .button3 {
@@ -227,3 +227,15 @@ select {
    
   /* Hover effect for Scan button */  
   .button3:hover {background-color: rgb(175, 38, 38)}
+
+  .label1 {
+    display: inline-block;
+    padding: 10px 25px;
+    font-size: 20px;
+    text-align: center;
+    outline: none;
+    color: rgb(240, 228, 228);
+    border: none;
+    margin:auto;
+    display:grid;
+  }

@@ -11,8 +11,8 @@ const isMac = process.platform === 'darwin';
 app.on('ready', () => {
     console.log('App is ready');
     mainWindow = new BrowserWindow({
-        width: 600,
-        height: 400,
+        width: 900,
+        height: 900,
         webPreferences: {
             nodeIntegration: true,
             nodeIntegrationInWorker: true,

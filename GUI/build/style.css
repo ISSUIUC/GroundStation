@@ -11,22 +11,44 @@ h1 {
     color: rgb(255, 255, 255);
 }
 
+td {
+    padding: 5px 5px 5px 5px;
+}
+
+table {
+    border: 1px solid white;
+  border-radius: 10px;
+  margin: 10px 10px 10px 10px;
+}
+
 div {
-    
+    margin-top: 5px;
+    font-size: 15px;
+    /* text-align: left; */
+    font-family: "Causten", "Futura", monospace;
+    color: rgb(255, 255, 255);
+}
+
+label {
+    margin-top: 20px;
+    font-size: 25px;
+    text-align: left;
+    font-family: "Causten", "Futura", monospace;
+    color: rgb(255, 255, 255);
 }
 
 /* Styling for the ON button */
 .button1 {
     display: inline-block;
     padding: 15px 25px;
-    font-size: 35px;
+    font-size: 25px;
     text-align: center;
     outline: none;
     color: rgb(255, 255, 255);
     background-color:rgb(76, 175, 80);
     border: none;
     border-radius: 15px;
-    width: 40%;
+    width: 30%;
     margin:auto;
     display:grid;
   }
