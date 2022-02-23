@@ -50,10 +50,25 @@ function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[]
             submenu: [
                 {
                     label: 'Serial',
+                    accelerator: 'ctrl+shift+C',
                     click() { createSerialWindow(); }
                 },
                 {
                     label: 'Ethernet'
+                }
+            ]
+        },
+        {
+            label: 'Commands',
+            submenu: [
+                {
+                    label: 'Call Sign',
+                },
+                {
+                    label: 'Abort',
+                },
+                {
+                    label: 'Frequency',
                 }
             ]
         }

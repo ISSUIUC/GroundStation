@@ -48,10 +48,25 @@ function mainWindowTemplate(window) {
             submenu: [
                 {
                     label: 'Serial',
+                    accelerator: 'ctrl+shift+C',
                     click() { (0, index_1.createSerialWindow)(); }
                 },
                 {
                     label: 'Ethernet'
+                }
+            ]
+        },
+        {
+            label: 'Commands',
+            submenu: [
+                {
+                    label: 'Call Sign',
+                },
+                {
+                    label: 'Abort',
+                },
+                {
+                    label: 'Frequency',
                 }
             ]
         }
