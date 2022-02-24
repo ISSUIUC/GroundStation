@@ -190,6 +190,8 @@ window.onload = function () {
         }
     });
 
+
+
     var canvas_gps = <HTMLCanvasElement>document.getElementById("gps");
     var ctx_gps = canvas_gps.getContext('2d');
     const gps = new Chart(ctx_gps, {

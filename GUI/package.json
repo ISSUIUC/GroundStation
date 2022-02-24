@@ -10,6 +10,7 @@
         "build": "tsc --watch"
     },
     "devDependencies": {
+        "@types/chart.js": "^2.9.35",
         "@types/serialport": "^8.0.2",
         "electron": "^15.3.4",
         "ts-loader": "^9.2.6",
