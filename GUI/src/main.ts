@@ -1,5 +1,5 @@
 import { ipcRenderer } from "electron";
-import { Chart } from 'chart.js';
+import { Chart, ChartConfiguration } from 'chart.js';
 
 const led_button = document.getElementById("Blink");
 const color_change = <HTMLButtonElement>document.getElementById("color");
@@ -7,7 +7,7 @@ const htmlcolorelement = document.getElementById("contrast");
 const stylesheetopt = <HTMLLinkElement>document.getElementById("style");
 let contrast = false;
 
-// ALL VALUES ARE DEMO FOR NOW BUT THESE ARE THE VARIABLES THAT WILL BE PASSED TO THE CHART
+// ALL VALUES ARE DEMO FOR NOW BUT THESE ARE THE constIABLES THAT WILL BE PASSED TO THE CHART
 const DP_LOWGM = [40, 20, 20, 60, 60, 120, 120, 125, 105, 110];
 const DP_LOWGG = [31, 35, 36, 43, 47, 54, 56, 59, 63, 65];
 const DP_LOWGA = [31, 36, 38, 42, 44, 49, 51, 55, 59, 62];
@@ -31,367 +31,92 @@ color_change.addEventListener('click', ()=> {
 
 })
 
-let led = false;
+let charts: {
+    lowgimu_accel?: Chart,
+    lowgimu_gyro?: Chart,
+    lowgimu_mag?: Chart,
+    gps?: Chart,
+    highg_kx_accel?: Chart,
+    highg_h3l_accel?: Chart,
+    baro_altitude?: Chart
+}
+
+function make_chart(element_id: string, name: string, data: number[]): Chart {
+    const canvas = <HTMLCanvasElement>document.getElementById(element_id);
+    const ctx = canvas.getContext('2d');
+    return new Chart(ctx, make_chart_options(name, data));
+}
+
+function make_chart_options(name: string, data: number[]) : ChartConfiguration {
+    return {
+        // The type of chart we want to create
+        type: 'line',
+
+        // The data for our dataset
+        data: {
+            labels,
+            datasets: [{
+                label: name,
+                borderColor: 'rgb(255, 99, 132)',
+                data: data
+            }]
+        },
+        // Configuration options go here
+        options: {
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    left: 5,
+                    top: 5,
+                    right: 5,
+                    bottom: 5
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: name,
+                    color: 'white'
+                }
+            },
+            scales: {
+                y: {
+                  ticks: {
+                    color: 'white'
+                  }
+                },
+                x: {
+                    ticks: {
+                      color: 'white'
+                    }
+                  }
+              }
+        }
+    }
+}
+
+function setup_charts(){
+    return {
+        lowgimu_accel: make_chart("lowgimuA", "LowG IMU acceleration", DP_LOWGA),
+        lowgimu_gyro: make_chart("lowgimuG", "LowG IMU gyroscope", DP_LOWGG),
+        lowgimu_mag: make_chart("lowgimuM", "LowG IMU magnetometer", DP_LOWGM),
+        gps: make_chart("gps", "GPS altitude", DP_GPS),
+        highg_kx_accel: make_chart("kx134", "kx134 acceleration", DP_KX134),
+        highg_h3l_accel: make_chart("H3LIS331DL", "H3L acceleration", DP_H3LIS331DL),
+        baro_altitude: make_chart("barometer", "Barometer altitude", DP_BAROMETER)
+    };
+}
+
 window.onload = function () {
 
     /* LOADS ALL THE CHARTS AFTER WINDOW LOADS 
     BUT WILL BE MOVED LATER TO AFTER GSS 
     ESTABLISHES CONNNECTION TO FEATHER */
 
-    var canvas_lowgimuA = <HTMLCanvasElement>document.getElementById("lowgimuA");
-    var ctx_lowgimuA = canvas_lowgimuA.getContext('2d');
-    const chart_lowgimuA = new Chart(ctx_lowgimuA, {
-        // The type of chart we want to create
-        type: 'line',
-
-        // The data for our dataset
-        data: {
-            labels,
-            datasets: [{
-                label: 'My First dataset',
-                borderColor: 'rgb(255, 99, 132)',
-                data: DP_LOWGA
-            }]
-        },
-        // Configuration options go here
-        options: {
-            maintainAspectRatio: false,
-            layout: {
-                padding: {
-                    left: 5,
-                    top: 5,
-                    right: 5,
-                    bottom: 5
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: 'LowG IMU Acceleration',
-                    color: 'white'
-                }
-            },
-            scales: {
-                y: {
-                  ticks: {
-                    color: 'white'
-                  }
-                },
-                x: {
-                    ticks: {
-                      color: 'white'
-                    }
-                  }
-              }
-        }
-    });
-    var canvas_lowgimug = <HTMLCanvasElement>document.getElementById("lowgimuG");
-    var ctx_lowgimug = canvas_lowgimug.getContext('2d');
-    const lowgimug = new Chart(ctx_lowgimug, {
-        // The type of chart we want to create
-        type: 'line',
-
-        // The data for our dataset
-        data: {
-            labels,
-            datasets: [{
-                label: 'My First dataset',
-                borderColor: 'rgb(255, 99, 132)',
-                data: DP_LOWGG
-            }]
-        },
-        // Configuration options go here
-        options: {
-            maintainAspectRatio: false,
-            layout: {
-                padding: {
-                    left: 5,
-                    top: 5,
-                    right: 5,
-                    bottom: 5
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: 'LowG IMU Gyroscope',
-                    color: 'white'
-                }
-            },
-            scales: {
-                y: {
-                  ticks: {
-                    color: 'white'
-                  }
-                },
-                x: {
-                    ticks: {
-                      color: 'white'
-                    }
-                  }
-              }
-        }
-    });
-
-    var canvas_lowgimum = <HTMLCanvasElement>document.getElementById("lowgimuM");
-    var ctx_lowgimum = canvas_lowgimum.getContext('2d');
-    const lowgimum = new Chart(ctx_lowgimum, {
-        // The type of chart we want to create
-        type: 'line',
-
-        // The data for our dataset
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'My First dataset',
-                borderColor: 'rgb(255, 99, 132)',
-                data: DP_LOWGM
-            }]
-        },
-        // Configuration options go here
-        options: {
-            maintainAspectRatio: false,
-            layout: {
-                padding: {
-                    left: 5,
-                    top: 5,
-                    right: 5,
-                    bottom: 5
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: 'LowG IMU Magnetometer',
-                    color: 'white'
-                }
-            },
-            scales: {
-                y: {
-                  ticks: {
-                    color: 'white'
-                  }
-                },
-                x: {
-                    ticks: {
-                      color: 'white'
-                    }
-                  }
-              }
-        }
-    });
-
-    var canvas_gps = <HTMLCanvasElement>document.getElementById("gps");
-    var ctx_gps = canvas_gps.getContext('2d');
-    const gps = new Chart(ctx_gps, {
-        // The type of chart we want to create
-        type: 'line',
-
-        // The data for our dataset
-        data: {
-            labels,
-            datasets: [{
-                label: 'My First dataset',
-                borderColor: 'rgb(255, 99, 132)',
-                data: DP_GPS
-            }]
-        },
-        // Configuration options go here
-        options: {
-            maintainAspectRatio: false,
-            layout: {
-                padding: {
-                    left: 5,
-                    top: 5,
-                    right: 5,
-                    bottom: 5
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: 'GPS',
-                    color: 'white'
-                }
-            },
-            scales: {
-                y: {
-                  ticks: {
-                    color: 'white'
-                  }
-                },
-                x: {
-                    ticks: {
-                      color: 'white'
-                    }
-                  }
-              }
-        }
-    });
-
-    var canvas_kx134 = <HTMLCanvasElement>document.getElementById("kx134");
-    var ctx_kx134 = canvas_kx134.getContext('2d');
-    const kx134 = new Chart(ctx_kx134, {
-        // The type of chart we want to create
-        type: 'line',
-
-        // The data for our dataset
-        data: {
-            labels,
-            datasets: [{
-                label: 'My First dataset',
-                borderColor: 'rgb(255, 99, 132)',
-                data: DP_KX134
-            }]
-        },
-        // Configuration options go here
-        options: {
-            maintainAspectRatio: false,
-            layout: {
-                padding: {
-                    left: 5,
-                    top: 5,
-                    right: 5,
-                    bottom: 5
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: 'HighG (KX134) Acceleration',
-                    color: 'white'
-                }
-            },
-            scales: {
-                y: {
-                  ticks: {
-                    color: 'white'
-                  }
-                },
-                x: {
-                    ticks: {
-                      color: 'white'
-                    }
-                  }
-              }
-        }
-    });
-
-    var canvas_H3LIS331DL = <HTMLCanvasElement>document.getElementById("H3LIS331DL");
-    var ctx_H3LIS331DL = canvas_H3LIS331DL.getContext('2d');
-    const H3LIS331DL = new Chart(ctx_H3LIS331DL, {
-        // The type of chart we want to create
-        type: 'line',
-
-        // The data for our dataset
-        data: {
-            labels,
-            datasets: [{
-                label: 'My First dataset',
-                borderColor: 'rgb(255, 99, 132)',
-                data: DP_H3LIS331DL
-            }]
-        },
-        // Configuration options go here
-        options: {
-            maintainAspectRatio: false,
-            layout: {
-                padding: {
-                    left: 5,
-                    top: 5,
-                    right: 5,
-                    bottom: 5
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: 'HighG (H3LISH3LIS331DL) Acceleration',
-                    color: 'white'
-                }
-            },
-            scales: {
-                y: {
-                  ticks: {
-                    color: 'white'
-                  }
-                },
-                x: {
-                    ticks: {
-                      color: 'white'
-                    }
-                  }
-              }
-        }
-    });
-    var canvas_barometer = <HTMLCanvasElement>document.getElementById("barometer");
-    var ctx_barometer = canvas_barometer.getContext('2d');
-    const barometer = new Chart(ctx_barometer, {
-        // The type of chart we want to create
-        type: 'line',
-
-        // The data for our dataset
-        data: {
-            labels,
-            datasets: [{
-                label: 'My First dataset',
-                borderColor: 'rgb(255, 99, 132)',
-                data: DP_BAROMETER
-            }]
-        },
-        // Configuration options go here
-        options: {
-            maintainAspectRatio: false,
-            layout: {
-                padding: {
-                    left: 5,
-                    top: 5,
-                    right: 5,
-                    bottom: 5
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: 'Barometer Altitude',
-                    color: 'white'
-                }
-            },
-            scales: {
-                y: {
-                  ticks: {
-                    color: 'white'
-                  }
-                },
-                x: {
-                    ticks: {
-                      color: 'white'
-                    }
-                  }
-              }
-        }
-    });
+    charts = setup_charts();
 }
 
 function currentTime() {
@@ -430,7 +155,7 @@ function currentTime() {
      let time = hour + ":" + minute + ":" + second + " " + session;
   
     document.getElementById("clock").innerText = time; 
-    var t = setTimeout(function(){ currentTime() }, 1000); 
+    const t = setTimeout(function(){ currentTime() }, 1000); 
   
   }
   
