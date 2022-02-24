@@ -27,8 +27,6 @@ color_change.addEventListener('click', ()=> {
         stylesheetopt.href="style.css";
         contrast = false;
     }
-    
-
 })
 
 let charts: {
@@ -110,61 +108,27 @@ function setup_charts(){
     };
 }
 
-window.onload = function () {
-
-    /* LOADS ALL THE CHARTS AFTER WINDOW LOADS 
-    BUT WILL BE MOVED LATER TO AFTER GSS 
-    ESTABLISHES CONNNECTION TO FEATHER */
-
+window.onload = () => {
     charts = setup_charts();
+    set_current_time();
+    setInterval(set_current_time, 1000);
 }
 
-function currentTime() {
-    let date = new Date(); 
-    let hh = date.getHours();
-    let mm = date.getMinutes();
-    let ss = date.getSeconds();
-    let session = "AM";
-  
+function set_current_time() {
+    const date = new Date(); 
+    const hh = date.getHours();
+    const mm = date.getMinutes();
+    const ss = date.getSeconds();
+
+    const session = hh <= 12 ? "AM" : "PM";
+    const hour = (hh < 10) ? "0" + hh : hh;
+    const minute = (mm < 10) ? "0" + mm : mm;
+    const second = (ss < 10) ? "0" + ss : ss;
       
-    if(hh > 12){
-        session = "PM";
-     }
-     let hour;
-     let minute;
-     let second;
-     if (hh < 10) {
-         hour = "0" + hh;
-     } else {
-         hour = hh;
-     }
-     if (mm < 10) {
-         minute = "0" + mm;
-     } else {
-         minute = mm;
-     }
-     if (ss < 10) {
-         second = "0" + ss;
-     } else {
-         second = ss;
-     }
-    //  hh = (hh < 10) ? "0" + hh : hh;
-    //  mm = (mm < 10) ? "0" + mm : mm;
-    //  ss = (ss < 10) ? "0" + ss : ss;
-      
-     let time = hour + ":" + minute + ":" + second + " " + session;
-  
+    const time = `${hour}:${minute}:${second} ${session}`;
     document.getElementById("clock").innerText = time; 
-    const t = setTimeout(function(){ currentTime() }, 1000); 
-  
-  }
-  
-  currentTime();
+}
 
-
-// led_button.addEventListener("click", ()=>{
 ipcRenderer.on("connection", (event, message) => {
-    const m = JSON.parse(message);
-
 
 });
