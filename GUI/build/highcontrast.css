@@ -4,11 +4,10 @@
     --bg: rgb(15, 21, 35);
 }
 
-
-/* html {
+html {
     -webkit-filter: invert(1);
     filter: invert(1);
-} */
+}
 
 
 /* Styling for the body of the app */

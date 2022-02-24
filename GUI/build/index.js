@@ -22,8 +22,8 @@ const isMac = process.platform === 'darwin';
 electron_1.app.on('ready', () => {
     console.log('App is ready');
     mainWindow = new electron_1.BrowserWindow({
-        width: 900,
-        height: 900,
+        width: 1920,
+        height: 1080,
         webPreferences: {
             nodeIntegration: true,
             nodeIntegrationInWorker: true,
