@@ -9,6 +9,11 @@ html {
     filter: invert(1);
 }
 
+img {
+    -webkit-filter: invert(1);
+    filter: invert(1);
+}
+
 
 /* Styling for the body of the app */
 

@@ -6,6 +6,7 @@ const color_change = <HTMLButtonElement>document.getElementById("color");
 const htmlcolorelement = document.getElementById("contrast");
 const stylesheetopt = <HTMLLinkElement>document.getElementById("style");
 let contrast = false;
+let time = 9;
 
 // ALL VALUES ARE DEMO FOR NOW BUT THESE ARE THE constIABLES THAT WILL BE PASSED TO THE CHART
 const DP_LOWGM = [40, 20, 20, 60, 60, 120, 120, 125, 105, 110];
@@ -17,17 +18,51 @@ const DP_H3LIS331DL = [76, 127, 91, 67, 99, 102, 61, 125, 79, 66];
 const DP_BAROMETER = [1140, 1179, 1338, 1353, 1554, 1571, 1666, 1754, 1885, 1999];
 
 // X-AXIS LABELS CAN BE REMOVED LATER
-const labels = ['0', '1', '2','3','4','5','6','7','8','9','10'];
+let labels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-color_change.addEventListener('click', ()=> {
+function getRandomInt(min: number, max: number) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function updateData() {
+    labels.splice(0, 1);
+    time++;
+    labels.push(time.toString());
+
+    DP_LOWGM.splice(0, 1);
+    DP_LOWGG.splice(0, 1);
+    DP_LOWGA.splice(0, 1);
+    DP_GPS.splice(0, 1);
+    DP_KX134.splice(0, 1);
+    DP_H3LIS331DL.splice(0, 1);
+    DP_BAROMETER.splice(0, 1);
+
+    //CHANGE THIS TO ASSIGN THE LISTS NOT PUSH RANDOM DATA
+    DP_LOWGM.push(getRandomInt(80, 100));
+    DP_LOWGG.push(getRandomInt(30, 70));
+    DP_LOWGA.push(getRandomInt(30, 70));
+    DP_GPS.push(getRandomInt(60, 130));
+    DP_KX134.push(getRandomInt(80, 130));
+    DP_H3LIS331DL.push(getRandomInt(60, 130));
+    DP_BAROMETER.push(getRandomInt(1000, 2000));
+}
+
+led_button.addEventListener('click', () => {
+    destroy_charts();
+    updateData();
+    charts = setup_charts();
+})
+
+color_change.addEventListener('click', () => {
     if (!contrast) {
-        stylesheetopt.href="highcontrast.css";
+        stylesheetopt.href = "highcontrast.css";
         contrast = true;
     } else {
-        stylesheetopt.href="style.css";
+        stylesheetopt.href = "style.css";
         contrast = false;
     }
-    
 
 })
 
@@ -47,7 +82,7 @@ function make_chart(element_id: string, name: string, data: number[]): Chart {
     return new Chart(ctx, make_chart_options(name, data));
 }
 
-function make_chart_options(name: string, data: number[]) : ChartConfiguration {
+function make_chart_options(name: string, data: number[]): ChartConfiguration {
     return {
         // The type of chart we want to create
         type: 'line',
@@ -84,21 +119,21 @@ function make_chart_options(name: string, data: number[]) : ChartConfiguration {
             },
             scales: {
                 y: {
-                  ticks: {
-                    color: 'white'
-                  }
+                    ticks: {
+                        color: 'white'
+                    }
                 },
                 x: {
                     ticks: {
-                      color: 'white'
+                        color: 'white'
                     }
-                  }
-              }
+                }
+            }
         }
     }
 }
 
-function setup_charts(){
+function setup_charts() {
     return {
         lowgimu_accel: make_chart("lowgimuA", "LowG IMU acceleration", DP_LOWGA),
         lowgimu_gyro: make_chart("lowgimuG", "LowG IMU gyroscope", DP_LOWGG),
@@ -108,6 +143,16 @@ function setup_charts(){
         highg_h3l_accel: make_chart("H3LIS331DL", "H3L acceleration", DP_H3LIS331DL),
         baro_altitude: make_chart("barometer", "Barometer altitude", DP_BAROMETER)
     };
+}
+
+function destroy_charts() {
+    charts.lowgimu_accel.destroy();
+    charts.lowgimu_gyro.destroy();
+    charts.lowgimu_mag.destroy();
+    charts.gps.destroy();
+    charts.highg_kx_accel.destroy();
+    charts.highg_h3l_accel.destroy();
+    charts.baro_altitude.destroy();
 }
 
 window.onload = function () {
@@ -120,51 +165,59 @@ window.onload = function () {
 }
 
 function currentTime() {
-    let date = new Date(); 
+    let date = new Date();
     let hh = date.getHours();
     let mm = date.getMinutes();
     let ss = date.getSeconds();
     let session = "AM";
-  
-      
-    if(hh > 12){
+
+
+    if (hh > 12) {
         session = "PM";
-     }
-     let hour;
-     let minute;
-     let second;
-     if (hh < 10) {
-         hour = "0" + hh;
-     } else {
-         hour = hh;
-     }
-     if (mm < 10) {
-         minute = "0" + mm;
-     } else {
-         minute = mm;
-     }
-     if (ss < 10) {
-         second = "0" + ss;
-     } else {
-         second = ss;
-     }
+    }
+    let hour;
+    let minute;
+    let second;
+    if (hh < 10) {
+        hour = "0" + hh;
+    } else {
+        hour = hh;
+    }
+    if (mm < 10) {
+        minute = "0" + mm;
+    } else {
+        minute = mm;
+    }
+    if (ss < 10) {
+        second = "0" + ss;
+    } else {
+        second = ss;
+    }
     //  hh = (hh < 10) ? "0" + hh : hh;
     //  mm = (mm < 10) ? "0" + mm : mm;
     //  ss = (ss < 10) ? "0" + ss : ss;
-      
-     let time = hour + ":" + minute + ":" + second + " " + session;
-  
-    document.getElementById("clock").innerText = time; 
-    const t = setTimeout(function(){ currentTime() }, 1000); 
-  
-  }
-  
-  currentTime();
+
+    let time = hour + ":" + minute + ":" + second + " " + session;
+
+    document.getElementById("clock").innerText = time;
+    const t = setTimeout(function () { currentTime() }, 1000);
+
+}
+
+currentTime();
+
 
 
 // led_button.addEventListener("click", ()=>{
 ipcRenderer.on("connection", (event, message) => {
-    const m = JSON.parse(message);
+    const masterJSON = JSON.parse(message);
+    const m = masterJSON["value"];
+    /* Finds the Raw Telemetry Table 
+    finds the field by ID and assigns 
+    the value to the div */
+    for (var key in m) {
+        document.getElementById(key).innerText = m[key];
+    }
 
 
 });
