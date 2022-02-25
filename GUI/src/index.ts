@@ -17,7 +17,8 @@ app.on('ready', () => {
             nodeIntegration: true,
             nodeIntegrationInWorker: true,
             contextIsolation: false,
-        }
+        },
+        icon: __dirname + '/iss_logo.png',
     }); 
 
     const indexHTML = path.join(__dirname + '/index.html');
