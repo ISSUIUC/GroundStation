@@ -27,42 +27,31 @@ function getRandomInt(min: number, max: number) {
 }
 
 function updateData(LOWGM: number, LOWGG: number, LOWGA: number, GPS: number, KX134: number, H3LIS331DL: number, BAROMETER: number) {
-    // labels.splice(0, 1);
+    labels.splice(0, 1);
     time++;
-    // labels.push(time.toString());
+    labels.push(time.toString());
 
-    DP_LOWGM.splice(0, 1);
-    DP_LOWGG.splice(0, 1);
-    DP_LOWGA.splice(0, 1);
-    DP_GPS.splice(0, 1);
-    DP_KX134.splice(0, 1);
-    DP_H3LIS331DL.splice(0, 1);
-    DP_BAROMETER.splice(0, 1);
+    const chart_arr = [
+        {chart: charts.baro_altitude, val: BAROMETER},
+        {chart: charts.gps, val: GPS},
+        {chart: charts.highg_h3l_accel, val: H3LIS331DL},
+        {chart: charts.highg_kx_accel, val: KX134},
+        {chart: charts.lowgimu_accel, val: LOWGA},
+        {chart: charts.lowgimu_gyro, val: LOWGG},
+        {chart: charts.lowgimu_mag, val: LOWGM}
+    ]
 
-    //CHANGE THIS TO ASSIGN THE LISTS NOT PUSH RANDOM DATA
-    // DP_LOWGM.push(getRandomInt(80, 100));
-    // DP_LOWGG.push(getRandomInt(30, 70));
-    // DP_LOWGA.push(getRandomInt(30, 70));
-    // DP_GPS.push(getRandomInt(60, 130));
-    // DP_KX134.push(getRandomInt(80, 130));
-    // DP_H3LIS331DL.push(getRandomInt(60, 130));
-    // DP_BAROMETER.push(getRandomInt(1000, 2000));
-
-    DP_LOWGM.push(LOWGM);
-    DP_LOWGG.push(LOWGG);
-    DP_LOWGA.push(LOWGA);
-    DP_GPS.push(GPS);
-    DP_KX134.push(KX134);
-    DP_H3LIS331DL.push(H3LIS331DL);
-    // DP_BAROMETER.push(BAROMETER);
-
-    for (let i = 0; i < 9; i++) {
-        charts.baro_altitude.data.datasets[0].data[i] = charts.baro_altitude.data.datasets[0].data[i+1]
-    }
-    charts.baro_altitude.data.datasets[0].data[9] = BAROMETER;
-    // charts.baro_altitude.data.datasets[0].data = DP_BAROMETER;
-    charts.baro_altitude.update();
-
+    chart_arr.forEach(
+        c => {
+            const {chart, val} = c;
+            const arr = chart.data.datasets[0].data;
+            for (let i = 0; i < 9; i++) {
+                arr[i] = arr[i+1];
+            }
+            arr[arr.length - 1] = val;
+            chart.update();
+        }
+    )
 }
 
 led_button.addEventListener('click', () => {
@@ -212,3 +201,8 @@ ipcRenderer.on("connection", (event, message) => {
     updateData(m["LSM_IMU_mx"], m["LSM_IMU_gx"], m["LSM_IMU_ax"], m["gps_lat"], m["KX_IMU_ax"], m["H3L_IMU_ax"], m["barometer_alt"]);
     
 });
+
+setInterval(()=>{
+    const c = Math.cos(Math.random());
+    updateData(c,c,c,c,c,c,c);
+}, 100)
