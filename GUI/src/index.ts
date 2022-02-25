@@ -63,7 +63,7 @@ ipcMain.on('connect', (evt, message, baud) => {
     let baudrate = parseInt(baud);
     // serial_port = new SerialPort(message, {baudRate : baudrate});
     serial_port = new SerialPort(message);
-    const parser = new SerialPort.parsers.Delimiter({delimiter:'\n'});
+    const parser = new SerialPort.parsers.Readline({delimiter:'\n'});
     serial_port.pipe(parser);
     parser.on('data', data=>{
         mainWindow.webContents.send('connection', data.toString());

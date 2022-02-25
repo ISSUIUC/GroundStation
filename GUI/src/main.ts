@@ -26,10 +26,10 @@ function getRandomInt(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function updateData() {
-    labels.splice(0, 1);
+function updateData(LOWGM: number, LOWGG: number, LOWGA: number, GPS: number, KX134: number, H3LIS331DL: number, BAROMETER: number) {
+    // labels.splice(0, 1);
     time++;
-    labels.push(time.toString());
+    // labels.push(time.toString());
 
     DP_LOWGM.splice(0, 1);
     DP_LOWGG.splice(0, 1);
@@ -40,18 +40,33 @@ function updateData() {
     DP_BAROMETER.splice(0, 1);
 
     //CHANGE THIS TO ASSIGN THE LISTS NOT PUSH RANDOM DATA
-    DP_LOWGM.push(getRandomInt(80, 100));
-    DP_LOWGG.push(getRandomInt(30, 70));
-    DP_LOWGA.push(getRandomInt(30, 70));
-    DP_GPS.push(getRandomInt(60, 130));
-    DP_KX134.push(getRandomInt(80, 130));
-    DP_H3LIS331DL.push(getRandomInt(60, 130));
-    DP_BAROMETER.push(getRandomInt(1000, 2000));
+    // DP_LOWGM.push(getRandomInt(80, 100));
+    // DP_LOWGG.push(getRandomInt(30, 70));
+    // DP_LOWGA.push(getRandomInt(30, 70));
+    // DP_GPS.push(getRandomInt(60, 130));
+    // DP_KX134.push(getRandomInt(80, 130));
+    // DP_H3LIS331DL.push(getRandomInt(60, 130));
+    // DP_BAROMETER.push(getRandomInt(1000, 2000));
+
+    DP_LOWGM.push(LOWGM);
+    DP_LOWGG.push(LOWGG);
+    DP_LOWGA.push(LOWGA);
+    DP_GPS.push(GPS);
+    DP_KX134.push(KX134);
+    DP_H3LIS331DL.push(H3LIS331DL);
+    // DP_BAROMETER.push(BAROMETER);
+
+    for (let i = 0; i < 9; i++) {
+        charts.baro_altitude.data.datasets[0].data[i] = charts.baro_altitude.data.datasets[0].data[i+1]
+    }
+    charts.baro_altitude.data.datasets[0].data[9] = BAROMETER;
+    // charts.baro_altitude.data.datasets[0].data = DP_BAROMETER;
+    charts.baro_altitude.update();
+
 }
 
 led_button.addEventListener('click', () => {
     destroy_charts();
-    updateData();
     charts = setup_charts();
 })
 
@@ -63,7 +78,6 @@ color_change.addEventListener('click', () => {
         stylesheetopt.href = "style.css";
         contrast = false;
     }
-
 })
 
 let charts: {
@@ -74,6 +88,10 @@ let charts: {
     highg_kx_accel?: Chart,
     highg_h3l_accel?: Chart,
     baro_altitude?: Chart
+}
+
+let data = {
+    
 }
 
 function make_chart(element_id: string, name: string, data: number[]): Chart {
@@ -162,53 +180,25 @@ window.onload = function () {
     ESTABLISHES CONNNECTION TO FEATHER */
 
     charts = setup_charts();
+    set_current_time();
+    setInterval(set_current_time, 1000);
 }
 
-function currentTime() {
-    let date = new Date();
-    let hh = date.getHours();
-    let mm = date.getMinutes();
-    let ss = date.getSeconds();
-    let session = "AM";
+function set_current_time() {
+    const date = new Date(); 
+    const hh = date.getHours();
+    const mm = date.getMinutes();
+    const ss = date.getSeconds();
 
-
-    if (hh > 12) {
-        session = "PM";
-    }
-    let hour;
-    let minute;
-    let second;
-    if (hh < 10) {
-        hour = "0" + hh;
-    } else {
-        hour = hh;
-    }
-    if (mm < 10) {
-        minute = "0" + mm;
-    } else {
-        minute = mm;
-    }
-    if (ss < 10) {
-        second = "0" + ss;
-    } else {
-        second = ss;
-    }
-    //  hh = (hh < 10) ? "0" + hh : hh;
-    //  mm = (mm < 10) ? "0" + mm : mm;
-    //  ss = (ss < 10) ? "0" + ss : ss;
-
-    let time = hour + ":" + minute + ":" + second + " " + session;
-
-    document.getElementById("clock").innerText = time;
-    const t = setTimeout(function () { currentTime() }, 1000);
-
+    const session = hh <= 12 ? "AM" : "PM";
+    const hour = (hh < 10) ? "0" + hh : hh;
+    const minute = (mm < 10) ? "0" + mm : mm;
+    const second = (ss < 10) ? "0" + ss : ss;
+      
+    const time = `${hour}:${minute}:${second} ${session}`;
+    document.getElementById("clock").innerText = time; 
 }
 
-currentTime();
-
-
-
-// led_button.addEventListener("click", ()=>{
 ipcRenderer.on("connection", (event, message) => {
     const masterJSON = JSON.parse(message);
     const m = masterJSON["value"];
@@ -218,6 +208,7 @@ ipcRenderer.on("connection", (event, message) => {
     for (var key in m) {
         document.getElementById(key).innerText = m[key];
     }
-
-
+    
+    updateData(m["LSM_IMU_mx"], m["LSM_IMU_gx"], m["LSM_IMU_ax"], m["gps_lat"], m["KX_IMU_ax"], m["H3L_IMU_ax"], m["barometer_alt"]);
+    
 });
