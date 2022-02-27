@@ -227,7 +227,7 @@
 
 </div> -->
 <script>
-    if(WebSocket){
+    if(!(window && window.process && window.process.type)){
         const a = document.createElement("script");
         a.src = "./bundle.js";
         document.body.appendChild(a);
