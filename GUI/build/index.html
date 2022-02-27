@@ -9,12 +9,13 @@
     <div class="grid-item"><canvas id="lowgimuG"></canvas></div>
     <div class="grid-item"><canvas id="lowgimuM"></canvas></div>
     <div class="grid-item">
-        <img src="iss_logo.png" width="100px" height="100px">
+        <!-- <img src="iss_logo.png" width="100px" height="100px">
 
         <body>
             <h1>ISS Ground Station</h1>
             <div id="clock" class="clock">Time: </div>
-        </body>
+        </body> -->
+        <canvas id="signal"></canvas>
     </div>
 
     <div class="grid-item"><canvas id="gps"></canvas></div>
@@ -227,7 +228,7 @@
 
 </div> -->
 <script>
-    if(!(window && window.process && window.process.type)){
+    if (!(window && window.process && window.process.type)) {
         const a = document.createElement("script");
         a.src = "./bundle.js";
         document.body.appendChild(a);

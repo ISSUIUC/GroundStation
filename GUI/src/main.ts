@@ -35,6 +35,7 @@ const DP_H3LAY = Array(starting_length).fill(0);
 const DP_H3LAZ = Array(starting_length).fill(0);
 
 const DP_BAROMETER = Array(starting_length).fill(0);
+const DP_SIGNAL = Array(starting_length).fill(0);
 
 // X-AXIS LABELS CAN BE REMOVED LATER
 let labels = Array(starting_length).fill(0).map((_,i)=>i);
@@ -45,7 +46,7 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
     GPS_LAT: number, GPS_LONG: number, GPS_ALT: number, 
     KXAX: number, KXAY: number, KXAZ: number,
      H3LAX: number, H3LAY: number, H3LAZ: number, 
-     BAROMETER: number) {
+     BAROMETER: number, SIGNAL: number) {
     labels.splice(0, 1);
     time++;
     labels.push(time);
@@ -57,7 +58,8 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
         {chart: charts.highg_kx_accel, val: [KXAX, KXAY, KXAZ]},
         {chart: charts.lowgimu_accel, val: [LOWGAX, LOWGAY, LOWGAZ]},
         {chart: charts.lowgimu_gyro, val: [LOWGGX, LOWGGY, LOWGGZ]},
-        {chart: charts.lowgimu_mag, val: [LOWGMX, LOWGMY, LOWGMZ]}
+        {chart: charts.lowgimu_mag, val: [LOWGMX, LOWGMY, LOWGMZ]},
+        {chart: charts.signal, val: [SIGNAL]}
     ]
 
     chart_arr.forEach(
@@ -107,7 +109,8 @@ let charts: {
     gps?: Chart,
     highg_kx_accel?: Chart,
     highg_h3l_accel?: Chart,
-    baro_altitude?: Chart
+    baro_altitude?: Chart,
+    signal: Chart
 }
 
 let data = {
@@ -195,7 +198,8 @@ function setup_charts() {
         gps: make_chart_multiaxis("gps", "GPS altitude", DP_GPS_LAT, DP_GPS_LONG, DP_GPS_ALT),
         highg_kx_accel: make_chart_multiaxis("kx134", "kx134 acceleration", DP_KXAX, DP_KXAY, DP_KXAZ),
         highg_h3l_accel: make_chart_multiaxis("H3LIS331DL", "H3L acceleration", DP_H3LAX, DP_H3LAY, DP_H3LAZ),
-        baro_altitude: make_chart("barometer", "Barometer altitude", DP_BAROMETER)
+        baro_altitude: make_chart("barometer", "Barometer altitude", DP_BAROMETER),
+        signal: make_chart("signal", "Signal Strength", DP_SIGNAL)
     };
 }
 
@@ -216,7 +220,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
         const c = Math.cos(times++/100);
         const d = Math.cos(times++/100);
         const e = Math.cos(times++/100);
-        updateData(c,d,e,c,d,e,c,d,e,c,d,e,c,d,e,c,d,e,c);
+        updateData(c,d,e,c,d,e,c,d,e,c,d,e,c,d,e,c,d,e,c,d);
     }, 30);
 
     
@@ -235,7 +239,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                     m["gps_lat"], m["gps_long"], m["gps_alt"], 
                     m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],
                     m["H3L_IMU_ax"], m["H3L_IMU_ay"], m["H3L_IMU_az"],
-                    m["barometer_alt"]);
+                    m["barometer_alt"], m["signal_strength"]);
         
     });
 
