@@ -4,11 +4,15 @@
     --bg: rgb(15, 21, 35);
 }
 
-
-/* html {
+html {
     -webkit-filter: invert(1);
     filter: invert(1);
-} */
+}
+
+img {
+    -webkit-filter: invert(1);
+    filter: invert(1);
+}
 
 
 /* Styling for the body of the app */
@@ -23,7 +27,7 @@ body {
 h1 {
     font-size: 45px;
     text-align: center;
-    font-family: "Causten", "Helvetica", monospace;
+    font-family: "Causten", "Futura", monospace;
     color: rgb(255, 255, 255);
 }
 

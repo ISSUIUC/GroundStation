@@ -1,79 +1,225 @@
 <!DOCTYPE html>
-<link rel="stylesheet" type="text/css" href="style.css">
+<link id="style" rel="stylesheet" type="text/css" href="style.css">
 
 <head>
     <title>ISS Ground Station</title>
 </head>
+<div class="grid-container">
+    <div class="grid-item"><canvas id="lowgimuA"></canvas></div>
+    <div class="grid-item"><canvas id="lowgimuG"></canvas></div>
+    <div class="grid-item"><canvas id="lowgimuM"></canvas></div>
+    <div class="grid-item">
+        <!-- <img src="iss_logo.png" width="100px" height="100px">
 
-<body>
-    <h1>ISS Ground Station</h1>
-</body>
-<button class="button1" id="Blink">Blink LED</button>
-<table><tr><td><table>
-    <tr><td><div>Sensor: </div></td>
-        <td><div>x</div></td>
-        <td><div>y</div></td>
-        <td><div>z</div></td></tr>
-    <tr>
-        <td><div>LowG Acceleration:</div></td>
-        <td><div id="LSM_IMU_ax">0</div></td>
-        <td><div id="LSM_IMU_ay">0</div></td>
-        <td><div id="LSM_IMU_az">0</div></td>
-    </tr>
-    <tr>
-        <td><div>LowG Gyroscope:</div></td>
-        <td><div id="LSM_IMU_gx">0</div></td>
-        <td><div id="LSM_IMU_gy">0</div></td>
-        <td><div id="LSM_IMU_gz">0</div></td>
-    </tr>
-    <tr>
-        <td><div>LowG Magnetometer:</div></td>
-        <td><div id="LSM_IMU_mx">0</div></td>
-        <td><div id="LSM_IMU_my">0</div></td>
-        <td><div id="LSM_IMU_mz">0</div></td>
-    </tr>
-    </table></td>
-<td><table>
-    <tr><td><div>Sensor: </div></td>
-        <td><div>x</div></td>
-        <td><div>y</div></td>
-        <td><div>z</div></td></tr>
-    <tr>
-<tr>
-    <td><div>HighG (KX134) Acceleration:</div></td>
-    <td><div id="KX_IMU_ax">0</div></td>
-    <td><div id="KX_IMU_ay">0</div></td>
-    <td><div id="KX_IMU_az">0</div></td>
-</tr>
-<tr>
-    <td><div>HighG (H3LIS331DL) Acceleration:</div></td>
-    <td><div id="H3L_IMU_ax">0</div></td>
-    <td><div id="H3L_IMU_ay">0</div></td>
-    <td><div id="H3L_IMU_az">0</div></td>
-</tr>
-</table></td>
-</tr>
-<tr>
-<td><div style="margin-top:20px">GPS: </div>
-    <table>
-        <tr><td><div>Latitude</div></td>
-            <td><div>Longitude</div></td>
-            <td><div>Altitude</div></td></tr>
-            <tr><td><div id="gps_lat">0</div></td>
-                <td><div id="gps_long">0</div></td>
-                <td><div id="gps_alt">0</div></td></tr>
-                </table></td>
+        <body>
+            <h1>ISS Ground Station</h1>
+            <div id="clock" class="clock">Time: </div>
+        </body> -->
+        <canvas id="signal"></canvas>
+    </div>
+
+    <div class="grid-item"><canvas id="gps"></canvas></div>
+    <div class="panel1">
+        <div class="control">Command Panel</div>
+        <table>
+            <tr>
+                <td><button class="button1" id="Blink">Blink LED</button></td>
+                <td><button class="button3" id="abort">Abort</button></td>
+                <td><button class="button2" id="frequency">Frequency</button></td>
+            </tr>
+            <tr>
+                <td><button class="button1" id="color">Change Color</button></td>
+            </tr>
+        </table>
+    </div>
+    <div class="rawtelem">
+        <div style="text-align: center;">Raw Telemetry</div>
+        <table>
+            <tr>
                 <td>
-                <div style="margin-top:20px">Others: </div>
-                <table>
-        <tr><td><div>Barometer:</div></td>
-            <td><div id="barometer_alt">0</div></td></tr>
-        <tr><td><div>FSM State: </div></td><td><div id="FSM_state">0</div></td></tr>
-        <tr><td><div>Call Sign: </div></td><td><div id="sign">0</div></td></tr>
-    </table></td>
-</tr></table>
+                    <table>
+                        <tr>
+                            <td>
+                                <div>Sensor: </div>
+                            </td>
+                            <td>
+                                <div style="color: rgb(255, 99, 132)">x</div>
+                            </td>
+                            <td>
+                                <div style="color: rgb(99, 132, 255)">y</div>
+                            </td>
+                            <td>
+                                <div style="color: rgb(132, 255, 99)">z</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>LowG Acceleration:</div>
+                            </td>
+                            <td>
+                                <div id="LSM_IMU_ax">0</div>
+                            </td>
+                            <td>
+                                <div id="LSM_IMU_ay">0</div>
+                            </td>
+                            <td>
+                                <div id="LSM_IMU_az">0</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>LowG Gyroscope:</div>
+                            </td>
+                            <td>
+                                <div id="LSM_IMU_gx">0</div>
+                            </td>
+                            <td>
+                                <div id="LSM_IMU_gy">0</div>
+                            </td>
+                            <td>
+                                <div id="LSM_IMU_gz">0</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>LowG Magnetometer:</div>
+                            </td>
+                            <td>
+                                <div id="LSM_IMU_mx">0</div>
+                            </td>
+                            <td>
+                                <div id="LSM_IMU_my">0</div>
+                            </td>
+                            <td>
+                                <div id="LSM_IMU_mz">0</div>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table>
+                        <tr>
+                            <td>
+                                <div>Sensor: </div>
+                            </td>
+                            <td>
+                                <div style="color: rgb(255, 99, 132)">x</div>
+                            </td>
+                            <td>
+                                <div style="color: rgb(99, 132, 255)">y</div>
+                            </td>
+                            <td>
+                                <div style="color: rgb(132, 255, 99)">z</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <tr>
+                                <td>
+                                    <div>HighG (KX134) Acceleration:</div>
+                                </td>
+                                <td>
+                                    <div id="KX_IMU_ax">0</div>
+                                </td>
+                                <td>
+                                    <div id="KX_IMU_ay">0</div>
+                                </td>
+                                <td>
+                                    <div id="KX_IMU_az">0</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div>HighG (H3LIS331DL) Acceleration:</div>
+                                </td>
+                                <td>
+                                    <div id="H3L_IMU_ax">0</div>
+                                </td>
+                                <td>
+                                    <div id="H3L_IMU_ay">0</div>
+                                </td>
+                                <td>
+                                    <div id="H3L_IMU_az">0</div>
+                                </td>
+                            </tr>
+                    </table>
+                </td>
+                </tr>
+                <tr>
+                    <tr>
+                        <td>
+                            <div style="margin-top:5px">GPS: </div>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <div style="color: rgb(255, 99, 132)">Latitude</div>
+                                    </td>
+                                    <td>
+                                        <div style="color: rgb(99, 132, 255)">Longitude</div>
+                                    </td>
+                                    <td>
+                                        <div style="color: rgb(132, 255, 99)">Altitude</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div id="gps_lat">0</div>
+                                    </td>
+                                    <td>
+                                        <div id="gps_long">0</div>
+                                    </td>
+                                    <td>
+                                        <div id="gps_alt">0</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div style="margin-top:5px">Others: </div>
+                            <table>
+                                <tr>
+                                    <td>
+                                        <div style="color: rgb(255, 99, 132)">Barometer:</div>
+                                    </td>
+                                    <td>
+                                        <div>FSM State: </div>
+                                    </td>
+                                    <td>
+                                        <div>Call Sign: </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div id="barometer_alt">0</div>
+                                    </td>
+                                    <td>
+                                        <div id="FSM_state">0</div>
+                                    </td>
+                                    <td>
+                                        <div id="sign">0</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </tr>
+            </tr>
+        </table>
+    </div>
+    <div class="grid-item"><canvas id="kx134"></canvas></div>
+    <div class="grid-item"><canvas id="H3LIS331DL"></canvas></div>
+    <div class="grid-item"><canvas id="barometer"></canvas></div>
+    <!-- <div class="grid-item">Data Panel 2</div> -->
+</div>
 
-    
+
+
+
+
+
 
 
 <!-- <div>
@@ -82,8 +228,15 @@
 
 </div> -->
 <script>
-    require("./main.js")
+    if (!(window && window.process && window.process.type)) {
+        const a = document.createElement("script");
+        a.src = "./bundle.js";
+        document.body.appendChild(a);
+    } else {
+        const a = document.createElement("script");
+        a.innerHTML = `require("./electronMain.js")`;
+        document.body.appendChild(a);
+    }
 </script>
 
 </html>
-
