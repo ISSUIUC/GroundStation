@@ -8,41 +8,36 @@ const stylesheetopt = <HTMLLinkElement>document.getElementById("style");
 let contrast = false;
 let time = 9;
 
+const starting_length = 100;
 // ALL VALUES ARE DEMO FOR NOW BUT THESE ARE THE constIABLES THAT WILL BE PASSED TO THE CHART
-const DP_LOWGMX = [0,0,0,0,0,0,0,0,0,0];
-const DP_LOWGMY = [0,0,0,0,0,0,0,0,0,0];
-const DP_LOWGMZ = [0,0,0,0,0,0,0,0,0,0];
+const DP_LOWGMX = Array(starting_length).fill(0);
+const DP_LOWGMY = Array(starting_length).fill(0);
+const DP_LOWGMZ = Array(starting_length).fill(0);
 
-const DP_LOWGAX = [0,0,0,0,0,0,0,0,0,0];
-const DP_LOWGAY = [0,0,0,0,0,0,0,0,0,0];
-const DP_LOWGAZ = [0,0,0,0,0,0,0,0,0,0];
+const DP_LOWGAX = Array(starting_length).fill(0);
+const DP_LOWGAY = Array(starting_length).fill(0);
+const DP_LOWGAZ = Array(starting_length).fill(0);
 
-const DP_LOWGGX = [0,0,0,0,0,0,0,0,0,0];
-const DP_LOWGGY = [0,0,0,0,0,0,0,0,0,0];
-const DP_LOWGGZ = [0,0,0,0,0,0,0,0,0,0];
+const DP_LOWGGX = Array(starting_length).fill(0);
+const DP_LOWGGY = Array(starting_length).fill(0);
+const DP_LOWGGZ = Array(starting_length).fill(0);
 
-const DP_GPS_LAT = [0,0,0,0,0,0,0,0,0,0];
-const DP_GPS_LONG = [0,0,0,0,0,0,0,0,0,0];
-const DP_GPS_ALT = [0,0,0,0,0,0,0,0,0,0];
+const DP_GPS_LAT = Array(starting_length).fill(0);
+const DP_GPS_LONG = Array(starting_length).fill(0);
+const DP_GPS_ALT = Array(starting_length).fill(0);
 
-const DP_KXAX = [0,0,0,0,0,0,0,0,0,0];
-const DP_KXAY = [0,0,0,0,0,0,0,0,0,0];
-const DP_KXAZ = [0,0,0,0,0,0,0,0,0,0];
+const DP_KXAX = Array(starting_length).fill(0);
+const DP_KXAY = Array(starting_length).fill(0);
+const DP_KXAZ = Array(starting_length).fill(0);
 
-const DP_H3LAX = [0,0,0,0,0,0,0,0,0,0];
-const DP_H3LAY = [0,0,0,0,0,0,0,0,0,0];
-const DP_H3LAZ = [0,0,0,0,0,0,0,0,0,0];
+const DP_H3LAX = Array(starting_length).fill(0);
+const DP_H3LAY = Array(starting_length).fill(0);
+const DP_H3LAZ = Array(starting_length).fill(0);
 
-const DP_BAROMETER = [0,0,0,0,0,0,0,0,0,0];
+const DP_BAROMETER = Array(starting_length).fill(0);
 
 // X-AXIS LABELS CAN BE REMOVED LATER
-let labels = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-
-function getRandomInt(min: number, max: number) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+let labels = Array(starting_length).fill(0).map((_,i)=>i);
 
 function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,  
     LOWGGX: number, LOWGGY: number, LOWGGZ: number, 
@@ -53,7 +48,7 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
      BAROMETER: number) {
     labels.splice(0, 1);
     time++;
-    labels.push(time.toString());
+    labels.push(time);
 
     const chart_arr = [
         {chart: charts.baro_altitude, val: [BAROMETER]},
@@ -70,7 +65,7 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
             const {chart, val} = c;
             for (let coord = 0; coord < val.length; coord++) {
                 const arr = chart.data.datasets[coord].data;
-                for (let i = 0; i < 9; i++) {
+                for (let i = 0; i + 1 < arr.length; i++) {
                     arr[i] = arr[i+1];
                 }
                 arr[arr.length - 1] = val[coord];
@@ -82,18 +77,17 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
 }
 
 led_button.addEventListener('click', () => {
-    let newdataset = addNewDataset(DP_LOWGMX, "lowGimumx");
+    let newdataset = make_new_dataset(DP_LOWGMX, "lowGimumx");
     charts.lowgimu_accel.data.datasets.push(newdataset);
     charts.lowgimu_accel.update();
 })
 
-function addNewDataset(data: number[], name: string) {
-    let newdataset = {
+function make_new_dataset(data: number[], name: string) {
+    return {
         label: name,
         borderColor: 'rgb(99, 255, 132)',
         data: data
     }
-    return newdataset;
 }
 
 color_change.addEventListener('click', () => {
@@ -123,10 +117,12 @@ let data = {
 function make_chart(element_id: string, name: string, data: number[]): Chart {
     const canvas = <HTMLCanvasElement>document.getElementById(element_id);
     const ctx = canvas.getContext('2d');
-    return new Chart(ctx, make_chart_options(name, data));
+    return new Chart(ctx, make_chart_options(name, [data]));
 }
 
-function make_chart_options(name: string, data: number[]): ChartConfiguration {
+function make_chart_options(name: string, datasets: number[][]) : ChartConfiguration{
+    const colors = ['rgb(255, 99, 132)', 'rgb(99, 132, 255)', 'rgb(132, 255, 99)'];
+
     return {
         // The type of chart we want to create
         type: 'line',
@@ -134,15 +130,23 @@ function make_chart_options(name: string, data: number[]): ChartConfiguration {
         // The data for our dataset
         data: {
             labels,
-            datasets: [{
-                label: name,
-                borderColor: 'rgb(255, 99, 132)',
-                data: data
-            }]
+            datasets: datasets.map((d, i) => {
+                return {
+                    label: name,
+                    borderColor: colors[i],
+                    data: d
+                }
+            })
         },
         // Configuration options go here
         options: {
+            animation: false,
             maintainAspectRatio: false,
+            datasets: {
+                line: {
+                    pointRadius: 0
+                }
+            },
             layout: {
                 padding: {
                     left: 5,
@@ -180,69 +184,7 @@ function make_chart_options(name: string, data: number[]): ChartConfiguration {
 function make_chart_multiaxis(element_id: string, name: string, datax: number[], datay: number[], dataz: number[]): Chart {
     const canvas = <HTMLCanvasElement>document.getElementById(element_id);
     const ctx = canvas.getContext('2d');
-    return new Chart(ctx, make_chart_options_multiaxis(name, datax, datay, dataz));
-}
-
-function make_chart_options_multiaxis(name: string, datax: number[], datay: number[], dataz: number[]): ChartConfiguration {
-    return {
-        // The type of chart we want to create
-        type: 'line',
-
-        // The data for our dataset
-        data: {
-            labels,
-            datasets: [{
-                label: name,
-                borderColor: 'rgb(255, 99, 132)',
-                data: datax
-            },
-            {
-                label: name,
-                borderColor: 'rgb(99, 132, 255)',
-                data: datay
-            },
-            {
-                label: name,
-                borderColor: 'rgb(132, 255, 99)',
-                data: dataz
-            },
-            ]
-        },
-        // Configuration options go here
-        options: {
-            maintainAspectRatio: false,
-            layout: {
-                padding: {
-                    left: 5,
-                    top: 5,
-                    right: 5,
-                    bottom: 5
-                }
-            },
-            plugins: {
-                legend: {
-                    display: false
-                },
-                title: {
-                    display: true,
-                    text: name,
-                    color: 'white'
-                }
-            },
-            scales: {
-                y: {
-                    ticks: {
-                        color: 'white'
-                    }
-                },
-                x: {
-                    ticks: {
-                        color: 'white'
-                    }
-                }
-            }
-        }
-    }
+    return new Chart(ctx, make_chart_options(name, [datax, datay, dataz]));
 }
 
 function setup_charts() {
@@ -292,7 +234,7 @@ ipcRenderer.on("connection", (event, message) => {
     for (var key in m) {
         document.getElementById(key).innerText = m[key];
     }
-    
+    return;
     updateData(m["LSM_IMU_mx"], m["LSM_IMU_my"], m["LSM_IMU_mz"], 
                 m["LSM_IMU_gx"], m["LSM_IMU_gy"], m["LSM_IMU_gz"],
                 m["LSM_IMU_ax"], m["LSM_IMU_ay"], m["LSM_IMU_az"], 
@@ -305,7 +247,7 @@ ipcRenderer.on("connection", (event, message) => {
 
 setInterval(()=>{
     const c = Math.cos(Math.random());
-    const d = Math.sin(Math.random());
-    const e = Math.tan(Math.random());
+    const d = Math.cos(Math.random());
+    const e = Math.cos(Math.random());
     updateData(c,d,e,c,d,e,c,d,e,c,d,e,c,d,e,c,d,e,c);
 }, 100)
