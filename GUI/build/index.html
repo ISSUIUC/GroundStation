@@ -227,7 +227,15 @@
 
 </div> -->
 <script>
-    require("./main.js")
+    if(WebSocket){
+        const a = document.createElement("script");
+        a.src = "./bundle.js";
+        document.body.appendChild(a);
+    } else {
+        const a = document.createElement("script");
+        a.innerHTML = `require("./electronMain.js")`;
+        document.body.appendChild(a);
+    }
 </script>
 
 </html>
