@@ -211,16 +211,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
     set_current_time();
     setInterval(set_current_time, 1000);
     
-    let times = 0;
-    setInterval(()=>{
-        const c = Math.cos(times++/100);
-        const d = Math.cos(times++/100);
-        const e = Math.cos(times++/100);
-        updateData(c,d,e,c,d,e,c,d,e,c,d,e,c,d,e,c,d,e,c);
-    }, 30);
-
-    
-    serverConnection.on("data", (event, message) => {
+    serverConnection.on("data", (message) => {
         const masterJSON = JSON.parse(message);
         const m = masterJSON["value"];
         /* Finds the Raw Telemetry Table 
@@ -231,7 +222,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
         }
         updateData(m["LSM_IMU_mx"], m["LSM_IMU_my"], m["LSM_IMU_mz"], 
                     m["LSM_IMU_gx"], m["LSM_IMU_gy"], m["LSM_IMU_gz"],
-                    m["LSM_IMU_ax"], m["LSM_IMU_ay"], m["LSM_IMU_az"], 
+                    m["LSM_IMU_ax"], m["LSM_IMU_ay"], m["LSM_IMU_az"],
                     m["gps_lat"], m["gps_long"], m["gps_alt"], 
                     m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],
                     m["H3L_IMU_ax"], m["H3L_IMU_ay"], m["H3L_IMU_az"],
