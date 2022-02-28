@@ -117,13 +117,13 @@ let data = {
     
 }
 
-function make_chart(element_id: string, name: string, data: number[]): Chart {
+function make_chart(units: string, element_id: string, name: string, data: number[]): Chart {
     const canvas = <HTMLCanvasElement>document.getElementById(element_id);
     const ctx = canvas.getContext('2d');
-    return new Chart(ctx, make_chart_options(name, [data]));
+    return new Chart(ctx, make_chart_options(units, name, [data]));
 }
 
-function make_chart_options(name: string, datasets: number[][]) : ChartConfiguration{
+function make_chart_options(units: string, name: string, datasets: number[][]) : ChartConfiguration{
     const colors = ['rgb(255, 99, 132)', 'rgb(99, 132, 255)', 'rgb(132, 255, 99)'];
 
     return {
@@ -172,11 +172,33 @@ function make_chart_options(name: string, datasets: number[][]) : ChartConfigura
                 y: {
                     ticks: {
                         color: 'white'
+                    },
+                    title: {
+                        display: true,
+                        text: units,
+                        color: '#ffffff',
+                        font: {
+                          family: 'Causten',
+                          size: 14,
+                          weight: 'bold',
+                          lineHeight: 1.2,
+                        }
                     }
                 },
                 x: {
                     ticks: {
                         color: 'white'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Time (seconds)',
+                        color: '#ffffff',
+                        font: {
+                          family: 'Causten',
+                          size: 14,
+                          weight: 'bold',
+                          lineHeight: 1.2,
+                        }
                     }
                 }
             }
@@ -184,22 +206,22 @@ function make_chart_options(name: string, datasets: number[][]) : ChartConfigura
     }
 }
 
-function make_chart_multiaxis(element_id: string, name: string, datax: number[], datay: number[], dataz: number[]): Chart {
+function make_chart_multiaxis(units: string, element_id: string, name: string, datax: number[], datay: number[], dataz: number[]): Chart {
     const canvas = <HTMLCanvasElement>document.getElementById(element_id);
     const ctx = canvas.getContext('2d');
-    return new Chart(ctx, make_chart_options(name, [datax, datay, dataz]));
+    return new Chart(ctx, make_chart_options(units, name, [datax, datay, dataz]));
 }
 
 function setup_charts() {
     return {
-        lowgimu_accel: make_chart_multiaxis("lowgimuA", "LowG IMU acceleration", DP_LOWGAX, DP_LOWGAY, DP_LOWGAZ),
-        lowgimu_gyro: make_chart_multiaxis("lowgimuG", "LowG IMU gyroscope", DP_LOWGGX, DP_LOWGGY, DP_LOWGGZ),
-        lowgimu_mag: make_chart_multiaxis("lowgimuM", "LowG IMU magnetometer", DP_LOWGMX, DP_LOWGMY, DP_LOWGMZ),
-        gps: make_chart_multiaxis("gps", "GPS altitude", DP_GPS_LAT, DP_GPS_LONG, DP_GPS_ALT),
-        highg_kx_accel: make_chart_multiaxis("kx134", "kx134 acceleration", DP_KXAX, DP_KXAY, DP_KXAZ),
-        highg_h3l_accel: make_chart_multiaxis("H3LIS331DL", "H3L acceleration", DP_H3LAX, DP_H3LAY, DP_H3LAZ),
-        baro_altitude: make_chart("barometer", "Barometer altitude", DP_BAROMETER),
-        signal: make_chart("signal", "Signal Strength", DP_SIGNAL)
+        lowgimu_accel: make_chart_multiaxis("G","lowgimuA", "LowG IMU acceleration", DP_LOWGAX, DP_LOWGAY, DP_LOWGAZ),
+        lowgimu_gyro: make_chart_multiaxis("DPS","lowgimuG", "LowG IMU gyroscope", DP_LOWGGX, DP_LOWGGY, DP_LOWGGZ),
+        lowgimu_mag: make_chart_multiaxis("Gauss","lowgimuM", "LowG IMU magnetometer", DP_LOWGMX, DP_LOWGMY, DP_LOWGMZ),
+        gps: make_chart_multiaxis("Meters","gps", "GPS altitude", DP_GPS_LAT, DP_GPS_LONG, DP_GPS_ALT),
+        highg_kx_accel: make_chart_multiaxis("G","kx134", "kx134 acceleration", DP_KXAX, DP_KXAY, DP_KXAZ),
+        highg_h3l_accel: make_chart_multiaxis("G","H3LIS331DL", "H3L acceleration", DP_H3LAX, DP_H3LAY, DP_H3LAZ),
+        baro_altitude: make_chart("mbars","barometer", "Barometer altitude", DP_BAROMETER),
+        signal: make_chart("dBmW","signal", "Signal Strength", DP_SIGNAL)
     };
 }
 
@@ -218,7 +240,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
     let times = 0;
     setInterval(()=>{
         const c = Math.cos(times++/100);
-        const d = Math.cos(times++/100);
+        const d = Math.sin(times++/100);
         const e = Math.cos(times++/100);
         updateData(c,d,e,c,d,e,c,d,e,c,d,e,c,d,e,c,d,e,c,d);
     }, 30);
@@ -239,7 +261,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                     m["gps_lat"], m["gps_long"], m["gps_alt"], 
                     m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],
                     m["H3L_IMU_ax"], m["H3L_IMU_ay"], m["H3L_IMU_az"],
-                    m["barometer_alt"], m["signal_strength"]);
+                    m["barometer_alt"], m["RSSI"]);
         
     });
 
