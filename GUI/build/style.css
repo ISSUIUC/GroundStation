@@ -2,6 +2,7 @@
 
 :root {
     --bg: rgb(23, 26, 28);
+    --outliine: rgba(217, 186, 63, 0.8);
 }
 
 
@@ -51,6 +52,19 @@ label {
     text-align: left;
     font-family: "Causten", "Futura", monospace;
     color: rgb(255, 255, 255);
+}
+
+input {
+    width: auto;
+    resize: vertical;
+    padding: 15px;
+    border-radius: 5px;
+    font-family: "Causten", monospace;
+    font-size: 18;
+    border: 0;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.06);
+    border-color: var(--outliine);
+    margin: 10px;
 }
 
 
@@ -146,7 +160,7 @@ label {
 
 .grid-container>div {
     /* background-color: rgba(255, 255, 255, 0.8); */
-    border: 1px solid rgba(217, 186, 63, 0.8);
+    border: 1px solid var(--outliine);
     padding: 2px;
     font-size: 30px;
     text-align: center;
@@ -181,6 +195,11 @@ label {
     grid-column-start: 4;
     grid-row-start: 2;
     grid-row-end: 4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: auto;
+    /* max-width: 327px; alt option if ^ does'nt work*/
 }
 
 .grid-container>div.rawtelem2 {
@@ -191,4 +210,59 @@ label {
     text-align: center;
     /* width:250px; */
     height: auto;
+}
+
+#map {
+    height: 300px;
+}
+
+
+/* PROGRESS BAR ACTIVITY */
+
+.Section {
+    text-align: center;
+    /* max-width: 400px; */
+    margin: 0 auto;
+    /* margin-top: 20px; */
+    /* padding: 5px; */
+}
+
+#ProgressBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 1000px;
+    margin: 0 auto;
+    margin-bottom: 40px;
+}
+
+.step {
+    text-align: center;
+}
+
+.text {
+    margin-bottom: 10px;
+    color: white;
+}
+
+.bullets {
+    border: 1px solid var(--outliine);
+    height: 20px;
+    width: 20px;
+    border-radius: 100%;
+    color: var(--outliine);
+    display: inline-block;
+    position: relative;
+    transition: background-color 5s, right 3s ease;
+    line-height: 20px;
+}
+
+.bullets.completed::after {
+    content: "";
+    position: absolute;
+    right: -300px;
+    bottom: 8px;
+    height: 5px;
+    width: 300px;
+    background-color: var(--outliine);
 }

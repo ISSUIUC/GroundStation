@@ -6,6 +6,9 @@ import { WebSocket, WebSocketServer } from 'ws';
 // Initializes windows as main windows.
 let mainWindow : BrowserWindow;
 let serialWindow : BrowserWindow;
+let gpswindow : BrowserWindow;
+let freqwindow : BrowserWindow;
+let callsignwindow : BrowserWindow;
 let serial_port : SerialPort;
 let server : WebSocketServer;
 let web_sockets : WebSocket[] = [];
@@ -55,6 +58,10 @@ function serial_communicate(window: BrowserWindow){
     }, 1000);
 }
 
+export function change_contrast() {
+    mainWindow.webContents.send("contrast");
+}
+
 // Creates Serial Connect Window
 export function createSerialWindow() {
     serialWindow = new BrowserWindow({
@@ -72,7 +79,63 @@ export function createSerialWindow() {
     serial_communicate(serialWindow);
 }
 
+export function createGPSWindow() {
+    gpswindow = new BrowserWindow({
+        width: 500,
+        height: 450,
+        title: 'GPS Window',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+        }
+    });
+    gpswindow.loadURL(`file://${__dirname}/gps.html`);
+    // serialWindow.setMenu(makeSerialMenu(serialWindow)); May use it for future commands 
+}
+
+export function changeFrequencyWindow() {
+    freqwindow = new BrowserWindow({
+        width: 500,
+        height: 450,
+        title: 'Change Frequency',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+        }
+    });
+    freqwindow.loadURL(`file://${__dirname}/changefreq.html`);
+}
+
+export function changeCallSignWindow() {
+    callsignwindow = new BrowserWindow({
+        width: 500,
+        height: 450,
+        title: 'Change Call Sign',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+        }
+    });
+    callsignwindow.loadURL(`file://${__dirname}/callsign.html`);
+}
+
+ipcMain.on('frequency', (frequency) => {
+    freqwindow.close();
+    console.log(`Changing frequency to ${frequency}`);
+    // serial_port.write('{Command for Changing Frequency}' + frequency); //CHANGE COMMAND ASAP
+});
+
+ipcMain.on('call_sign', (call_sign) => {
+    callsignwindow.close();
+    console.log(`Changing Call Sign to ${call_sign}`);
+    // serial_port.write('{Command for Changing Call Sign}' + call_sign); //CHANGE COMMAND ASAP
+});
+
 ipcMain.on('connect', (evt, message, baud) => {
+    serialWindow.close();
     console.log(`Connecting to serial port ${message}`);
     let baudrate = parseInt(baud);
     // serial_port = new SerialPort(message, {baudRate : baudrate});
@@ -85,6 +148,7 @@ ipcMain.on('connect', (evt, message, baud) => {
 });
 
 ipcMain.on('disconnect', (evt, message, baud) => {
+    serialWindow.close();
     console.log(`Disconnecting from serial port ${message}`);
     // serial_port = new SerialPort(message, {baudRate : baudrate});
     serial_port.close(function (err) {

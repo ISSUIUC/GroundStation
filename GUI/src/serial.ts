@@ -7,7 +7,6 @@ const baud_drop = <HTMLSelectElement>document.getElementById('BaudDrop');
 const connect = <HTMLButtonElement>document.getElementById('Connect');
 const disconnect = <HTMLButtonElement>document.getElementById('Disconnect');
 const scan = <HTMLButtonElement>document.getElementById('Scan');
-
 let ScanDropMessage : [{path : string}];
 let set = false;
 
@@ -30,6 +29,7 @@ connect.addEventListener('click', ()=> {
     let i = scan_drop.selectedIndex;
     if(i <= 0) return;
     ipcRenderer.send('connect', scan_drop.options[i].value, baud_drop.options[baud_drop.selectedIndex].value);
+
 })
 
 disconnect.addEventListener('click', ()=> {

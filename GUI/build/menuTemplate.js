@@ -1,30 +1,30 @@
-import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from 'electron';
-import { changeCallSignWindow, changeFrequencyWindow, change_contrast, createGPSWindow, createSerialWindow } from './index';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.makeMainMenu = exports.makeSerialMenu = void 0;
+const electron_1 = require("electron");
+const index_1 = require("./index");
 const isMac = process.platform === 'darwin';
-
-export function makeSerialMenu(window: BrowserWindow) {
-    return Menu.buildFromTemplate(serialWindowTemplate(window));
+function makeSerialMenu(window) {
+    return electron_1.Menu.buildFromTemplate(serialWindowTemplate(window));
 }
-
-export function makeMainMenu(window: BrowserWindow) {
-    return Menu.buildFromTemplate(mainWindowTemplate(window));
+exports.makeSerialMenu = makeSerialMenu;
+function makeMainMenu(window) {
+    return electron_1.Menu.buildFromTemplate(mainWindowTemplate(window));
 }
-
-
-function serialWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[] {
+exports.makeMainMenu = makeMainMenu;
+function serialWindowTemplate(window) {
     return [
         fileMenu(window)
     ];
 }
-
-function fileMenu(window: BrowserWindow): MenuItemConstructorOptions {
+function fileMenu(window) {
     return {
         label: 'File',
         submenu: [
             {
                 label: 'Quit',
                 accelerator: 'ctrl+Q',
-                click() { app.quit(); }
+                click() { electron_1.app.quit(); }
             },
             {
                 label: 'Debug',
@@ -38,10 +38,8 @@ function fileMenu(window: BrowserWindow): MenuItemConstructorOptions {
             }
         ]
     };
-
 }
-
-function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[] {
+function mainWindowTemplate(window) {
     return [
         fileMenu(window),
         // "Connct" subgroup
@@ -51,7 +49,7 @@ function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[]
                 {
                     label: 'Serial',
                     accelerator: 'ctrl+shift+C',
-                    click() { createSerialWindow(); }
+                    click() { (0, index_1.createSerialWindow)(); }
                 },
                 {
                     label: 'Ethernet'
@@ -63,24 +61,25 @@ function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[]
             submenu: [
                 {
                     label: 'Call Sign',
-                    click() { changeCallSignWindow(); }
+                    click() { (0, index_1.changeCallSignWindow)(); }
                 },
                 {
                     label: 'Abort',
                 },
                 {
                     label: 'Frequency',
-                    click() { changeFrequencyWindow(); }
+                    click() { (0, index_1.changeFrequencyWindow)(); }
                 },
                 {
                     label: 'GPS Window',
-                    click() { createGPSWindow(); }
+                    click() { (0, index_1.createGPSWindow)(); }
                 },
                 {
                     label: 'Change Contrast',
-                    click() { change_contrast(); }
+                    click() { (0, index_1.change_contrast)(); }
                 }
             ]
         }
     ];
 }
+//# sourceMappingURL=menuTemplate.js.map
