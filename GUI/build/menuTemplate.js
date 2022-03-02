@@ -65,6 +65,7 @@ function mainWindowTemplate(window) {
                 },
                 {
                     label: 'Abort',
+                    click() { (0, index_1.callAbort)(); }
                 },
                 {
                     label: 'Frequency',
@@ -77,6 +78,15 @@ function mainWindowTemplate(window) {
                 {
                     label: 'Change Contrast',
                     click() { (0, index_1.change_contrast)(); }
+                }
+            ]
+        },
+        {
+            label: 'Maps',
+            submenu: [
+                {
+                    label: 'GPS Window',
+                    click() { (0, index_1.createGPSWindow)(); }
                 }
             ]
         }

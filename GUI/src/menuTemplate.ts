@@ -1,5 +1,5 @@
 import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from 'electron';
-import { changeCallSignWindow, changeFrequencyWindow, change_contrast, createGPSWindow, createSerialWindow } from './index';
+import { callAbort, changeCallSignWindow, changeFrequencyWindow, change_contrast, createGPSWindow, createSerialWindow } from './index';
 const isMac = process.platform === 'darwin';
 
 export function makeSerialMenu(window: BrowserWindow) {
@@ -67,6 +67,7 @@ function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[]
                 },
                 {
                     label: 'Abort',
+                    click() { callAbort(); }
                 },
                 {
                     label: 'Frequency',
@@ -79,6 +80,15 @@ function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[]
                 {
                     label: 'Change Contrast',
                     click() { change_contrast(); }
+                }
+            ]
+        },
+        {
+            label: 'Maps',
+            submenu: [
+                {
+                    label: 'GPS Window',
+                    click() { createGPSWindow(); }
                 }
             ]
         }

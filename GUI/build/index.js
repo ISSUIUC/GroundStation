@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changeCallSignWindow = exports.changeFrequencyWindow = exports.createGPSWindow = exports.createSerialWindow = exports.change_contrast = void 0;
+exports.callAbort = exports.changeCallSignWindow = exports.changeFrequencyWindow = exports.createGPSWindow = exports.createSerialWindow = exports.change_contrast = void 0;
 const electron_1 = require("electron");
 const SerialPort = require("serialport");
 const path = require("path");
@@ -84,8 +84,8 @@ function createSerialWindow() {
 exports.createSerialWindow = createSerialWindow;
 function createGPSWindow() {
     gpswindow = new electron_1.BrowserWindow({
-        width: 500,
-        height: 450,
+        width: 800,
+        height: 800,
         title: 'GPS Window',
         webPreferences: {
             nodeIntegration: true,
@@ -125,6 +125,18 @@ function changeCallSignWindow() {
     callsignwindow.loadURL(`file://${__dirname}/callsign.html`);
 }
 exports.changeCallSignWindow = changeCallSignWindow;
+function callAbort() {
+    let response = electron_1.dialog.showMessageBoxSync(this, {
+        type: 'question',
+        buttons: ['Yes', 'No'],
+        title: 'Confirm',
+        message: 'Are you sure you want to Abort?'
+    });
+    if (response == 0) {
+        // serial_port.write("ABORT COMMAND GOES HERE"); CHANGE COMMAND ASAP
+    }
+}
+exports.callAbort = callAbort;
 electron_1.ipcMain.on('frequency', (frequency) => {
     freqwindow.close();
     console.log(`Changing frequency to ${frequency}`);
