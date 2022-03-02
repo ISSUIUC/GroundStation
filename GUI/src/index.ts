@@ -93,35 +93,35 @@ ipcMain.on('disconnect', (evt, message, baud) => {
 });
 
 function send_frontends_data(tag: string, data: string){
-    mainWindow?.webContents.send(tag, data);
+    mainWindow?.webContents?.send(tag, data);
     for(const ws of web_sockets){
         ws.send(JSON.stringify({event: tag, message: data}));
     }
 }
 
-setInterval(()=>{
+// setInterval(()=>{
 
-    const val = Math.cos(Math.random());
-    const data = {
-		LSM_IMU_mx : val,
-		LSM_IMU_my : val,
-		LSM_IMU_mz : val,
-		LSM_IMU_gx : val,
-		LSM_IMU_gy : val,
-		LSM_IMU_gz : val,
-		LSM_IMU_ax : val,
-		LSM_IMU_ay : val,
-		LSM_IMU_az : val,
-		gps_lat : val,
-		gps_long : val,
-		gps_alt : val,
-		KX_IMU_ax : val,
-		KX_IMU_ay : val,
-		KX_IMU_az : val,
-		H3L_IMU_ax : val,
-		H3L_IMU_ay : val,
-		H3L_IMU_az : val,
-        barometer_alt : val,
-    }
-    send_frontends_data('data', JSON.stringify({type: 'data', value: data}));
-}, 30);
+//     const val = Math.cos(Math.random());
+//     const data = {
+// 		LSM_IMU_mx : val,
+// 		LSM_IMU_my : val,
+// 		LSM_IMU_mz : val,
+// 		LSM_IMU_gx : val,
+// 		LSM_IMU_gy : val,
+// 		LSM_IMU_gz : val,
+// 		LSM_IMU_ax : val,
+// 		LSM_IMU_ay : val,
+// 		LSM_IMU_az : val,
+// 		gps_lat : val,
+// 		gps_long : val,
+// 		gps_alt : val,
+// 		KX_IMU_ax : val,
+// 		KX_IMU_ay : val,
+// 		KX_IMU_az : val,
+// 		H3L_IMU_ax : val,
+// 		H3L_IMU_ay : val,
+// 		H3L_IMU_az : val,
+//         barometer_alt : val,
+//     }
+//     send_frontends_data('data', JSON.stringify({type: 'data', value: data}));
+// }, 30);
