@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.run_frontend = void 0;
 const L = require("leaflet");
 //MAP WORK
 var ter = L.tileLayer('../build/terrain/{z}/{x}/{y}.png', {
@@ -19,4 +20,15 @@ var baseMaps = {
 };
 L.control.layers(baseMaps).addTo(map);
 L.marker([40.1119, -88.2282]).addTo(map);
+function run_frontend(serverConnection) {
+    /* LOADS ALL THE CHARTS AFTER WINDOW LOADS
+    BUT WILL BE MOVED LATER TO AFTER GSS
+    ESTABLISHES CONNNECTION TO FEATHER */
+    serverConnection.on("data", (event, message) => {
+        const masterJSON = JSON.parse(message);
+        const m = masterJSON["value"];
+        // L.marker([GPS_LAT, GPS_LONG]).addTo(map); m["GPS_LAT"]
+    });
+}
+exports.run_frontend = run_frontend;
 //# sourceMappingURL=gps.js.map

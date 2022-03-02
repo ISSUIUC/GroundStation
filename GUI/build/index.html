@@ -249,18 +249,41 @@
     </div>
 </head>
 <!--experimental progress bar start-->
+
 <body>
     <div class="container">
-      <div class="progress-container">
-        <div class="progress" id="progress"></div>
-        <div class="circle active">1</div>
-        <div class="circle">2</div>
-        <div class="circle">3</div>
-        <div class="circle">4</div>
-      </div>
+        <div class="progress-container">
+            <div class="progress" id="progress"></div>
 
-      <button class="btn" id="prev" disabled>Prev</button>
-      <button class="btn" id="next">Next</button>
+            <div class="step">
+                <p class="text">Nick</p>
+                <div class="circle active">1</div>
+            </div>
+            <div class="step">
+                <p class="text">Peter</p>
+                <div class="circle">2</div>
+            </div>
+            <div class="step">
+                <p class="text">Ary</p>
+                <div class="circle">3</div>
+            </div>
+            <div class="step">
+                <p class="text">Gautam</p>
+                <div class="circle">4</div>
+            </div>
+            <div class="step">
+                <p class="text">Noah</p>
+                <div class="circle">5</div>
+            </div>
+
+            <!-- <div class="circle active">1</div>
+            <div class="circle">2</div>
+            <div class="circle">3</div>
+            <div class="circle">4</div> -->
+        </div>
+
+        <button class="btn" id="prev" disabled>Prev</button>
+        <button class="btn" id="next">Next</button>
     </div>
     <script src="script.js"></script>
 </body>
