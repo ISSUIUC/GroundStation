@@ -3,6 +3,9 @@ import * as SerialPort from "serialport"
 import * as path from 'path';
 import { makeMainMenu, makeSerialMenu } from './menuTemplate';
 import { WebSocket, WebSocketServer } from 'ws';
+import * as fs from 'fs';
+import { write } from 'original-fs';
+
 // Initializes windows as main windows.
 let mainWindow: BrowserWindow;
 let serialWindow: BrowserWindow;
@@ -134,15 +137,18 @@ export function callAbort() {
     if(response == 0) {
         // serial_port.write("ABORT COMMAND GOES HERE"); CHANGE COMMAND ASAP
     }
+
+    console.log(app.getPath("logs"));
+    mainWindow.webContents.send("write_to_csv", app.getPath("logs"));
 }
 
-ipcMain.on('frequency', (frequency) => {
+ipcMain.on('frequency', (evt, frequency) => {
     freqwindow.close();
     console.log(`Changing frequency to ${frequency}`);
     // serial_port.write('{Command for Changing Frequency}' + frequency); //CHANGE COMMAND ASAP
 });
 
-ipcMain.on('call_sign', (call_sign) => {
+ipcMain.on('call_sign', (evt, call_sign) => {
     callsignwindow.close();
     console.log(`Changing Call Sign to ${call_sign}`);
     // serial_port.write('{Command for Changing Call Sign}' + call_sign); //CHANGE COMMAND ASAP

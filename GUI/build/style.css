@@ -56,6 +56,14 @@ label {
     color: rgb(255, 255, 255);
 }
 
+p {
+    margin: 2px 2px 2px 2px;
+    font-size: 14px;
+    /* text-align: left; */
+    font-family: "Causten", "Futura", monospace;
+    color: rgb(255, 255, 255);
+}
+
 input {
     width: auto;
     resize: vertical;
@@ -307,6 +315,8 @@ input {
     margin-bottom: 30px;
     max-width: 100%;
     width: auto;
+    margin-left: 30px;
+    margin-right: 30px;
 }
 
 .progress-container::before {
@@ -324,13 +334,14 @@ input {
 .progress {
     background-color: var(--line-border-fill);
     position: absolute;
-    top: 75%;
+    top: 70%;
     left: 0;
     transform: translateY(-50%);
     height: 4px;
     width: 0%;
     z-index: -1;
     transition: 0.4s ease;
+    margin: auto;
 }
 
 .circle {
@@ -344,6 +355,7 @@ input {
     justify-content: center;
     border: 3px solid var(--line-border-empty);
     transition: 0.4s ease;
+    margin: auto;
 }
 
 .circle.active {

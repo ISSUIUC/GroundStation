@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.run_frontend = void 0;
 const chart_js_1 = require("chart.js");
 const electron_1 = require("electron");
+const fs = require("fs"); //CSV FILE ACTIVITY
 // const led_button = document.getElementById("Blink");
 // const color_change = <HTMLButtonElement>document.getElementById("color");
 // const htmlcolorelement = document.getElementById("contrast");
@@ -31,35 +32,21 @@ const DP_H3LAY = Array(starting_length).fill(0);
 const DP_H3LAZ = Array(starting_length).fill(0);
 const DP_BAROMETER = Array(starting_length).fill(0);
 const DP_SIGNAL = Array(starting_length).fill(0);
-const Btnprevious = document.getElementById('Previous');
-const Btnnext = document.getElementById('Next');
-const Btnsubmit = document.getElementById('Submit');
-const bullets = [...document.querySelectorAll('.bullets')];
-let current = 0;
-const max = 3;
-Btnprevious.style.display = 'none';
-Btnsubmit.style.display = 'none';
-Btnnext.addEventListener('click', () => {
-    bullets[current].classList.add('completed');
-    current += 1;
-    Btnprevious.style.display = 'inline';
-    if (current === max) {
-        Btnnext.style.display = 'none';
-        Btnsubmit.style.display = 'inline';
-    }
-});
-Btnprevious.addEventListener('click', () => {
-    bullets[current - 1].classList.remove('completed');
-    current -= 1;
-    Btnsubmit.style.display = 'none';
-    Btnnext.style.display = 'inline';
-    if (current === 0) {
-        Btnprevious.style.display = 'none';
-    }
-});
-Btnsubmit.addEventListener('click', () => {
-    location.reload();
-});
+//CSV FILE HEADERS
+const CSV_HEADERS = ["Time", "LSM_IMU_mx", "LSM_IMU_my", "LSM_IMU_mz",
+    "LSM_IMU_gx", "LSM_IMU_gy", "LSM_IMU_gz",
+    "LSM_IMU_ax", "LSM_IMU_ay", "LSM_IMU_az",
+    "gps_lat", "gps_long", "gps_alt",
+    "KX_IMU_ax", "KX_IMU_ay", "KX_IMU_az",
+    "H3L_IMU_ax", "H3L_IMU_ay", "H3L_IMU_az",
+    "barometer_alt", "RSSI"];
+const CSV_DATA = [["Time", "LSM_IMU_mx", "LSM_IMU_my", "LSM_IMU_mz",
+        "LSM_IMU_gx", "LSM_IMU_gy", "LSM_IMU_gz",
+        "LSM_IMU_ax", "LSM_IMU_ay", "LSM_IMU_az",
+        "gps_lat", "gps_long", "gps_alt",
+        "KX_IMU_ax", "KX_IMU_ay", "KX_IMU_az",
+        "H3L_IMU_ax", "H3L_IMU_ay", "H3L_IMU_az",
+        "barometer_alt", "RSSI"]];
 // X-AXIS LABELS CAN BE REMOVED LATER
 let labels = Array(starting_length).fill(0).map((_, i) => i);
 function updateData(LOWGMX, LOWGMY, LOWGMZ, LOWGGX, LOWGGY, LOWGGZ, LOWGAX, LOWGAY, LOWGAZ, GPS_LAT, GPS_LONG, GPS_ALT, KXAX, KXAY, KXAZ, H3LAX, H3LAY, H3LAZ, BAROMETER, SIGNAL) {
@@ -67,6 +54,18 @@ function updateData(LOWGMX, LOWGMY, LOWGMZ, LOWGGX, LOWGGY, LOWGGZ, LOWGAX, LOWG
     labels.splice(0, 1);
     time++;
     labels.push(time);
+    const current_cycle_string = [];
+    const current_cycle_number = [get_current_time(), LOWGMX, LOWGMY, LOWGMZ,
+        LOWGGX, LOWGGY, LOWGGZ,
+        LOWGAX, LOWGAY, LOWGAZ,
+        GPS_LAT, GPS_LONG, GPS_ALT,
+        KXAX, KXAY, KXAZ,
+        H3LAX, H3LAY, H3LAZ,
+        BAROMETER, SIGNAL];
+    current_cycle_number.forEach(c => {
+        current_cycle_string.push(c.toString());
+    });
+    CSV_DATA.push(current_cycle_string);
     const chart_arr = [
         { chart: charts.baro_altitude, val: [BAROMETER] },
         { chart: charts.gps, val: [GPS_LAT, GPS_LONG, GPS_ALT] },
@@ -206,6 +205,11 @@ function setup_charts() {
         signal: make_chart("dBmW", "signal", "Signal Strength (RSSI)", DP_SIGNAL)
     };
 }
+electron_1.ipcRenderer.on('write_to_csv', (evt, filepath) => {
+    console.log(filepath);
+    let csvContent = CSV_DATA.map(e => e.join(",")).join("\n");
+    fs.writeFile(filepath + "/" + "Log--" + get_current_time_full().toString() + ".csv", csvContent, () => { });
+});
 function run_frontend(serverConnection, registerables) {
     /* LOADS ALL THE CHARTS AFTER WINDOW LOADS
     BUT WILL BE MOVED LATER TO AFTER GSS
@@ -234,18 +238,37 @@ function run_frontend(serverConnection, registerables) {
     });
 }
 exports.run_frontend = run_frontend;
-// function set_current_time() {
-//     const date = new Date();
-//     const hh = date.getHours();
-//     const mm = date.getMinutes();
-//     const ss = date.getSeconds();
-//     const session = hh <= 12 ? "AM" : "PM";
-//     const hour = (hh < 10) ? "0" + hh : hh;
-//     const minute = (mm < 10) ? "0" + mm : mm;
-//     const second = (ss < 10) ? "0" + ss : ss;
-//     const time = `${hour}:${minute}:${second} ${session}`;
-//     document.getElementById("clock").innerText = time;
-// }
+function get_current_time_full() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hh = date.getHours();
+    const mm = date.getMinutes();
+    const ss = date.getSeconds();
+    const ms = date.getMilliseconds();
+    const session = hh <= 12 ? "AM" : "PM";
+    const hour = (hh < 10) ? "0" + hh : hh;
+    const minute = (mm < 10) ? "0" + mm : mm;
+    const second = (ss < 10) ? "0" + ss : ss;
+    // let time = `${hour}:${minute}:${second}:${ms}`; WEBPAGE FORMAT
+    let time = year + "-" + month + "-" + day + "--" + hour + "-" + minute + "-" + second + "-" + ms;
+    return time;
+    // document.getElementById("clock").innerText = time;
+}
+function get_current_time() {
+    const date = new Date();
+    const hh = date.getHours();
+    const mm = date.getMinutes();
+    const ss = date.getSeconds();
+    const ms = date.getMilliseconds();
+    const session = hh <= 12 ? "AM" : "PM";
+    const hour = (hh < 10) ? "0" + hh : hh;
+    const minute = (mm < 10) ? "0" + mm : mm;
+    const second = (ss < 10) ? "0" + ss : ss;
+    let time = hour + "-" + minute + "-" + second + "-" + ms;
+    return time;
+}
 electron_1.ipcRenderer.on('contrast', () => {
     if (!contrast) {
         stylesheetopt.href = "highcontrast.css";

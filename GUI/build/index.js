@@ -135,14 +135,16 @@ function callAbort() {
     if (response == 0) {
         // serial_port.write("ABORT COMMAND GOES HERE"); CHANGE COMMAND ASAP
     }
+    console.log(electron_1.app.getPath("logs"));
+    mainWindow.webContents.send("write_to_csv", electron_1.app.getPath("logs"));
 }
 exports.callAbort = callAbort;
-electron_1.ipcMain.on('frequency', (frequency) => {
+electron_1.ipcMain.on('frequency', (evt, frequency) => {
     freqwindow.close();
     console.log(`Changing frequency to ${frequency}`);
     // serial_port.write('{Command for Changing Frequency}' + frequency); //CHANGE COMMAND ASAP
 });
-electron_1.ipcMain.on('call_sign', (call_sign) => {
+electron_1.ipcMain.on('call_sign', (evt, call_sign) => {
     callsignwindow.close();
     console.log(`Changing Call Sign to ${call_sign}`);
     // serial_port.write('{Command for Changing Call Sign}' + call_sign); //CHANGE COMMAND ASAP
