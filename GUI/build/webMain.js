@@ -5,14 +5,15 @@ const chart_js_1 = require("chart.js");
 class WebConnection {
     constructor(url) {
         this.ws = new WebSocket(url);
+        this.listeners = new Map();
         this.ws.onmessage = (msg) => {
             this.post_listeners(msg);
         };
     }
     post_listeners(msg) {
         var _a;
-        const json = JSON.parse(msg.data);
-        (_a = this.listeners.get(json.channel)) === null || _a === void 0 ? void 0 : _a.forEach(l => l(...json.args));
+        const { event, message } = JSON.parse(msg.data);
+        (_a = this.listeners.get(event)) === null || _a === void 0 ? void 0 : _a.forEach(l => l(message));
     }
     on(channel, listener) {
         let arr = this.listeners.get(channel);
