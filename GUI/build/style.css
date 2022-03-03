@@ -248,6 +248,7 @@ input {
 
 .step {
     text-align: center;
+    padding: auto;
 }
 
 .text {

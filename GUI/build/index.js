@@ -35,6 +35,7 @@ electron_1.app.on('ready', () => {
             nodeIntegrationInWorker: true,
             contextIsolation: false,
         },
+        fullscreen: true,
         icon: __dirname + '/iss_logo.png',
     });
     const indexHTML = path.join(__dirname + '/index.html');
