@@ -54,11 +54,14 @@ label {
 }
 
 p {
-    margin: 2px 2px 2px 2px;
+    margin: auto;
+    padding: auto;
+    margin-bottom: auto;
     font-size: 14px;
-    /* text-align: left; */
+    text-align: center;
     font-family: "Causten", "Futura", monospace;
     color: rgb(255, 255, 255);
+    position: absolute;
 }
 
 input {
@@ -75,8 +78,9 @@ input {
 }
 
 canvas {
-    width: 24vw;
+    width: 22vw;
 }
+
 
 /* Styling for the ON button */
 
@@ -307,17 +311,20 @@ canvas {
 
 .container {
     text-align: center;
+    width: 80%;
+    margin: auto;
 }
 
 .progress-container {
     display: flex;
     justify-content: space-between;
+    /* justify-content: space-evenly; */
     position: relative;
     margin-bottom: 30px;
     max-width: 100%;
     width: auto;
-    margin-left: 30px;
-    margin-right: 30px;
+    /* margin-left: 30px;
+    margin-right: 30px; */
 }
 
 .progress-container::before {
@@ -357,6 +364,7 @@ canvas {
     border: 3px solid var(--line-border-empty);
     transition: 0.4s ease;
     margin: auto;
+    margin-top: 30px;
 }
 
 .circle.active {

@@ -58,7 +58,7 @@ app.on('ready', () => {
     });
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
-        // mainWindow.maximize();
+        mainWindow.maximize();
       });
     
     const indexHTML = path.join(__dirname + '/index.html');
