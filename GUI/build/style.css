@@ -74,6 +74,9 @@ input {
     margin: 10px;
 }
 
+canvas {
+    width: 24vw;
+}
 
 /* Styling for the ON button */
 

@@ -25,8 +25,27 @@ let callsignwindow;
 let serial_port;
 let server;
 let web_sockets = [];
-let csv = new csv_1.default(electron_1.app.getPath("logs") + "/" + new Date() + ".csv");
+let csv;
 const isMac = process.platform === 'darwin';
+const date = new Date();
+const year = date.getFullYear();
+const month = date.getMonth() + 1;
+const day = date.getDate();
+const hh = date.getHours();
+const mm = date.getMinutes();
+const ss = date.getSeconds();
+const ms = date.getMilliseconds();
+const session = hh <= 12 ? "AM" : "PM";
+const hour = (hh < 10) ? "0" + hh : hh;
+const minute = (mm < 10) ? "0" + mm : mm;
+const second = (ss < 10) ? "0" + ss : ss;
+let time = year + "-" + month + "-" + day + "--" + hour + "-" + minute + "-" + second + "-" + ms;
+if (isMac) {
+    csv = new csv_1.default(electron_1.app.getPath("logs") + "/" + time + ".csv");
+}
+else {
+    csv = new csv_1.default(electron_1.app.getPath("logs") + "\\" + time + ".csv");
+}
 electron_1.app.on('ready', () => {
     console.log('App is ready');
     mainWindow = new electron_1.BrowserWindow({
@@ -37,8 +56,11 @@ electron_1.app.on('ready', () => {
             nodeIntegrationInWorker: true,
             contextIsolation: false,
         },
-        fullscreen: true,
         icon: __dirname + '/iss_logo.png',
+    });
+    mainWindow.once('ready-to-show', () => {
+        mainWindow.show();
+        // mainWindow.maximize();
     });
     const indexHTML = path.join(__dirname + '/index.html');
     mainWindow.loadFile(indexHTML);

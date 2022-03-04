@@ -18,8 +18,31 @@ let callsignwindow: BrowserWindow;
 let serial_port: SerialPort;
 let server: WebSocketServer;
 let web_sockets: WebSocket[] = [];
-let csv = new CSVWriter(app.getPath("logs") + "/" + new Date() + ".csv");
+let csv: CSVWriter;
 const isMac = process.platform === 'darwin';
+
+const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hh = date.getHours();
+    const mm = date.getMinutes();
+    const ss = date.getSeconds();
+    const ms = date.getMilliseconds();
+
+    const session = hh <= 12 ? "AM" : "PM";
+    const hour = (hh < 10) ? "0" + hh : hh;
+    const minute = (mm < 10) ? "0" + mm : mm;
+    const second = (ss < 10) ? "0" + ss : ss;
+
+    let time = year + "-" + month + "-" + day + "--" + hour + "-" + minute + "-" + second + "-" + ms;
+
+if (isMac) {
+    
+    csv = new CSVWriter(app.getPath("logs") + "/" + time + ".csv")
+} else {
+    csv = new CSVWriter(app.getPath("logs") + "\\" + time + ".csv")
+}
 
 app.on('ready', () => {
     console.log('App is ready');
@@ -31,10 +54,13 @@ app.on('ready', () => {
             nodeIntegrationInWorker: true,
             contextIsolation: false,
         },
-        fullscreen: true,
         icon: __dirname + '/iss_logo.png',
     });
-
+    mainWindow.once('ready-to-show', () => {
+        mainWindow.show();
+        // mainWindow.maximize();
+      });
+    
     const indexHTML = path.join(__dirname + '/index.html');
     mainWindow.loadFile(indexHTML);
     // Builds menu template and renders it in the main window
