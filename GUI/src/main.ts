@@ -1,9 +1,5 @@
 import { Chart, ChartComponentLike, ChartConfiguration } from 'chart.js';
-<<<<<<< HEAD
-import { app, ipcMain, ipcRenderer } from 'electron';
-=======
 import { SerialResponse } from './serialResponse';
->>>>>>> feature/graph-work
 import { ServerConnection } from './serverConnection';
 import * as fs from 'fs'; //CSV FILE ACTIVITY
 
@@ -43,23 +39,6 @@ const DP_H3LAZ = Array(starting_length).fill(0);
 const DP_BAROMETER = Array(starting_length).fill(0);
 const DP_SIGNAL = Array(starting_length).fill(0);
 
-//CSV FILE HEADERS
-const CSV_HEADERS = ["Time", "LSM_IMU_mx", "LSM_IMU_my", "LSM_IMU_mz",
-"LSM_IMU_gx", "LSM_IMU_gy", "LSM_IMU_gz",
-"LSM_IMU_ax", "LSM_IMU_ay", "LSM_IMU_az",
-"gps_lat", "gps_long", "gps_alt",
-"KX_IMU_ax", "KX_IMU_ay", "KX_IMU_az",
-"H3L_IMU_ax", "H3L_IMU_ay", "H3L_IMU_az",
-"barometer_alt", "RSSI"]
-const CSV_DATA: string[][] = [["Time", "LSM_IMU_mx", "LSM_IMU_my", "LSM_IMU_mz",
-"LSM_IMU_gx", "LSM_IMU_gy", "LSM_IMU_gz",
-"LSM_IMU_ax", "LSM_IMU_ay", "LSM_IMU_az",
-"gps_lat", "gps_long", "gps_alt",
-"KX_IMU_ax", "KX_IMU_ay", "KX_IMU_az",
-"H3L_IMU_ax", "H3L_IMU_ay", "H3L_IMU_az",
-"barometer_alt", "RSSI"]];
-
-
 // X-AXIS LABELS CAN BE REMOVED LATER
 let labels = Array(starting_length).fill(0).map((_, i) => i);
 
@@ -75,20 +54,6 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
     labels.splice(0, 1);
     time++;
     labels.push(time);
-
-    const current_cycle_string: string[] = [];
-    const current_cycle_number = [get_current_time() ,LOWGMX, LOWGMY, LOWGMZ,
-        LOWGGX, LOWGGY, LOWGGZ,
-        LOWGAX, LOWGAY, LOWGAZ,
-        GPS_LAT, GPS_LONG, GPS_ALT,
-        KXAX, KXAY, KXAZ,
-        H3LAX, H3LAY, H3LAZ,
-        BAROMETER, SIGNAL];
-    current_cycle_number.forEach( c=> {
-        current_cycle_string.push(c.toString());
-    })
-    CSV_DATA.push(current_cycle_string);
-
 
     const chart_arr = [
         { chart: charts.baro_altitude, val: [BAROMETER] },
@@ -256,14 +221,6 @@ function setup_charts() {
     };
 }
 
-ipcRenderer.on('write_to_csv', (evt, filepath) => {
-    console.log(filepath);
-    let csvContent = CSV_DATA.map(e => e.join(",")).join("\n");
-    fs.writeFile(filepath + "/" + "Log--" + get_current_time_full().toString() + ".csv", csvContent, () => { });
-
-});
-
-
 export function run_frontend(serverConnection: ServerConnection, registerables: readonly ChartComponentLike[]) {
     /* LOADS ALL THE CHARTS AFTER WINDOW LOADS 
     BUT WILL BE MOVED LATER TO AFTER GSS 
@@ -338,16 +295,6 @@ function get_current_time() {
     let time = hour + "-" + minute + "-" + second + "-" + ms;
     return time
 }
-
-ipcRenderer.on('contrast', () => {
-    if (!contrast) {
-        stylesheetopt.href = "highcontrast.css";
-        contrast = true;
-    } else {
-        stylesheetopt.href = "style.css";
-        contrast = false;
-    }
-});
 
 //begin experimental progress bar
 const progress = document.getElementById('progress')

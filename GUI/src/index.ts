@@ -5,6 +5,9 @@ import { makeMainMenu, makeSerialMenu } from './menuTemplate';
 import { WebSocket, WebSocketServer } from 'ws';
 import * as fs from 'fs';
 import { write } from 'original-fs';
+import CSVWriter from './csv';
+import { SerialResponse } from './serialResponse';
+
 
 // Initializes windows as main windows.
 let mainWindow: BrowserWindow;
@@ -15,6 +18,7 @@ let callsignwindow: BrowserWindow;
 let serial_port: SerialPort;
 let server: WebSocketServer;
 let web_sockets: WebSocket[] = [];
+let csv = new CSVWriter("log.csv");
 const isMac = process.platform === 'darwin';
 
 app.on('ready', () => {
@@ -163,9 +167,7 @@ ipcMain.on('connect', (evt, message, baud) => {
     serial_port = new SerialPort(message);
     const parser = new SerialPort.parsers.Readline({ delimiter: '\n' });
     serial_port.pipe(parser);
-    parser.on('data', data => {
-        send_frontends_data('data', data.toString());
-    });
+    parser.on('data', on_serial_data);
 });
 
 ipcMain.on('disconnect', (evt, message, baud) => {
@@ -177,6 +179,11 @@ ipcMain.on('disconnect', (evt, message, baud) => {
     });
 });
 
+function on_serial_data(data: string){
+    send_frontends_data('data', data.toString());
+    csv.write_data(JSON.parse(data));
+}
+
 function send_frontends_data(tag: string, data: string){
     mainWindow?.webContents?.send(tag, data);
     for(const ws of web_sockets){
@@ -184,29 +191,36 @@ function send_frontends_data(tag: string, data: string){
     }
 }
 
-// setInterval(()=>{
+setInterval(()=>{
 
-//     const val = Math.cos(Math.random());
-//     const data = {
-// 		LSM_IMU_mx : val,
-// 		LSM_IMU_my : val,
-// 		LSM_IMU_mz : val,
-// 		LSM_IMU_gx : val,
-// 		LSM_IMU_gy : val,
-// 		LSM_IMU_gz : val,
-// 		LSM_IMU_ax : val,
-// 		LSM_IMU_ay : val,
-// 		LSM_IMU_az : val,
-// 		gps_lat : val,
-// 		gps_long : val,
-// 		gps_alt : val,
-// 		KX_IMU_ax : val,
-// 		KX_IMU_ay : val,
-// 		KX_IMU_az : val,
-// 		H3L_IMU_ax : val,
-// 		H3L_IMU_ay : val,
-// 		H3L_IMU_az : val,
-//         barometer_alt : val,
-//     }
-//     send_frontends_data('data', JSON.stringify({type: 'data', value: data}));
-// }, 30);
+    const val = Math.cos(Math.random());
+    const data: SerialResponse = {
+        type: 'data',
+        value:{
+            LSM_IMU_mx : val,
+            LSM_IMU_my : val,
+            LSM_IMU_mz : val,
+            LSM_IMU_gx : val,
+            LSM_IMU_gy : val,
+            LSM_IMU_gz : val,
+            LSM_IMU_ax : val,
+            LSM_IMU_ay : val,
+            LSM_IMU_az : val,
+            gps_lat : val,
+            gps_long : val,
+            gps_alt : val,
+            KX_IMU_ax : val,
+            KX_IMU_ay : val,
+            KX_IMU_az : val,
+            H3L_IMU_ax : val,
+            H3L_IMU_ay : val,
+            H3L_IMU_az : val,
+            barometer_alt : val,
+            signal : val,
+            sign: "qxqxlol",
+            FSM_state: 1
+        }
+    }
+
+    on_serial_data(JSON.stringify(data));
+}, 30);
