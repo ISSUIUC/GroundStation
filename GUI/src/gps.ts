@@ -28,7 +28,7 @@ export function run_frontend(serverConnection: ServerConnection) {
     BUT WILL BE MOVED LATER TO AFTER GSS 
     ESTABLISHES CONNNECTION TO FEATHER */
 
-    serverConnection.on("data", (event, message) => {
+    serverConnection.on("data", (message) => {
         const masterJSON = JSON.parse(message);
         const m = masterJSON["value"];
 

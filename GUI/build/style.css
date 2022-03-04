@@ -32,12 +32,9 @@ h1 {
 
 td {
     padding: 5px 5px 5px 5px;
-}
-
-table {
-    /* border: 1px solid white;
-  border-radius: 10px; */
-    margin: auto auto auto auto;
+    max-width: auto;
+    min-width: 35px;
+    text-align: left;
 }
 
 div {

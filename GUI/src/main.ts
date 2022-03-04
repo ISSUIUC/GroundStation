@@ -241,7 +241,11 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
             finds the field by ID and assigns 
             the value to the div */
             for (var key in m) {
-                document.getElementById(key).innerText = (m as any)[key];
+                if (typeof(((m as any)[key])) === "string") {
+                    document.getElementById(key).innerText = (m as any)[key];
+                } else {
+                    document.getElementById(key).innerText = ((m as any)[key]).toFixed(1);
+                }
             }
             updateData(m["LSM_IMU_mx"], m["LSM_IMU_my"], m["LSM_IMU_mz"], 
                         m["LSM_IMU_gx"], m["LSM_IMU_gy"], m["LSM_IMU_gz"],

@@ -18,7 +18,7 @@ let callsignwindow: BrowserWindow;
 let serial_port: SerialPort;
 let server: WebSocketServer;
 let web_sockets: WebSocket[] = [];
-let csv = new CSVWriter("log.csv");
+let csv = new CSVWriter(app.getPath("logs") + "/" + new Date() + ".csv");
 const isMac = process.platform === 'darwin';
 
 app.on('ready', () => {
