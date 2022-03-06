@@ -21,7 +21,7 @@ export default class CSVWriter {
             const m = data.value;
 
             const str = `${new Date()},${CSV_HEADERS.slice(1).map(c=>(m as any)[c]).join(',')}\n`;
-            fs.appendFileSync(this.file_name, str);
+            fs.appendFile(this.file_name, str, null, ()=>{});
         }
     }
 }

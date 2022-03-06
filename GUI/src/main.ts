@@ -1,7 +1,6 @@
 import { Chart, ChartComponentLike, ChartConfiguration } from 'chart.js';
 import { SerialResponse } from './serialResponse';
 import { ServerConnection } from './serverConnection';
-import * as fs from 'fs'; //CSV FILE ACTIVITY
 
 // const led_button = document.getElementById("Blink");
 // const color_change = <HTMLButtonElement>document.getElementById("color");

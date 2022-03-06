@@ -24,7 +24,7 @@ function run_frontend(serverConnection) {
     /* LOADS ALL THE CHARTS AFTER WINDOW LOADS
     BUT WILL BE MOVED LATER TO AFTER GSS
     ESTABLISHES CONNNECTION TO FEATHER */
-    serverConnection.on("data", (event, message) => {
+    serverConnection.on("data", (message) => {
         const masterJSON = JSON.parse(message);
         const m = masterJSON["value"];
         // L.marker([GPS_LAT, GPS_LONG]).addTo(map); m["GPS_LAT"]

@@ -267,20 +267,18 @@
         <button class="btn" id="prev" disabled>Prev</button>
         <button class="btn" id="next">Next</button>
     </div>
+    
+    <script>
+        if (!(window && window.process && window.process.type)) {
+            const a = document.createElement("script");
+            a.src = "./bundle.js";
+            document.body.appendChild(a);
+        } else {
+            const a = document.createElement("script");
+            a.innerHTML = `require("./electronMain.js")`;
+            document.body.appendChild(a);
+        }
+    </script>
+
 </body>
-<!--experimental progress bar end-->
-
-
-<script>
-    if (!(window && window.process && window.process.type)) {
-        const a = document.createElement("script");
-        a.src = "./bundle.js";
-        document.body.appendChild(a);
-    } else {
-        const a = document.createElement("script");
-        a.innerHTML = `require("./electronMain.js")`;
-        document.body.appendChild(a);
-    }
-</script>
-
 </html>

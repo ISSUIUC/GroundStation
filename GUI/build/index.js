@@ -15,6 +15,7 @@ const SerialPort = require("serialport");
 const path = require("path");
 const menuTemplate_1 = require("./menuTemplate");
 const ws_1 = require("ws");
+const csv_1 = require("./csv");
 // Initializes windows as main windows.
 let mainWindow;
 let serialWindow;
@@ -24,6 +25,7 @@ let callsignwindow;
 let serial_port;
 let server;
 let web_sockets = [];
+let csv = new csv_1.default("log.csv");
 const isMac = process.platform === 'darwin';
 electron_1.app.on('ready', () => {
     console.log('App is ready');
@@ -158,9 +160,7 @@ electron_1.ipcMain.on('connect', (evt, message, baud) => {
     serial_port = new SerialPort(message);
     const parser = new SerialPort.parsers.Readline({ delimiter: '\n' });
     serial_port.pipe(parser);
-    parser.on('data', data => {
-        send_frontends_data('data', data.toString());
-    });
+    parser.on('data', on_serial_data);
 });
 electron_1.ipcMain.on('disconnect', (evt, message, baud) => {
     serialWindow.close();
@@ -170,6 +170,10 @@ electron_1.ipcMain.on('disconnect', (evt, message, baud) => {
         console.log('port closed', err);
     });
 });
+function on_serial_data(data) {
+    send_frontends_data('data', data.toString());
+    csv.write_data(JSON.parse(data));
+}
 function send_frontends_data(tag, data) {
     var _a;
     (_a = mainWindow === null || mainWindow === void 0 ? void 0 : mainWindow.webContents) === null || _a === void 0 ? void 0 : _a.send(tag, data);
@@ -177,29 +181,35 @@ function send_frontends_data(tag, data) {
         ws.send(JSON.stringify({ event: tag, message: data }));
     }
 }
-// setInterval(()=>{
-//     const val = Math.cos(Math.random());
-//     const data = {
-// 		LSM_IMU_mx : val,
-// 		LSM_IMU_my : val,
-// 		LSM_IMU_mz : val,
-// 		LSM_IMU_gx : val,
-// 		LSM_IMU_gy : val,
-// 		LSM_IMU_gz : val,
-// 		LSM_IMU_ax : val,
-// 		LSM_IMU_ay : val,
-// 		LSM_IMU_az : val,
-// 		gps_lat : val,
-// 		gps_long : val,
-// 		gps_alt : val,
-// 		KX_IMU_ax : val,
-// 		KX_IMU_ay : val,
-// 		KX_IMU_az : val,
-// 		H3L_IMU_ax : val,
-// 		H3L_IMU_ay : val,
-// 		H3L_IMU_az : val,
-//         barometer_alt : val,
-//     }
-//     send_frontends_data('data', JSON.stringify({type: 'data', value: data}));
-// }, 30);
+setInterval(() => {
+    const val = Math.cos(Math.random());
+    const data = {
+        type: 'data',
+        value: {
+            LSM_IMU_mx: val,
+            LSM_IMU_my: val,
+            LSM_IMU_mz: val,
+            LSM_IMU_gx: val,
+            LSM_IMU_gy: val,
+            LSM_IMU_gz: val,
+            LSM_IMU_ax: val,
+            LSM_IMU_ay: val,
+            LSM_IMU_az: val,
+            gps_lat: val,
+            gps_long: val,
+            gps_alt: val,
+            KX_IMU_ax: val,
+            KX_IMU_ay: val,
+            KX_IMU_az: val,
+            H3L_IMU_ax: val,
+            H3L_IMU_ay: val,
+            H3L_IMU_az: val,
+            barometer_alt: val,
+            signal: val,
+            sign: "qxqxlol",
+            FSM_state: 1
+        }
+    };
+    on_serial_data(JSON.stringify(data));
+}, 1000);
 //# sourceMappingURL=index.js.map
