@@ -25,8 +25,27 @@ let callsignwindow;
 let serial_port;
 let server;
 let web_sockets = [];
-let csv = new csv_1.default("log.csv");
+let csv;
 const isMac = process.platform === 'darwin';
+const date = new Date();
+const year = date.getFullYear();
+const month = date.getMonth() + 1;
+const day = date.getDate();
+const hh = date.getHours();
+const mm = date.getMinutes();
+const ss = date.getSeconds();
+const ms = date.getMilliseconds();
+const session = hh <= 12 ? "AM" : "PM";
+const hour = (hh < 10) ? "0" + hh : hh;
+const minute = (mm < 10) ? "0" + mm : mm;
+const second = (ss < 10) ? "0" + ss : ss;
+let time = year + "-" + month + "-" + day + "--" + hour + "-" + minute + "-" + second + "-" + ms;
+if (isMac) {
+    csv = new csv_1.default(electron_1.app.getPath("logs") + "/" + time + ".csv");
+}
+else {
+    csv = new csv_1.default(electron_1.app.getPath("logs") + "\\" + time + ".csv");
+}
 electron_1.app.on('ready', () => {
     console.log('App is ready');
     mainWindow = new electron_1.BrowserWindow({
@@ -37,8 +56,11 @@ electron_1.app.on('ready', () => {
             nodeIntegrationInWorker: true,
             contextIsolation: false,
         },
-        fullscreen: true,
         icon: __dirname + '/iss_logo.png',
+    });
+    mainWindow.once('ready-to-show', () => {
+        mainWindow.show();
+        mainWindow.maximize();
     });
     const indexHTML = path.join(__dirname + '/index.html');
     mainWindow.loadFile(indexHTML);
@@ -61,7 +83,12 @@ function serial_communicate(window) {
             clearInterval(interval);
         }
         const ports = yield SerialPort.list();
-        window.webContents.send("serial", JSON.stringify(ports));
+        try {
+            window.webContents.send("serial", JSON.stringify(ports));
+        }
+        catch (e) {
+            clearInterval(interval);
+        }
     }), 1000);
 }
 function change_contrast() {
@@ -136,21 +163,24 @@ function callAbort() {
         message: 'Are you sure you want to Abort?'
     });
     if (response == 0) {
-        // serial_port.write("ABORT COMMAND GOES HERE"); CHANGE COMMAND ASAP
+        serial_port.write("ABORT \n");
+        serial_port.flush();
     }
-    console.log(electron_1.app.getPath("logs"));
-    mainWindow.webContents.send("write_to_csv", electron_1.app.getPath("logs"));
+    // console.log(app.getPath("logs"));
+    // mainWindow.webContents.send("write_to_csv", app.getPath("logs"));
 }
 exports.callAbort = callAbort;
 electron_1.ipcMain.on('frequency', (evt, frequency) => {
     freqwindow.close();
     console.log(`Changing frequency to ${frequency}`);
-    // serial_port.write('{Command for Changing Frequency}' + frequency); //CHANGE COMMAND ASAP
+    serial_port.write(`FREQ ${frequency}\n`);
+    serial_port.flush();
 });
 electron_1.ipcMain.on('call_sign', (evt, call_sign) => {
     callsignwindow.close();
     console.log(`Changing Call Sign to ${call_sign}`);
-    // serial_port.write('{Command for Changing Call Sign}' + call_sign); //CHANGE COMMAND ASAP
+    serial_port.write(`CALLSIGN ${call_sign}\n`);
+    serial_port.flush();
 });
 electron_1.ipcMain.on('connect', (evt, message, baud) => {
     serialWindow.close();
@@ -171,8 +201,14 @@ electron_1.ipcMain.on('disconnect', (evt, message, baud) => {
     });
 });
 function on_serial_data(data) {
+    console.log(data);
     send_frontends_data('data', data.toString());
-    csv.write_data(JSON.parse(data));
+    try {
+        csv.write_data(JSON.parse(data));
+    }
+    catch (e) {
+        console.error(`couldn't parase ${data}`);
+    }
 }
 function send_frontends_data(tag, data) {
     var _a;
@@ -181,35 +217,35 @@ function send_frontends_data(tag, data) {
         ws.send(JSON.stringify({ event: tag, message: data }));
     }
 }
-setInterval(() => {
-    const val = Math.cos(Math.random());
-    const data = {
-        type: 'data',
-        value: {
-            LSM_IMU_mx: val,
-            LSM_IMU_my: val,
-            LSM_IMU_mz: val,
-            LSM_IMU_gx: val,
-            LSM_IMU_gy: val,
-            LSM_IMU_gz: val,
-            LSM_IMU_ax: val,
-            LSM_IMU_ay: val,
-            LSM_IMU_az: val,
-            gps_lat: val,
-            gps_long: val,
-            gps_alt: val,
-            KX_IMU_ax: val,
-            KX_IMU_ay: val,
-            KX_IMU_az: val,
-            H3L_IMU_ax: val,
-            H3L_IMU_ay: val,
-            H3L_IMU_az: val,
-            barometer_alt: val,
-            signal: val,
-            sign: "qxqxlol",
-            FSM_state: 1
-        }
-    };
-    on_serial_data(JSON.stringify(data));
-}, 1000);
+// setInterval(()=>{
+//     const val = Math.cos(Math.random());
+//     const data: SerialResponse = {
+//         type: 'data',
+//         value:{
+//             LSM_IMU_mx : val,
+//             LSM_IMU_my : val,
+//             LSM_IMU_mz : val,
+//             LSM_IMU_gx : val,
+//             LSM_IMU_gy : val,
+//             LSM_IMU_gz : val,
+//             LSM_IMU_ax : val,
+//             LSM_IMU_ay : val,
+//             LSM_IMU_az : val,
+//             gps_lat : val,
+//             gps_long : val,
+//             gps_alt : val,
+//             KX_IMU_ax : val,
+//             KX_IMU_ay : val,
+//             KX_IMU_az : val,
+//             H3L_IMU_ax : val,
+//             H3L_IMU_ay : val,
+//             H3L_IMU_az : val,
+//             barometer_alt : val,
+//             signal : val,
+//             sign: "qxqxlol",
+//             FSM_state: 1
+//         }
+//     }
+//     on_serial_data(JSON.stringify(data));
+// }, 1000);
 //# sourceMappingURL=index.js.map

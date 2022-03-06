@@ -18,8 +18,31 @@ let callsignwindow: BrowserWindow;
 let serial_port: SerialPort;
 let server: WebSocketServer;
 let web_sockets: WebSocket[] = [];
-let csv = new CSVWriter("log.csv");
+let csv: CSVWriter;
 const isMac = process.platform === 'darwin';
+
+const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hh = date.getHours();
+    const mm = date.getMinutes();
+    const ss = date.getSeconds();
+    const ms = date.getMilliseconds();
+
+    const session = hh <= 12 ? "AM" : "PM";
+    const hour = (hh < 10) ? "0" + hh : hh;
+    const minute = (mm < 10) ? "0" + mm : mm;
+    const second = (ss < 10) ? "0" + ss : ss;
+
+    let time = year + "-" + month + "-" + day + "--" + hour + "-" + minute + "-" + second + "-" + ms;
+
+if (isMac) {
+    
+    csv = new CSVWriter(app.getPath("logs") + "/" + time + ".csv")
+} else {
+    csv = new CSVWriter(app.getPath("logs") + "\\" + time + ".csv")
+}
 
 app.on('ready', () => {
     console.log('App is ready');
@@ -31,10 +54,13 @@ app.on('ready', () => {
             nodeIntegrationInWorker: true,
             contextIsolation: false,
         },
-        fullscreen: true,
         icon: __dirname + '/iss_logo.png',
     });
-
+    mainWindow.once('ready-to-show', () => {
+        mainWindow.show();
+        mainWindow.maximize();
+      });
+    
     const indexHTML = path.join(__dirname + '/index.html');
     mainWindow.loadFile(indexHTML);
     // Builds menu template and renders it in the main window
@@ -62,7 +88,11 @@ function serial_communicate(window: BrowserWindow) {
             clearInterval(interval);
         }
         const ports = await SerialPort.list();
-        window.webContents.send("serial", JSON.stringify(ports));
+        try {
+            window.webContents.send("serial", JSON.stringify(ports));
+        } catch(e: any){
+            clearInterval(interval);
+        }
     }, 1000);
 }
 
@@ -140,23 +170,26 @@ export function callAbort() {
     });
 
     if(response == 0) {
-        // serial_port.write("ABORT COMMAND GOES HERE"); CHANGE COMMAND ASAP
+        serial_port.write("ABORT \n");
+        serial_port.flush();
     }
 
-    console.log(app.getPath("logs"));
-    mainWindow.webContents.send("write_to_csv", app.getPath("logs"));
+    // console.log(app.getPath("logs"));
+    // mainWindow.webContents.send("write_to_csv", app.getPath("logs"));
 }
 
 ipcMain.on('frequency', (evt, frequency) => {
     freqwindow.close();
     console.log(`Changing frequency to ${frequency}`);
-    // serial_port.write('{Command for Changing Frequency}' + frequency); //CHANGE COMMAND ASAP
+    serial_port.write(`FREQ ${frequency}\n`);
+    serial_port.flush();
 });
 
 ipcMain.on('call_sign', (evt, call_sign) => {
     callsignwindow.close();
     console.log(`Changing Call Sign to ${call_sign}`);
-    // serial_port.write('{Command for Changing Call Sign}' + call_sign); //CHANGE COMMAND ASAP
+    serial_port.write(`CALLSIGN ${call_sign}\n`);
+    serial_port.flush();
 });
 
 ipcMain.on('connect', (evt, message, baud) => {
@@ -180,8 +213,13 @@ ipcMain.on('disconnect', (evt, message, baud) => {
 });
 
 function on_serial_data(data: string){
+    console.log(data);
     send_frontends_data('data', data.toString());
-    csv.write_data(JSON.parse(data));
+    try {
+        csv.write_data(JSON.parse(data));
+    } catch (e: any){
+        console.error(`couldn't parase ${data}`)
+    }
 }
 
 function send_frontends_data(tag: string, data: string){

@@ -32,12 +32,9 @@ h1 {
 
 td {
     padding: 5px 5px 5px 5px;
-}
-
-table {
-    /* border: 1px solid white;
-  border-radius: 10px; */
-    margin: auto auto auto auto;
+    max-width: auto;
+    min-width: 35px;
+    text-align: left;
 }
 
 div {
@@ -57,11 +54,14 @@ label {
 }
 
 p {
-    margin: 2px 2px 2px 2px;
+    margin: auto;
+    padding: auto;
+    margin-bottom: auto;
     font-size: 14px;
-    /* text-align: left; */
+    text-align: center;
     font-family: "Causten", "Futura", monospace;
     color: rgb(255, 255, 255);
+    position: absolute;
 }
 
 input {
@@ -75,6 +75,10 @@ input {
     box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.06);
     border-color: var(--outliine);
     margin: 10px;
+}
+
+canvas {
+    width: 22vw;
 }
 
 
@@ -307,17 +311,20 @@ input {
 
 .container {
     text-align: center;
+    width: 80%;
+    margin: auto;
 }
 
 .progress-container {
     display: flex;
     justify-content: space-between;
+    /* justify-content: space-evenly; */
     position: relative;
     margin-bottom: 30px;
     max-width: 100%;
     width: auto;
-    margin-left: 30px;
-    margin-right: 30px;
+    /* margin-left: 30px;
+    margin-right: 30px; */
 }
 
 .progress-container::before {
@@ -357,6 +364,7 @@ input {
     border: 3px solid var(--line-border-empty);
     transition: 0.4s ease;
     margin: auto;
+    margin-top: 30px;
 }
 
 .circle.active {
