@@ -9,18 +9,14 @@
     <div class="grid-item"><canvas id="lowgimuG"></canvas></div>
     <div class="grid-item"><canvas id="lowgimuM"></canvas></div>
     <div class="grid-item">
-        <!-- <img src="iss_logo.png" width="100px" height="100px">
-
-        <body>
-            <h1>ISS Ground Station</h1>
-            <div id="clock" class="clock">Time: </div>
-        </body> -->
-        <canvas id="signal"></canvas>
+        <canvas id="signal_data"></canvas>
     </div>
 
     <div class="grid-item"><canvas id="gps"></canvas></div>
     <div class="panel1">
 
+        <div id="packetstats">0 seconds since last packet</div>
+        <div id="response_ID"></div>
     </div>
     <div class="rawtelem">
         <div style="text-align: center;">Raw Telemetry</div>
@@ -180,6 +176,9 @@
                                     <td>
                                         <div>Call Sign: </div>
                                     </td>
+                                    <td>
+                                        <div style="color: rgb(255, 99, 132)">RSSI</div>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>
@@ -190,6 +189,9 @@
                                     </td>
                                     <td>
                                         <div id="sign">0</div>
+                                    </td>
+                                    <td>
+                                        <div id="RSSI">-1</div>
                                     </td>
                                 </tr>
                             </table>
@@ -268,7 +270,7 @@
         <button class="btn" id="prev" disabled>Prev</button>
         <button class="btn" id="next">Next</button>
     </div>
-    
+
     <script>
         if (!(window && window.process && window.process.type)) {
             const a = document.createElement("script");
@@ -282,4 +284,5 @@
     </script>
 
 </body>
+
 </html>

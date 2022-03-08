@@ -8,6 +8,7 @@ import { ServerConnection } from './serverConnection';
 const stylesheetopt = <HTMLLinkElement>document.getElementById("style");
 let contrast = false;
 let time = 9;
+let current_time = new Date();
 
 const starting_length = 100;
 // ALL VALUES ARE DEMO FOR NOW BUT THESE ARE THE constIABLES THAT WILL BE PASSED TO THE CHART
@@ -216,7 +217,7 @@ function setup_charts() {
         highg_kx_accel: make_chart_multiaxis("G", "kx134", "kx134 acceleration", DP_KXAX, DP_KXAY, DP_KXAZ),
         highg_h3l_accel: make_chart_multiaxis("G", "H3LIS331DL", "H3L acceleration", DP_H3LAX, DP_H3LAY, DP_H3LAZ),
         baro_altitude: make_chart("mbars", "barometer", "Barometer altitude", DP_BAROMETER),
-        signal: make_chart("dBmW", "signal", "Signal Strength (RSSI)", DP_SIGNAL)
+        signal: make_chart("dBmW", "signal_data", "Signal Strength (RSSI)", DP_SIGNAL)
     };
 }
 
@@ -224,38 +225,63 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
     /* LOADS ALL THE CHARTS AFTER WINDOW LOADS 
     BUT WILL BE MOVED LATER TO AFTER GSS 
     ESTABLISHES CONNNECTION TO FEATHER */
-
     Chart.register(...registerables)
 
     charts = setup_charts();
     // set_current_time();
     // setInterval(set_current_time, 1000);
-    
+
+    serverConnection.on("contrast", () => {
+        if (!contrast) {
+            stylesheetopt.href = "highcontrast.css";
+            contrast = true;
+        } else {
+            stylesheetopt.href = "style.css";
+            contrast = false;
+        }
+    });
+
     serverConnection.on("data", (message) => {
+        document.getElementById("packetstats").innerText = "0 seconds since last packet";
+        current_time = new Date();
         const masterJSON: SerialResponse = JSON.parse(message);
 
-        if(masterJSON.type == "data"){
+        if (masterJSON.type == "data") {
             const m = masterJSON["value"];
             /* Finds the Raw Telemetry Table 
             finds the field by ID and assigns 
             the value to the div */
             for (var key in m) {
-                if (typeof(((m as any)[key])) === "string") {
+                if (typeof (((m as any)[key])) === "string") {
                     document.getElementById(key).innerText = (m as any)[key];
                 } else {
-                    document.getElementById(key).innerText = ((m as any)[key]).toFixed(1);
+                    document.getElementById(key).innerText = ((m as any)[key]).toFixed(3);
                 }
             }
-            updateData(m["LSM_IMU_mx"], m["LSM_IMU_my"], m["LSM_IMU_mz"], 
-                        m["LSM_IMU_gx"], m["LSM_IMU_gy"], m["LSM_IMU_gz"],
-                        m["LSM_IMU_ax"], m["LSM_IMU_ay"], m["LSM_IMU_az"],
-                        m["gps_lat"], m["gps_long"], m["gps_alt"], 
-                        m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],
-                        m["H3L_IMU_ax"], m["H3L_IMU_ay"], m["H3L_IMU_az"],
-                        m["barometer_alt"], m["signal"]);
+            updateData(m["LSM_IMU_mx"], m["LSM_IMU_my"], m["LSM_IMU_mz"],
+                m["LSM_IMU_gx"], m["LSM_IMU_gy"], m["LSM_IMU_gz"],
+                m["LSM_IMU_ax"], m["LSM_IMU_ay"], m["LSM_IMU_az"],
+                m["gps_lat"], m["gps_long"], m["gps_alt"],
+                m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],
+                m["H3L_IMU_ax"], m["H3L_IMU_ay"], m["H3L_IMU_az"],
+                m["barometer_alt"], m["signal"]);
+            
+                // if (m["FSM_state"] > currentActive) {
+                //     for (let i = currentActive; i < m["FSM_state"]; i++) {
+                //         nextState();
+                //     }
+                //     currentActive = m["FSM_state"];
+                // }
+
+                // if (m["FSM_state"] < currentActive) {
+                //     for (let i = currentActive; i > m["FSM_state"]; i--) {
+                //         prevState();
+                //     }
+                //     currentActive = m["FSM_state"];
+                // }
         }
-        
-        if(masterJSON.type == "init_error"){
+
+        if (masterJSON.type == "init_error") {
             alert(masterJSON.error);
         }
     });
@@ -282,6 +308,16 @@ function get_current_time_full() {
     return time;
     // document.getElementById("clock").innerText = time;
 }
+
+function diff_time() {
+    let suffix = " seconds since last packet";
+    let current = new Date();
+    let diff = current.getTime() - current_time.getTime();
+    document.getElementById("packetstats").innerText = Math.round(diff / 1000) + suffix;
+    var t = setTimeout(function () { diff_time() }, 1000);
+}
+
+diff_time();
 
 function get_current_time() {
     const date = new Date();
@@ -317,6 +353,16 @@ next.addEventListener('click', () => {
     update()
 })
 
+function nextState() {
+    currentActive++
+
+    if (currentActive > circles.length) {
+        currentActive = circles.length
+    }
+
+    update()
+}
+
 prev.addEventListener('click', () => {
     currentActive--
 
@@ -326,6 +372,16 @@ prev.addEventListener('click', () => {
 
     update()
 })
+
+function prevState() {
+    currentActive--
+
+    if (currentActive < 1) {
+        currentActive = 1
+    }
+
+    update()
+}
 
 function update() {
     circles.forEach((circle, idx) => {

@@ -72,10 +72,6 @@ function mainWindowTemplate(window) {
                     click() { (0, index_1.changeFrequencyWindow)(); }
                 },
                 {
-                    label: 'GPS Window',
-                    click() { (0, index_1.createGPSWindow)(); }
-                },
-                {
                     label: 'Change Contrast',
                     click() { (0, index_1.change_contrast)(); }
                 }

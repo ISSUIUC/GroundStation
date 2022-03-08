@@ -74,10 +74,6 @@ function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[]
                     click() { changeFrequencyWindow(); }
                 },
                 {
-                    label: 'GPS Window',
-                    click() { createGPSWindow(); }
-                },
-                {
                     label: 'Change Contrast',
                     click() { change_contrast(); }
                 }

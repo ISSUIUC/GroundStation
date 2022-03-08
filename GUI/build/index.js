@@ -162,9 +162,13 @@ function callAbort() {
         title: 'Confirm',
         message: 'Are you sure you want to Abort?'
     });
-    if (response == 0) {
-        serial_port.write("ABORT \n");
-        serial_port.flush();
+    serial_port.write('ABORT \n');
+    if (response === 0) {
+        console.log("CALLING ABORT!");
+        // serial_port.write('ABORT \n', function(err) {
+        //     console.log("err: " + err);
+        // });
+        // serial_port.flush();
     }
     // console.log(app.getPath("logs"));
     // mainWindow.webContents.send("write_to_csv", app.getPath("logs"));
@@ -172,14 +176,15 @@ function callAbort() {
 exports.callAbort = callAbort;
 electron_1.ipcMain.on('frequency', (evt, frequency) => {
     freqwindow.close();
-    console.log(`Changing frequency to ${frequency}`);
-    serial_port.write(`FREQ ${frequency}\n`);
+    let int_Frequency = parseInt(frequency);
+    console.log(`Changing frequency to ${int_Frequency}`);
+    serial_port.write(`FREQ ${int_Frequency}\n`);
     serial_port.flush();
 });
 electron_1.ipcMain.on('call_sign', (evt, call_sign) => {
     callsignwindow.close();
     console.log(`Changing Call Sign to ${call_sign}`);
-    serial_port.write(`CALLSIGN ${call_sign}\n`);
+    serial_port.write("CALLSIGN " + call_sign + "\n");
     serial_port.flush();
 });
 electron_1.ipcMain.on('connect', (evt, message, baud) => {

@@ -38,6 +38,25 @@ export default class CSVWriter {
 
             const str = `${time},${CSV_HEADERS.slice(1).map(c => (m as any)[c]).join(',')}\n`;
             fs.appendFileSync(this.file_name, str);
+            refresh_time();
         }
     }
+}
+
+function refresh_time() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hh = date.getHours();
+    const mm = date.getMinutes();
+    const ss = date.getSeconds();
+    const ms = date.getMilliseconds();
+
+    const session = hh <= 12 ? "AM" : "PM";
+    const hour = (hh < 10) ? "0" + hh : hh;
+    const minute = (mm < 10) ? "0" + mm : mm;
+    const second = (ss < 10) ? "0" + ss : ss;
+
+    let time = year + "-" + month + "-" + day + "--" + hour + "-" + minute + "-" + second + "-" + ms;
 }
