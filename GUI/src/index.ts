@@ -22,23 +22,23 @@ let csv: CSVWriter;
 const isMac = process.platform === 'darwin';
 
 const date = new Date();
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const hh = date.getHours();
-    const mm = date.getMinutes();
-    const ss = date.getSeconds();
-    const ms = date.getMilliseconds();
+const year = date.getFullYear();
+const month = date.getMonth() + 1;
+const day = date.getDate();
+const hh = date.getHours();
+const mm = date.getMinutes();
+const ss = date.getSeconds();
+const ms = date.getMilliseconds();
 
-    const session = hh <= 12 ? "AM" : "PM";
-    const hour = (hh < 10) ? "0" + hh : hh;
-    const minute = (mm < 10) ? "0" + mm : mm;
-    const second = (ss < 10) ? "0" + ss : ss;
+const session = hh <= 12 ? "AM" : "PM";
+const hour = (hh < 10) ? "0" + hh : hh;
+const minute = (mm < 10) ? "0" + mm : mm;
+const second = (ss < 10) ? "0" + ss : ss;
 
-    let time = year + "-" + month + "-" + day + "--" + hour + "-" + minute + "-" + second + "-" + ms;
+let time = year + "-" + month + "-" + day + "--" + hour + "-" + minute + "-" + second + "-" + ms;
 
 if (isMac) {
-    
+
     csv = new CSVWriter(app.getPath("logs") + "/" + time + ".csv")
 } else {
     csv = new CSVWriter(app.getPath("logs") + "\\" + time + ".csv")
@@ -59,8 +59,8 @@ app.on('ready', () => {
     mainWindow.once('ready-to-show', () => {
         mainWindow.show();
         mainWindow.maximize();
-      });
-    
+    });
+
     const indexHTML = path.join(__dirname + '/index.html');
     mainWindow.loadFile(indexHTML);
     // Builds menu template and renders it in the main window
@@ -90,7 +90,7 @@ function serial_communicate(window: BrowserWindow) {
         const ports = await SerialPort.list();
         try {
             window.webContents.send("serial", JSON.stringify(ports));
-        } catch(e: any){
+        } catch (e: any) {
             clearInterval(interval);
         }
     }, 1000);
@@ -170,7 +170,7 @@ export function callAbort() {
     });
 
     serial_port.write('ABORT \n');
-    if(response === 0) {
+    if (response === 0) {
         console.log("CALLING ABORT!");
         // serial_port.write('ABORT \n', function(err) {
         //     console.log("err: " + err);
@@ -217,20 +217,20 @@ ipcMain.on('disconnect', (evt, message, baud) => {
     });
 });
 
-function on_serial_data(data: string){
+function on_serial_data(data: string) {
     console.log(data);
     send_frontends_data('data', data.toString());
     try {
         csv.write_data(JSON.parse(data));
-    } catch (e: any){
+    } catch (e: any) {
         console.error(`couldn't parase ${data}`)
     }
 }
 
-function send_frontends_data(tag: string, data: string){
+function send_frontends_data(tag: string, data: string) {
     mainWindow?.webContents?.send(tag, data);
-    for(const ws of web_sockets){
-        ws.send(JSON.stringify({event: tag, message: data}));
+    for (const ws of web_sockets) {
+        ws.send(JSON.stringify({ event: tag, message: data }));
     }
 }
 

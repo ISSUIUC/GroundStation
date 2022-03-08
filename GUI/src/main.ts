@@ -265,20 +265,20 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],
                 m["H3L_IMU_ax"], m["H3L_IMU_ay"], m["H3L_IMU_az"],
                 m["barometer_alt"], m["signal"]);
-            
-                // if (m["FSM_state"] > currentActive) {
-                //     for (let i = currentActive; i < m["FSM_state"]; i++) {
-                //         nextState();
-                //     }
-                //     currentActive = m["FSM_state"];
-                // }
 
-                // if (m["FSM_state"] < currentActive) {
-                //     for (let i = currentActive; i > m["FSM_state"]; i--) {
-                //         prevState();
-                //     }
-                //     currentActive = m["FSM_state"];
-                // }
+            // if (m["FSM_state"] > currentActive) {
+            //     for (let i = currentActive; i < m["FSM_state"]; i++) {
+            //         nextState();
+            //     }
+            //     currentActive = m["FSM_state"];
+            // }
+
+            // if (m["FSM_state"] < currentActive) {
+            //     for (let i = currentActive; i > m["FSM_state"]; i--) {
+            //         prevState();
+            //     }
+            //     currentActive = m["FSM_state"];
+            // }
         }
 
         if (masterJSON.type == "init_error") {
