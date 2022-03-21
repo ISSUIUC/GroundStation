@@ -9,28 +9,14 @@
     <div class="grid-item"><canvas id="lowgimuG"></canvas></div>
     <div class="grid-item"><canvas id="lowgimuM"></canvas></div>
     <div class="grid-item">
-        <!-- <img src="iss_logo.png" width="100px" height="100px">
-
-        <body>
-            <h1>ISS Ground Station</h1>
-            <div id="clock" class="clock">Time: </div>
-        </body> -->
-        <canvas id="signal"></canvas>
+        <canvas id="signal_data"></canvas>
     </div>
 
     <div class="grid-item"><canvas id="gps"></canvas></div>
     <div class="panel1">
-        <div class="control">Command Panel</div>
-        <table>
-            <tr>
-                <td><button class="button1" id="Blink">Blink LED</button></td>
-                <td><button class="button3" id="abort">Abort</button></td>
-                <td><button class="button2" id="frequency">Frequency</button></td>
-            </tr>
-            <tr>
-                <td><button class="button1" id="color">Change Color</button></td>
-            </tr>
-        </table>
+
+        <div id="packetstats">0 seconds since last packet</div>
+        <div id="response_ID"></div>
     </div>
     <div class="rawtelem">
         <div style="text-align: center;">Raw Telemetry</div>
@@ -40,7 +26,7 @@
                     <table>
                         <tr>
                             <td>
-                                <div>Sensor: </div>
+                                <div>LowG Sensor: </div>
                             </td>
                             <td>
                                 <div style="color: rgb(255, 99, 132)">x</div>
@@ -54,7 +40,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <div>LowG Acceleration:</div>
+                                <div>Acceleration (g):</div>
                             </td>
                             <td>
                                 <div id="LSM_IMU_ax">0</div>
@@ -68,7 +54,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <div>LowG Gyroscope:</div>
+                                <div>Gyroscope (DPS):</div>
                             </td>
                             <td>
                                 <div id="LSM_IMU_gx">0</div>
@@ -82,7 +68,7 @@
                         </tr>
                         <tr>
                             <td>
-                                <div>LowG Magnetometer:</div>
+                                <div>Magnetometer (Gauss):</div>
                             </td>
                             <td>
                                 <div id="LSM_IMU_mx">0</div>
@@ -102,7 +88,7 @@
                     <table>
                         <tr>
                             <td>
-                                <div>Sensor: </div>
+                                <div>HighG Sensor: </div>
                             </td>
                             <td>
                                 <div style="color: rgb(255, 99, 132)">x</div>
@@ -117,7 +103,7 @@
                         <tr>
                             <tr>
                                 <td>
-                                    <div>HighG (KX134) Acceleration:</div>
+                                    <div>KX134 Acceleration (g):</div>
                                 </td>
                                 <td>
                                     <div id="KX_IMU_ax">0</div>
@@ -131,7 +117,7 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <div>HighG (H3LIS331DL) Acceleration:</div>
+                                    <div>H3LIS331DL Acceleration (g):</div>
                                 </td>
                                 <td>
                                     <div id="H3L_IMU_ax">0</div>
@@ -159,7 +145,7 @@
                                         <div style="color: rgb(99, 132, 255)">Longitude</div>
                                     </td>
                                     <td>
-                                        <div style="color: rgb(132, 255, 99)">Altitude</div>
+                                        <div style="color: rgb(132, 255, 99)">Altitude (m)</div>
                                     </td>
                                 </tr>
                                 <tr>
@@ -190,6 +176,9 @@
                                     <td>
                                         <div>Call Sign: </div>
                                     </td>
+                                    <td>
+                                        <div style="color: rgb(255, 99, 132)">RSSI</div>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td>
@@ -200,6 +189,9 @@
                                     </td>
                                     <td>
                                         <div id="sign">0</div>
+                                    </td>
+                                    <td>
+                                        <div id="RSSI">-1</div>
                                     </td>
                                 </tr>
                             </table>
@@ -215,28 +207,82 @@
     <!-- <div class="grid-item">Data Panel 2</div> -->
 </div>
 
+<!-- <div id="clock" class="clock">Time: </div> -->
+<!-- <div class="control">Command Panel</div>
+<table>
+    <tr>
+        <td><button class="button1" id="Blink">Blink LED</button></td>
+        <td><button class="button3" id="abort">Abort</button></td>
+        <td><button class="button2" id="frequency">Frequency</button></td>
+    </tr>
+    <tr>
+        <td><button class="button1" id="color">Change Color</button></td>
+    </tr>
+</table> -->
 
+<!--experimental progress bar start-->
 
+<body>
+    <div class="container">
+        <div class="progress-container">
 
+            <div class="progress" id="progress"></div>
 
+            <div class="step">
+                <p class="text">Init</p>
+                <div class="circle active">1</div>
+            </div>
+            <div class="step">
+                <p class="text">Idle</p>
+                <div class="circle">2</div>
+            </div>
+            <div class="step">
+                <p class="text">Boost</p>
+                <div class="circle">3</div>
+            </div>
+            <div class="step">
+                <p class="text">Coast</p>
+                <div class="circle">4</div>
+            </div>
+            <div class="step">
+                <p class="text">Apogee</p>
+                <div class="circle">5</div>
+            </div>
+            <div class="step">
+                <p class="text">Drogue</p>
+                <div class="circle">6</div>
+            </div>
+            <div class="step">
+                <p class="text">Main Chute</p>
+                <div class="circle">7</div>
+            </div>
+            <div class="step">
+                <p class="text">Landed</p>
+                <div class="circle">8</div>
+            </div>
 
+            <!-- <div class="circle active">1</div>
+            <div class="circle">2</div>
+            <div class="circle">3</div>
+            <div class="circle">4</div> -->
+        </div>
 
+        <!-- <button class="btn" id="prev" disabled>Prev</button>
+        <button class="btn" id="next">Next</button> -->
+    </div>
 
-<!-- <div>
-    <div id="led_status">OFF</div>
-    <div id="barometer">0</div>
+    <script>
+        if (!(window && window.process && window.process.type)) {
+            const a = document.createElement("script");
+            a.src = "./bundle.js";
+            document.body.appendChild(a);
+        } else {
+            const a = document.createElement("script");
+            a.innerHTML = `require("./electronMain.js")`;
+            document.body.appendChild(a);
+        }
+    </script>
 
-</div> -->
-<script>
-    if (!(window && window.process && window.process.type)) {
-        const a = document.createElement("script");
-        a.src = "./bundle.js";
-        document.body.appendChild(a);
-    } else {
-        const a = document.createElement("script");
-        a.innerHTML = `require("./electronMain.js")`;
-        document.body.appendChild(a);
-    }
-</script>
+</body>
 
 </html>

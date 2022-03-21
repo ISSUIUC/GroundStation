@@ -1,21 +1,22 @@
-import { ServerConnection } from "./serverConnection";
+import { Listener, ServerConnection } from "./serverConnection";
 import { run_frontend } from "./main";
 import { registerables } from "chart.js"
 
 class WebConnection implements ServerConnection {
     ws: WebSocket;
-    listeners: Map<string, ((...args: string[])=>void)[]>; 
+    listeners: Map<string, Listener[]>; 
     constructor(url: string){
         this.ws = new WebSocket(url);
+        this.listeners = new Map();
         this.ws.onmessage = (msg)=>{
             this.post_listeners(msg);
         }
     }
     post_listeners(msg: MessageEvent<any>){
-        const json: {channel: string, args: string[]} = JSON.parse(msg.data);
-        this.listeners.get(json.channel)?.forEach(l=>l(...json.args));
+        const {event, message} = JSON.parse(msg.data);
+        this.listeners.get(event)?.forEach(l=>l(message));
     }
-    on(channel: string, listener: (...args: string[])=>void): void {
+    on(channel: string, listener: Listener): void {
         let arr = this.listeners.get(channel);
         if(!arr){
             arr = [];
