@@ -4,14 +4,14 @@ import { ServerConnection } from './serverConnection';
 //MAP WORK
 
 var ter = L.tileLayer('../build/terrain/{z}/{x}/{y}.png', {
-    maxZoom: 19,
+    maxZoom: 18,
 });
 var sat = L.tileLayer('../build/satellite/{z}/{x}/{y}.png', {
-    maxZoom: 19,
+    maxZoom: 18,
 });
 var map = L.map('map', {
     center: [40.1119, -88.2282],
-    zoom: 19,
+    zoom: 18,
     layers: [sat, ter]
 });
 
