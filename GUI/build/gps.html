@@ -1,11 +1,43 @@
 <html>
-<h1>
+<h1 id="title">
     GPS Viewer
 </h1>
 <link id="style" rel="stylesheet" type="text/css" href="style.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
-<div id="map"></div>
+<div id="map" style="height: 525px;"></div>
+<table>
+    <tr>
+        <td>
+            <div>Lat: </div>
+        </td>
+        <td>
+            <div id="lat"></div>
+        </td>
+        <td>
+            <div>Alt: </div>
+        </td>
+        <td>
+            <div id="alt"></div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div>Long: </div>
+        </td>
+        <td>
+            <div id="long"></div>
+        </td>
+        <td>
+            <div>Distance: </div>
+        </td>
+        <td>
+            <div id="distance"></div>
+        </td>
+    </tr>
+</table>
+<button id="center" class="button1">Center</button>
+
 <script>
     require('./gps.js');
 </script>

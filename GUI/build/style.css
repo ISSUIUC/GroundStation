@@ -30,17 +30,33 @@ h1 {
     color: rgb(255, 255, 255);
 }
 
+h2 {
+    font-size: 18px;
+    text-align: center;
+    font-family: "Causten", "Helvetica", monospace;
+    color: rgb(255, 255, 255);
+}
+
 td {
     padding: 5px 5px 5px 5px;
-    max-width: auto;
-    min-width: 35px;
+    /* max-width: auto;
+    min-width: 35px; */
     text-align: left;
 }
 
 div {
     margin-top: 4px;
-    font-size: 14px;
+    font-size: 1vw;
     /* text-align: left; */
+    font-family: "Causten", "Futura", monospace;
+    color: rgb(255, 255, 255);
+}
+
+a {
+    margin-top: 4px;
+    margin-left: 4px;
+    font-size: 15px;
+    text-align: center;
     font-family: "Causten", "Futura", monospace;
     color: rgb(255, 255, 255);
 }
@@ -78,7 +94,8 @@ input {
 }
 
 canvas {
-    width: 22vw;
+    width: auto;
+    height: auto;
 }
 
 
@@ -86,6 +103,7 @@ canvas {
 
 .button1 {
     display: inline-block;
+    font-family: 'Causten';
     padding: 15px 25px;
     font-size: 25px;
     text-align: center;
@@ -111,7 +129,7 @@ canvas {
 /* Hover effect for ON button */
 
 .button1:hover {
-    background-color: rgb(62, 142, 65)
+    background-color: rgb(223, 167, 13)
 }
 
 
@@ -121,10 +139,11 @@ canvas {
     display: inline-block;
     padding: 15px 25px;
     font-size: 25px;
+    font-family: 'Causten';
     text-align: center;
     outline: none;
     color: rgb(255, 255, 255);
-    background-color: rgb(70, 130, 134);
+    background-color: rgb(70, 134, 78);
     border: none;
     border-radius: 5px;
     width: 100%;
@@ -136,7 +155,7 @@ canvas {
 /* Button press effect for OFF button */
 
 .button2:active {
-    box-shadow: 0 5px rgb(104, 99, 99);
+    box-shadow: 0 5px rgb(99, 104, 99);
     transform: translateY(4px);
 }
 
@@ -144,7 +163,7 @@ canvas {
 /* Hover effect for OFF button */
 
 .button2:hover {
-    background-color: rgb(179, 44, 44)
+    background-color: rgb(42, 189, 13)
 }
 
 
@@ -155,6 +174,7 @@ canvas {
     font-size: 25px;
     text-align: center;
     outline: none;
+    font-family: 'Causten';
     color: rgb(255, 255, 255);
     background-color: rgb(194, 70, 47);
     border: none;
@@ -170,27 +190,41 @@ canvas {
     grid-template-columns: auto auto auto auto;
     /* background-color: #2196F3; */
     padding: 2px;
+    width: auto;
+    height: 80%;
 }
 
 .grid-container>div {
-    /* background-color: rgba(255, 255, 255, 0.8); */
     border: 1px solid var(--outliine);
     padding: 2px;
     font-size: 30px;
     text-align: center;
-    /* width:250px; */
     margin: 4px;
     border-radius: 3px;
+}
+
+.grid-item {
+    /* width: auto;
+    height: auto; */
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .panel1 {
     grid-column-start: 2;
     grid-column-end: 4;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .control {
     margin-top: 2px;
     margin-bottom: 10px;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
     font-size: 20px;
     /* text-align: left; */
     font-family: "Causten", "Futura", monospace;
@@ -211,6 +245,8 @@ canvas {
     grid-row-end: 4;
     white-space: nowrap;
     overflow: hidden;
+    min-width: 0;
+    min-height: 0;
     text-overflow: ellipsis;
     max-width: auto;
     /* max-width: 327px; alt option if ^ does'nt work*/
@@ -224,6 +260,9 @@ canvas {
     text-align: center;
     /* width:250px; */
     height: auto;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
 }
 
 #map {

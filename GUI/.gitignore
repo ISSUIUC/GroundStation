@@ -1,6 +1,9 @@
 .DS_Store
 node_modules/
-build/
+# build/*.js
+# build/*.js.map
+# build/Satellite
+# build/Terrain
 .vs/
 !*.html
 !*.css

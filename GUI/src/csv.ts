@@ -26,6 +26,9 @@ export default class CSVWriter {
             fs.appendFileSync(this.file_name, str);
         }
     }
+    read_data() {
+        return fs.readFileSync(this.file_name, "utf8");
+    }
 }
 
 function refresh_time() {

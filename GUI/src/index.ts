@@ -11,14 +11,20 @@ import { SerialResponse } from './serialResponse';
 
 // Initializes windows as main windows.
 let mainWindow: BrowserWindow;
+let aboutWindow: BrowserWindow;
 let serialWindow: BrowserWindow;
 let gpswindow: BrowserWindow;
 let freqwindow: BrowserWindow;
+let localfreqwindow: BrowserWindow;
 let callsignwindow: BrowserWindow;
+let homepointswindow: BrowserWindow;
 let serial_port: SerialPort;
 let server: WebSocketServer;
 let web_sockets: WebSocket[] = [];
 let csv: CSVWriter;
+let latitude = 0;
+let longitude = 0;
+let altitude = 0;
 const isMac = process.platform === 'darwin';
 
 const date = new Date();
@@ -40,6 +46,7 @@ let time = year + "-" + month + "-" + day + "--" + hour + "-" + minute + "-" + s
 if (isMac) {
 
     csv = new CSVWriter(app.getPath("logs") + "/" + time + ".csv")
+    // csv = new CSVWriter(app.getPath("logs") + "/2022-3-12--14-43-14-36.csv"); //TESTING DELETE LATER
 } else {
     csv = new CSVWriter(app.getPath("logs") + "\\" + time + ".csv")
 }
@@ -56,10 +63,7 @@ app.on('ready', () => {
         },
         icon: __dirname + '/iss_logo.png',
     });
-    mainWindow.once('ready-to-show', () => {
-        mainWindow.show();
-        mainWindow.maximize();
-    });
+    mainWindow.maximize();
 
     const indexHTML = path.join(__dirname + '/index.html');
     mainWindow.loadFile(indexHTML);
@@ -118,6 +122,11 @@ export function createSerialWindow() {
 }
 
 export function createGPSWindow() {
+    if (latitude === 0 && longitude === 0 && altitude === 0) {
+        changeHomePoints();
+        homepointswindow.addListener("closed", createGPSWindow);
+        return;
+    }
     gpswindow = new BrowserWindow({
         width: 800,
         height: 800,
@@ -129,6 +138,9 @@ export function createGPSWindow() {
         }
     });
     gpswindow.loadURL(`file://${__dirname}/gps.html`);
+    if (isMac) {
+        Menu.setApplicationMenu(makeMainMenu(gpswindow));
+    }
     // serialWindow.setMenu(makeSerialMenu(serialWindow)); May use it for future commands 
 }
 
@@ -146,6 +158,20 @@ export function changeFrequencyWindow() {
     freqwindow.loadURL(`file://${__dirname}/changefreq.html`);
 }
 
+export function changeLocalFrequencyWindow() {
+    localfreqwindow = new BrowserWindow({
+        width: 500,
+        height: 450,
+        title: 'Change Frequency',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+        }
+    });
+    localfreqwindow.loadURL(`file://${__dirname}/changelocalfreq.html`);
+}
+
 export function changeCallSignWindow() {
     callsignwindow = new BrowserWindow({
         width: 500,
@@ -160,6 +186,34 @@ export function changeCallSignWindow() {
     callsignwindow.loadURL(`file://${__dirname}/callsign.html`);
 }
 
+export function changeHomePoints() {
+    homepointswindow = new BrowserWindow({
+        width: 500,
+        height: 450,
+        title: 'Change Home Coords',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+        }
+    });
+    homepointswindow.loadURL(`file://${__dirname}/homecoords.html`);
+}
+
+export function openAboutWindow() {
+    aboutWindow = new BrowserWindow({
+        width: 500,
+        height: 450,
+        title: 'About',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+        }
+    });
+    aboutWindow.loadURL(`file://${__dirname}/about.html`);
+}
+
 export function callAbort() {
 
     let response = dialog.showMessageBoxSync(this, {
@@ -169,9 +223,9 @@ export function callAbort() {
         message: 'Are you sure you want to Abort?'
     });
 
-    serial_port.write('ABORT \n');
     if (response === 0) {
         console.log("CALLING ABORT!");
+        serial_port.write('ABORT \n');
         // serial_port.write('ABORT \n', function(err) {
         //     console.log("err: " + err);
         // });
@@ -190,11 +244,29 @@ ipcMain.on('frequency', (evt, frequency) => {
     serial_port.flush();
 });
 
+ipcMain.on('local_frequency', (evt, frequency) => {
+    freqwindow.close();
+    let int_Frequency = parseInt(frequency);
+    console.log(`Changing frequency to ${int_Frequency}`);
+    serial_port.write(`FLOC ${int_Frequency}\n`);
+    serial_port.flush();
+});
+
 ipcMain.on('call_sign', (evt, call_sign) => {
     callsignwindow.close();
     console.log(`Changing Call Sign to ${call_sign}`);
     serial_port.write("CALLSIGN " + call_sign + "\n");
     serial_port.flush();
+});
+
+ipcMain.on('homecoords', (evt, lat, long, alt) => {
+    homepointswindow.close();
+    latitude = lat;
+    longitude = long;
+    altitude = alt;
+    console.log("Latitude: " + latitude);
+    console.log("Longitude: " + longitude);
+    console.log("Altitude: " + altitude);
 });
 
 ipcMain.on('connect', (evt, message, baud) => {
@@ -233,6 +305,12 @@ function send_frontends_data(tag: string, data: string) {
         ws.send(JSON.stringify({ event: tag, message: data }));
     }
 }
+
+ipcMain.on('load_coords', (evt) => {
+    let data = csv.read_data();
+    console.log(data.split("\n"));
+    gpswindow?.webContents?.send('csv', JSON.stringify(data.split("\n")), latitude, longitude, altitude);
+});
 
 // setInterval(()=>{
 

@@ -140,6 +140,7 @@ function make_chart_options(units: string, name: string, datasets: number[][]): 
         // Configuration options go here
         options: {
             animation: false,
+            responsive: true,
             maintainAspectRatio: false,
             datasets: {
                 line: {
@@ -175,7 +176,7 @@ function make_chart_options(units: string, name: string, datasets: number[][]): 
                         color: '#ffffff',
                         font: {
                             family: 'Causten',
-                            size: 14,
+                            // size: 14,
                             weight: 'bold',
                             lineHeight: 1.2,
                         }
@@ -266,19 +267,21 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 m["H3L_IMU_ax"], m["H3L_IMU_ay"], m["H3L_IMU_az"],
                 m["barometer_alt"], m["signal"]);
 
-            // if (m["FSM_state"] > currentActive) {
-            //     for (let i = currentActive; i < m["FSM_state"]; i++) {
-            //         nextState();
-            //     }
-            //     currentActive = m["FSM_state"];
-            // }
-
-            // if (m["FSM_state"] < currentActive) {
-            //     for (let i = currentActive; i > m["FSM_state"]; i--) {
-            //         prevState();
-            //     }
-            //     currentActive = m["FSM_state"];
-            // }
+            if (m["FSM_state"] >= 0 && m["FSM_state"] <= 9) {
+                if (m["FSM_state"] > currentActive) {
+                    for (let i = currentActive; i < m["FSM_state"]; i++) {
+                        nextState();
+                    }
+                    currentActive = m["FSM_state"];
+                }
+    
+                if (m["FSM_state"] < currentActive) {
+                    for (let i = currentActive; i > m["FSM_state"]; i--) {
+                        prevState();
+                    }
+                    currentActive = m["FSM_state"];
+                }
+            }
         }
 
         if (masterJSON.type == "init_error") {
