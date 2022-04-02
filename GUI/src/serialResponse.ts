@@ -23,7 +23,9 @@ export type SerialResponse =
         LSM_IMU_mz:number,
         FSM_state:number,
         sign:string,
-        signal:number
+        RSSI:number,
+        Voltage:number,
+        frequency:number
     }
 } | {
     type: "command_success"

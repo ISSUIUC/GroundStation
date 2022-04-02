@@ -5,6 +5,7 @@
     --outliine: rgba(217, 186, 63, 0.8);
     --line-border-fill: rgb(217, 186, 63);
     --line-border-empty: #e0e0e0;
+    --font: "Causten", "Helvetica", monospace;
 }
 
 
@@ -26,29 +27,29 @@ body {
 h1 {
     font-size: 45px;
     text-align: center;
-    font-family: "Causten", "Helvetica", monospace;
+    font-family: var(--font);
     color: rgb(255, 255, 255);
 }
 
 h2 {
     font-size: 18px;
     text-align: center;
-    font-family: "Causten", "Helvetica", monospace;
+    font-family: var(--font);
     color: rgb(255, 255, 255);
 }
 
 td {
-    padding: 5px 5px 5px 5px;
+    padding: 0.2vh 0.5vh 0.5vh 0.2vh;
     /* max-width: auto;
     min-width: 35px; */
     text-align: left;
 }
 
 div {
-    margin-top: 4px;
-    font-size: 1vw;
+    margin-top: auto;
+    font-size: 2vh;
     /* text-align: left; */
-    font-family: "Causten", "Futura", monospace;
+    font-family: var(--font);
     color: rgb(255, 255, 255);
 }
 
@@ -57,7 +58,7 @@ a {
     margin-left: 4px;
     font-size: 15px;
     text-align: center;
-    font-family: "Causten", "Futura", monospace;
+    font-family: var(--font);
     color: rgb(255, 255, 255);
 }
 
@@ -65,7 +66,7 @@ label {
     margin-top: 20px;
     font-size: 25px;
     text-align: left;
-    font-family: "Causten", "Futura", monospace;
+    font-family: var(--font);
     color: rgb(255, 255, 255);
 }
 
@@ -75,7 +76,7 @@ p {
     margin-bottom: auto;
     font-size: 14px;
     text-align: center;
-    font-family: "Causten", "Futura", monospace;
+    font-family: var(--font);
     color: rgb(255, 255, 255);
     position: absolute;
 }
@@ -85,7 +86,7 @@ input {
     resize: vertical;
     padding: 15px;
     border-radius: 5px;
-    font-family: "Causten", monospace;
+    font-family: var(--font);
     font-size: 18;
     border: 0;
     box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.06);
@@ -103,7 +104,7 @@ canvas {
 
 .button1 {
     display: inline-block;
-    font-family: 'Causten';
+    font-family: var(--font);
     padding: 15px 25px;
     font-size: 25px;
     text-align: center;
@@ -139,7 +140,7 @@ canvas {
     display: inline-block;
     padding: 15px 25px;
     font-size: 25px;
-    font-family: 'Causten';
+    font-family: var(--font);
     text-align: center;
     outline: none;
     color: rgb(255, 255, 255);
@@ -174,7 +175,7 @@ canvas {
     font-size: 25px;
     text-align: center;
     outline: none;
-    font-family: 'Causten';
+    font-family: var(--font);
     color: rgb(255, 255, 255);
     background-color: rgb(194, 70, 47);
     border: none;
@@ -189,9 +190,9 @@ canvas {
     display: grid;
     grid-template-columns: auto auto auto auto;
     /* background-color: #2196F3; */
-    padding: 2px;
+    padding: 1vh;
     width: auto;
-    height: 80%;
+    height: fit-content;
 }
 
 .grid-container>div {
@@ -209,6 +210,7 @@ canvas {
     min-width: 0;
     min-height: 0;
     overflow: hidden;
+    height: 25vh;
 }
 
 .panel1 {
@@ -217,6 +219,7 @@ canvas {
     min-width: 0;
     min-height: 0;
     overflow: hidden;
+    height: 25vh;
 }
 
 .control {
@@ -227,15 +230,7 @@ canvas {
     overflow: hidden;
     font-size: 20px;
     /* text-align: left; */
-    font-family: "Causten", "Futura", monospace;
-    color: rgb(255, 255, 255);
-}
-
-.clock {
-    margin-top: 2px;
-    font-size: 15px;
-    /* text-align: left; */
-    font-family: "Causten", "Futura", monospace;
+    font-family: var(--font);
     color: rgb(255, 255, 255);
 }
 
@@ -249,6 +244,7 @@ canvas {
     min-height: 0;
     text-overflow: ellipsis;
     max-width: auto;
+    height: 52vh;
     /* max-width: 327px; alt option if ^ does'nt work*/
 }
 
@@ -266,7 +262,7 @@ canvas {
 }
 
 #map {
-    height: 100vh;
+    height: 90vh;
 }
 
 
@@ -334,18 +330,6 @@ canvas {
 
 /* * {
   box-sizing: border-box;
-} */
-
-
-/* body {
-  background-color: #f6f7fb;
-  font-family: 'Muli', sans-serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  overflow: hidden;
-  margin: 0;
 } */
 
 .container {

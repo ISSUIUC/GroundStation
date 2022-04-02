@@ -226,14 +226,7 @@ export function callAbort() {
     if (response === 0) {
         console.log("CALLING ABORT!");
         serial_port.write('ABORT \n');
-        // serial_port.write('ABORT \n', function(err) {
-        //     console.log("err: " + err);
-        // });
-        // serial_port.flush();
     }
-
-    // console.log(app.getPath("logs"));
-    // mainWindow.webContents.send("write_to_csv", app.getPath("logs"));
 }
 
 ipcMain.on('frequency', (evt, frequency) => {
@@ -292,10 +285,15 @@ ipcMain.on('disconnect', (evt, message, baud) => {
 function on_serial_data(data: string) {
     console.log(data);
     send_frontends_data('data', data.toString());
+    if (gpswindow != null) {
+        if (!gpswindow.isDestroyed()) {
+            gpswindow.webContents.send('data', data.toString());
+        }
+    }
     try {
         csv.write_data(JSON.parse(data));
     } catch (e: any) {
-        console.error(`couldn't parase ${data}`)
+        console.error(`couldn't parse ${data}`)
     }
 }
 
@@ -304,6 +302,7 @@ function send_frontends_data(tag: string, data: string) {
     for (const ws of web_sockets) {
         ws.send(JSON.stringify({ event: tag, message: data }));
     }
+
 }
 
 ipcMain.on('load_coords', (evt) => {
@@ -312,34 +311,37 @@ ipcMain.on('load_coords', (evt) => {
     gpswindow?.webContents?.send('csv', JSON.stringify(data.split("\n")), latitude, longitude, altitude);
 });
 
-// setInterval(()=>{
+// setInterval(() => {
 
 //     const val = Math.cos(Math.random());
+//     const rand = Math.sin(Math.random());
 //     const data: SerialResponse = {
 //         type: 'data',
-//         value:{
-//             LSM_IMU_mx : val,
-//             LSM_IMU_my : val,
-//             LSM_IMU_mz : val,
-//             LSM_IMU_gx : val,
-//             LSM_IMU_gy : val,
-//             LSM_IMU_gz : val,
-//             LSM_IMU_ax : val,
-//             LSM_IMU_ay : val,
-//             LSM_IMU_az : val,
-//             gps_lat : val,
-//             gps_long : val,
-//             gps_alt : val,
-//             KX_IMU_ax : val,
-//             KX_IMU_ay : val,
-//             KX_IMU_az : val,
-//             H3L_IMU_ax : val,
-//             H3L_IMU_ay : val,
-//             H3L_IMU_az : val,
-//             barometer_alt : val,
-//             signal : val,
+//         value: {
+//             LSM_IMU_mx: val,
+//             LSM_IMU_my: val,
+//             LSM_IMU_mz: val,
+//             LSM_IMU_gx: val,
+//             LSM_IMU_gy: val,
+//             LSM_IMU_gz: val,
+//             LSM_IMU_ax: val,
+//             LSM_IMU_ay: val,
+//             LSM_IMU_az: val,
+//             gps_lat: (40.1119 + (val / 1000)),
+//             gps_long: (-88.2282 + (rand / 1000)),
+//             gps_alt: 45000*val,
+//             KX_IMU_ax: val,
+//             KX_IMU_ay: val,
+//             KX_IMU_az: val,
+//             H3L_IMU_ax: val,
+//             H3L_IMU_ay: val,
+//             H3L_IMU_az: val,
+//             barometer_alt: val,
 //             sign: "qxqxlol",
-//             FSM_state: 1
+//             FSM_state: 7 * val,
+//             RSSI: val,
+//             Voltage: val,
+//             frequency: val
 //         }
 //     }
 

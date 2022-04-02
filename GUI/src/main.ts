@@ -253,6 +253,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
             finds the field by ID and assigns 
             the value to the div */
             for (var key in m) {
+                // document.getElementById("response_ID").innerText = key;
                 if (typeof (((m as any)[key])) === "string") {
                     document.getElementById(key).innerText = (m as any)[key];
                 } else {
@@ -265,7 +266,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 m["gps_lat"], m["gps_long"], m["gps_alt"],
                 m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],
                 m["H3L_IMU_ax"], m["H3L_IMU_ay"], m["H3L_IMU_az"],
-                m["barometer_alt"], m["signal"]);
+                m["barometer_alt"], m["RSSI"]);
 
             if (m["FSM_state"] >= 0 && m["FSM_state"] <= 9) {
                 if (m["FSM_state"] > currentActive) {

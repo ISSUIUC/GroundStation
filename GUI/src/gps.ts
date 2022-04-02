@@ -5,6 +5,7 @@ import CSVWriter from './csv';
 import { ServerConnection } from './serverConnection';
 import * as chroma from 'chroma-js';
 import { LineString, MultiLineString } from 'geojson';
+import { SerialResponse } from './serialResponse';
 
 let lat_element = <HTMLDivElement>document.getElementById("lat");
 let long_element = <HTMLDivElement>document.getElementById("long");
@@ -80,7 +81,7 @@ ipcRenderer.on("csv", (something, message, lat, long, alt) => {
 
     marker_options = { "title": "Now" };
     circle_options = { "radius": 4 };
-    path_options = {"color": "#d9ba3f"};
+    path_options = { "color": "#d9ba3f" };
 
     lastAlt = alt;
     pathLine = L.polyline(c, path_options).addTo(map);
@@ -90,10 +91,8 @@ ipcRenderer.on("csv", (something, message, lat, long, alt) => {
         "<span style='color: black'>Terrain</span>": ter
     };
 
-    
-    map.addEventListener("click", () => {
-        moved();
-    });
+
+    map.on("dragstart", moved);
     L.control.layers(baseMaps).addTo(map);
 
     startMarker = L.marker([lat, long], { title: "Start" }).addTo(map).on('mouseover', function (e) {
@@ -104,7 +103,7 @@ ipcRenderer.on("csv", (something, message, lat, long, alt) => {
     });
 
     const data = JSON.parse(message);
-    for (var i = 1; i < 18; i++) {
+    for (var i = 1; i < data.length - 1; i++) {
         let parse = data.at(i).split(",");
         if (i === 1) {
             lastMarker = L.marker([parseFloat(parse.at(10)), parseFloat(parse.at(11))]).addTo(map).on('mouseover', function (e) {
@@ -120,11 +119,16 @@ ipcRenderer.on("csv", (something, message, lat, long, alt) => {
 });
 
 ipcRenderer.on("data", (something, message) => {
-    const masterJSON = JSON.parse(message);
-    const m = masterJSON["value"];
-    marker_options.title = m["Time"];
-    updateTrail(m["GPS_LAT"], m["GPS_LONG"], m["GPS_ALT"]);
-
+    const masterJSON: SerialResponse = JSON.parse(message);
+    if (masterJSON.type == "data") {
+        const m = masterJSON["value"];
+        marker_options.title = "Now";
+        updateTrail(m["gps_lat"], m["gps_long"], m["gps_alt"]);
+        if (!has_moved) {
+            map.setView(L.latLng(m["gps_lat"], m["gps_long"]));
+        }
+    }
+    
 });
 
 function updateTrail(lat: number, long: number, alt: number) {
@@ -142,7 +146,7 @@ function updateTrail(lat: number, long: number, alt: number) {
 
     c.push(latlng);
     pathLine = L.polyline(c, path_options).addTo(map);
-    lastMarker = L.marker([lat, long], {title: "Now"}).addTo(map).on('mouseover', function (e) {
+    lastMarker = L.marker([lat, long], { title: "Now" }).addTo(map).on('mouseover', function (e) {
         lat_element.innerHTML = lat.toString();
         long_element.innerHTML = long.toString();
         alt_element.innerHTML = alt.toString();
@@ -150,9 +154,9 @@ function updateTrail(lat: number, long: number, alt: number) {
     });
     lastAlt = alt;
     if (!has_moved) {
-        map.setView(L.latLng(lat,long));
+        map.setView(L.latLng(lat, long));
     }
-     //Changes the focus to new coordinates
+    //Changes the focus to new coordinates
 
 }
 
