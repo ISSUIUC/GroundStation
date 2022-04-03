@@ -8,11 +8,11 @@
     --font: "Causten", "Helvetica", monospace;
 }
 
-
-/* html {
-    -webkit-filter: invert(1);
-    filter: invert(1);
-} */
+html {
+    overflow: hidden;
+    /* -webkit-filter: invert(1);
+    filter: invert(1); */
+}
 
 
 /* Styling for the body of the app */
@@ -39,7 +39,7 @@ h2 {
 }
 
 td {
-    padding: 0.2vh 0.5vh 0.5vh 0.2vh;
+    padding: 0.5vh 0.5vh 0.5vh 0.2vh;
     /* max-width: auto;
     min-width: 35px; */
     text-align: left;
@@ -47,7 +47,7 @@ td {
 
 div {
     margin-top: auto;
-    font-size: 2vh;
+    font-size: 1.7vh;
     /* text-align: left; */
     font-family: var(--font);
     color: rgb(255, 255, 255);

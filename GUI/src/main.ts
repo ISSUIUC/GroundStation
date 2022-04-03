@@ -253,6 +253,9 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
             finds the field by ID and assigns 
             the value to the div */
             for (var key in m) {
+                if (key == "response_ID") {
+                    continue;
+                }
                 // document.getElementById("response_ID").innerText = key;
                 if (typeof (((m as any)[key])) === "string") {
                     document.getElementById(key).innerText = (m as any)[key];

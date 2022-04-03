@@ -238,7 +238,7 @@ ipcMain.on('frequency', (evt, frequency) => {
 });
 
 ipcMain.on('local_frequency', (evt, frequency) => {
-    freqwindow.close();
+    localfreqwindow.close();
     let int_Frequency = parseInt(frequency);
     console.log(`Changing frequency to ${int_Frequency}`);
     serial_port.write(`FLOC ${int_Frequency}\n`);
@@ -283,7 +283,9 @@ ipcMain.on('disconnect', (evt, message, baud) => {
 });
 
 function on_serial_data(data: string) {
-    console.log(data);
+    if (JSON.parse(data)["type"] != "data") {
+        console.log(data);
+    }
     send_frontends_data('data', data.toString());
     if (gpswindow != null) {
         if (!gpswindow.isDestroyed()) {
@@ -307,7 +309,6 @@ function send_frontends_data(tag: string, data: string) {
 
 ipcMain.on('load_coords', (evt) => {
     let data = csv.read_data();
-    console.log(data.split("\n"));
     gpswindow?.webContents?.send('csv', JSON.stringify(data.split("\n")), latitude, longitude, altitude);
 });
 
