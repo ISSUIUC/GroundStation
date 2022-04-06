@@ -4,19 +4,20 @@
 <head>
     <title>ISS Ground Station</title>
 </head>
-<div class="grid-container">
-    <div class="grid-item"><canvas id="lowgimuA"></canvas></div>
-    <div class="grid-item"><canvas id="lowgimuG"></canvas></div>
-    <div class="grid-item"><canvas id="lowgimuM"></canvas></div>
-    <div class="grid-item">
+<script type="text/javascript" src="../node_modules/grabbable/dist/grabbable.js"></script>
+<div class="grid-container" id="parent-container">
+    <div class="grid-item" draggable="true"><canvas id="lowgimuA"></canvas></div>
+    <div class="grid-item" draggable="true"><canvas id="lowgimuG"></canvas></div>
+    <div class="grid-item" draggable="true"><canvas id="lowgimuM"></canvas></div>
+    <div class="grid-item" draggable="true">
         <canvas id="signal_data"></canvas>
     </div>
 
-    <div class="grid-item"><canvas id="gps"></canvas></div>
-    <div class="panel1">
+    <div class="grid-item" draggable="true"><canvas id="gps"></canvas></div>
+    <div class="panel1" draggable="true">
 
         <div id="packetstats">0 seconds since last packet</div>
-        <div id="response_ID"></div>
+        <!-- <div id="response_ID"></div> -->
     </div>
     <div class="rawtelem">
         <div style="text-align: center;">Raw Telemetry</div>
@@ -82,134 +83,117 @@
                         </tr>
                         <tr>
                             <td>
-                                <div>HighG Sensor: </div>
+                                <div>H3LIS331DL Acceleration (g):</div>
                             </td>
                             <td>
-                                <div style="color: rgb(255, 99, 132)">x</div>
+                                <div id="H3L_IMU_ax">0</div>
                             </td>
                             <td>
-                                <div style="color: rgb(99, 132, 255)">y</div>
+                                <div id="H3L_IMU_ay">0</div>
                             </td>
                             <td>
-                                <div style="color: rgb(132, 255, 99)">z</div>
+                                <div id="H3L_IMU_az">0</div>
                             </td>
                         </tr>
-                        <tr>
-                            <tr>
-                                <td>
-                                    <div>KX134 Acceleration (g):</div>
-                                </td>
-                                <td>
-                                    <div id="KX_IMU_ax">0</div>
-                                </td>
-                                <td>
-                                    <div id="KX_IMU_ay">0</div>
-                                </td>
-                                <td>
-                                    <div id="KX_IMU_az">0</div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div>H3LIS331DL Acceleration (g):</div>
-                                </td>
-                                <td>
-                                    <div id="H3L_IMU_ax">0</div>
-                                </td>
-                                <td>
-                                    <div id="H3L_IMU_ay">0</div>
-                                </td>
-                                <td>
-                                    <div id="H3L_IMU_az">0</div>
-                                </td>
-                            </tr>
                     </table>
                 </td>
+            </tr>
+
+            <tr>
+                <tr>
+                    <td>
+                        <div style="margin-top:5px">GPS: </div>
+                        <table>
+                            <tr>
+                                <td>
+                                    <div style="color: rgb(255, 99, 132)">Latitude</div>
+                                </td>
+                                <td>
+                                    <div style="color: rgb(99, 132, 255)">Longitude</div>
+                                </td>
+                                <td>
+                                    <div style="color: rgb(132, 255, 99)">Altitude (m)</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div id="gps_lat">0</div>
+                                </td>
+                                <td>
+                                    <div id="gps_long">0</div>
+                                </td>
+                                <td>
+                                    <div id="gps_alt">0</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
                 </tr>
                 <tr>
-                    <tr>
-                        <td>
-                            <div style="margin-top:5px">GPS: </div>
-                            <table>
-                                <tr>
-                                    <td>
-                                        <div style="color: rgb(255, 99, 132)">Latitude</div>
-                                    </td>
-                                    <td>
-                                        <div style="color: rgb(99, 132, 255)">Longitude</div>
-                                    </td>
-                                    <td>
-                                        <div style="color: rgb(132, 255, 99)">Altitude (m)</div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div id="gps_lat">0</div>
-                                    </td>
-                                    <td>
-                                        <div id="gps_long">0</div>
-                                    </td>
-                                    <td>
-                                        <div id="gps_alt">0</div>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div style="margin-top:5px">Others: </div>
-                            <table>
-                                <tr>
-                                    <td>
-                                        <div style="color: rgb(255, 99, 132)">Barometer:</div>
-                                    </td>
-                                    <td>
-                                        <div>FSM:</div>
-                                    </td>
-                                    <td>
-                                        <div>CallSign:</div>
-                                    </td>
-                                    <td>
-                                        <div style="color: rgb(255, 99, 132)">RSSI:</div>
-                                    </td>
-                                    <td>
-                                        <div>Volt:</div>
-                                    </td>
-                                    <td>
-                                        <div>Freq:</div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <div id="barometer_alt">0</div>
-                                    </td>
-                                    <td>
-                                        <div id="FSM_state">0</div>
-                                    </td>
-                                    <td>
-                                        <div id="sign">0</div>
-                                    </td>
-                                    <td>
-                                        <div id="RSSI">-1</div>
-                                    </td>
-                                    <td>
-                                        <div id="Voltage">0</div>
-                                    </td>
-                                    <td>
-                                        <div id="frequency">0</div>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
+                    <td>
+                        <div style="margin-top:5px">Others: </div>
+                        <table>
+                            <tr>
+                                <td>
+                                    <div>Temperature: </div>
+                                </td>
+                                <td>
+                                    <div style="color: rgb(255, 99, 132)">Barometer:</div>
+                                </td>
+                                <td>
+                                    <div>FSM:</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div id="TEMP">0</div>
+                                </td>
+                                <td>
+                                    <div id="barometer_alt">0</div>
+                                </td>
+                                <td>
+                                    <div id="FSM_state">0</div>
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div>CallSign:</div>
+                                </td>
+                                <td>
+                                    <div style="color: rgb(255, 99, 132)">RSSI:</div>
+                                </td>
+                                <td>
+                                    <div>Volt:</div>
+                                </td>
+                                <td>
+                                    <div>Freq:</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div id="sign">0</div>
+                                </td>
+                                <td>
+                                    <div id="RSSI">-1</div>
+                                </td>
+                                <td>
+                                    <div id="Voltage">0</div>
+                                </td>
+                                <td>
+                                    <div id="frequency">0</div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
                 </tr>
+            </tr>
             </tr>
         </table>
     </div>
-    <div class="grid-item"><canvas id="kx134"></canvas></div>
-    <div class="grid-item"><canvas id="H3LIS331DL"></canvas></div>
-    <div class="grid-item"><canvas id="barometer"></canvas></div>
+    <div class="grid-item" draggable="true"><canvas id="temp"></canvas></div>
+    <div class="grid-item" draggable="true"><canvas id="H3LIS331DL"></canvas></div>
+    <div class="grid-item" draggable="true"><canvas id="barometer"></canvas></div>
 </div>
 
 <body>

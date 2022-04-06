@@ -97,6 +97,11 @@ input {
 canvas {
     width: auto;
     height: auto;
+    cursor: grab;
+}
+
+canvas.over {
+    border: 3px dotted var(--outliine);
 }
 
 
@@ -211,6 +216,11 @@ canvas {
     min-height: 0;
     overflow: hidden;
     height: 25vh;
+    cursor: grab;
+}
+
+.grid-item.over {
+    border: 3px dotted var(--outliine);
 }
 
 .panel1 {
@@ -220,6 +230,11 @@ canvas {
     min-height: 0;
     overflow: hidden;
     height: 25vh;
+    cursor: grab;
+}
+
+.panel1.over {
+    border: 3px dotted var(--outliine);
 }
 
 .control {
@@ -343,7 +358,8 @@ canvas {
     justify-content: space-between;
     /* justify-content: space-evenly; */
     position: relative;
-    margin-bottom: 30px;
+    margin-top: 1vmax;
+    margin-bottom: 1vmax;
     max-width: 100%;
     width: auto;
     /* margin-left: 30px;

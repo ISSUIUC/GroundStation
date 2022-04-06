@@ -2,16 +2,18 @@ import { Chart, ChartComponentLike, ChartConfiguration } from 'chart.js';
 import { SerialResponse } from './serialResponse';
 import { ServerConnection } from './serverConnection';
 
-// const led_button = document.getElementById("Blink");
-// const color_change = <HTMLButtonElement>document.getElementById("color");
-// const htmlcolorelement = document.getElementById("contrast");
+import { ipcRenderer } from 'electron';
+
+
 const stylesheetopt = <HTMLLinkElement>document.getElementById("style");
 let contrast = false;
 let time = 9;
 let current_time = new Date();
+let dragSrcEl: any;
+let dragID: string;
 
 const starting_length = 100;
-// ALL VALUES ARE DEMO FOR NOW BUT THESE ARE THE constIABLES THAT WILL BE PASSED TO THE CHART
+// ALL VALUES ARE DEMO FOR NOW BUT THESE ARE THE VARIABLES THAT WILL BE PASSED TO THE CHART
 const DP_LOWGMX = Array(starting_length).fill(0);
 const DP_LOWGMY = Array(starting_length).fill(0);
 const DP_LOWGMZ = Array(starting_length).fill(0);
@@ -28,9 +30,11 @@ const DP_GPS_LAT = Array(starting_length).fill(0);
 const DP_GPS_LONG = Array(starting_length).fill(0);
 const DP_GPS_ALT = Array(starting_length).fill(0);
 
-const DP_KXAX = Array(starting_length).fill(0);
-const DP_KXAY = Array(starting_length).fill(0);
-const DP_KXAZ = Array(starting_length).fill(0);
+// const DP_KXAX = Array(starting_length).fill(0);
+// const DP_KXAY = Array(starting_length).fill(0);
+// const DP_KXAZ = Array(starting_length).fill(0);
+
+const DP_TEMP = Array(starting_length).fill(0);
 
 const DP_H3LAX = Array(starting_length).fill(0);
 const DP_H3LAY = Array(starting_length).fill(0);
@@ -39,18 +43,16 @@ const DP_H3LAZ = Array(starting_length).fill(0);
 const DP_BAROMETER = Array(starting_length).fill(0);
 const DP_SIGNAL = Array(starting_length).fill(0);
 
-// X-AXIS LABELS CAN BE REMOVED LATER
 let labels = Array(starting_length).fill(0).map((_, i) => i);
 
 function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
     LOWGGX: number, LOWGGY: number, LOWGGZ: number,
     LOWGAX: number, LOWGAY: number, LOWGAZ: number,
     GPS_LAT: number, GPS_LONG: number, GPS_ALT: number,
-    KXAX: number, KXAY: number, KXAZ: number,
+    TEMP: number,
     H3LAX: number, H3LAY: number, H3LAZ: number,
     BAROMETER: number, SIGNAL: number) {
-
-    // L.marker([GPS_LAT, GPS_LONG]).addTo(map);    
+   
     labels.splice(0, 1);
     time++;
     labels.push(time);
@@ -59,7 +61,7 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
         { chart: charts.baro_altitude, val: [BAROMETER] },
         { chart: charts.gps, val: [GPS_LAT, GPS_LONG, GPS_ALT] },
         { chart: charts.highg_h3l_accel, val: [H3LAX, H3LAY, H3LAZ] },
-        { chart: charts.highg_kx_accel, val: [KXAX, KXAY, KXAZ] },
+        { chart: charts.temp, val: [TEMP] },
         { chart: charts.lowgimu_accel, val: [LOWGAX, LOWGAY, LOWGAZ] },
         { chart: charts.lowgimu_gyro, val: [LOWGGX, LOWGGY, LOWGGZ] },
         { chart: charts.lowgimu_mag, val: [LOWGMX, LOWGMY, LOWGMZ] },
@@ -81,12 +83,6 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
         }
     )
 }
-//LED BUTTON HAS BEEN DECOMISIONED
-// led_button.addEventListener('click', () => {
-//     let newdataset = make_new_dataset(DP_LOWGMX, "lowGimumx");
-//     charts.lowgimu_accel.data.datasets.push(newdataset);
-//     charts.lowgimu_accel.update();
-// })
 
 function make_new_dataset(data: number[], name: string) {
     return {
@@ -103,7 +99,7 @@ let charts: {
     lowgimu_gyro?: Chart,
     lowgimu_mag?: Chart,
     gps?: Chart,
-    highg_kx_accel?: Chart,
+    temp?: Chart,
     highg_h3l_accel?: Chart,
     baro_altitude?: Chart,
     signal: Chart
@@ -140,7 +136,7 @@ function make_chart_options(units: string, name: string, datasets: number[][]): 
         // Configuration options go here
         options: {
             animation: false,
-            responsive: true,
+            responsive: false,
             maintainAspectRatio: false,
             datasets: {
                 line: {
@@ -215,12 +211,14 @@ function setup_charts() {
         lowgimu_gyro: make_chart_multiaxis("DPS", "lowgimuG", "LowG IMU gyroscope", DP_LOWGGX, DP_LOWGGY, DP_LOWGGZ),
         lowgimu_mag: make_chart_multiaxis("Gauss", "lowgimuM", "LowG IMU magnetometer", DP_LOWGMX, DP_LOWGMY, DP_LOWGMZ),
         gps: make_chart_multiaxis("Meters", "gps", "GPS altitude", DP_GPS_LAT, DP_GPS_LONG, DP_GPS_ALT),
-        highg_kx_accel: make_chart_multiaxis("G", "kx134", "kx134 acceleration", DP_KXAX, DP_KXAY, DP_KXAZ),
+        temp: make_chart("C", "temp", "Temperature", DP_TEMP),
         highg_h3l_accel: make_chart_multiaxis("G", "H3LIS331DL", "H3L acceleration", DP_H3LAX, DP_H3LAY, DP_H3LAZ),
-        baro_altitude: make_chart("mbars", "barometer", "Barometer altitude", DP_BAROMETER),
+        baro_altitude: make_chart("Meters", "barometer", "Barometer altitude", DP_BAROMETER),
         signal: make_chart("dBmW", "signal_data", "Signal Strength (RSSI)", DP_SIGNAL)
     };
 }
+
+
 
 export function run_frontend(serverConnection: ServerConnection, registerables: readonly ChartComponentLike[]) {
     /* LOADS ALL THE CHARTS AFTER WINDOW LOADS 
@@ -256,7 +254,6 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 if (key == "response_ID") {
                     continue;
                 }
-                // document.getElementById("response_ID").innerText = key;
                 if (typeof (((m as any)[key])) === "string") {
                     document.getElementById(key).innerText = (m as any)[key];
                 } else {
@@ -267,7 +264,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 m["LSM_IMU_gx"], m["LSM_IMU_gy"], m["LSM_IMU_gz"],
                 m["LSM_IMU_ax"], m["LSM_IMU_ay"], m["LSM_IMU_az"],
                 m["gps_lat"], m["gps_long"], m["gps_alt"],
-                m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],
+                m["TEMP"],
                 m["H3L_IMU_ax"], m["H3L_IMU_ay"], m["H3L_IMU_az"],
                 m["barometer_alt"], m["RSSI"]);
 
@@ -278,7 +275,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                     }
                     currentActive = m["FSM_state"];
                 }
-    
+
                 if (m["FSM_state"] < currentActive) {
                     for (let i = currentActive; i > m["FSM_state"]; i--) {
                         prevState();
@@ -293,6 +290,17 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
         }
     });
 
+}
+
+function resize_charts() {
+    charts.lowgimu_accel.resize();
+    charts.lowgimu_gyro.resize();
+    charts.lowgimu_mag.resize();
+    charts.gps.resize();
+    charts.temp.resize();
+    charts.highg_h3l_accel.resize();
+    charts.baro_altitude.resize();
+    charts.signal.resize();
 }
 
 function get_current_time_full() {
@@ -310,10 +318,8 @@ function get_current_time_full() {
     const minute = (mm < 10) ? "0" + mm : mm;
     const second = (ss < 10) ? "0" + ss : ss;
 
-    // let time = `${hour}:${minute}:${second}:${ms}`; WEBPAGE FORMAT
     let time = year + "-" + month + "-" + day + "--" + hour + "-" + minute + "-" + second + "-" + ms;
     return time;
-    // document.getElementById("clock").innerText = time;
 }
 
 function diff_time() {
@@ -342,23 +348,11 @@ function get_current_time() {
     return time
 }
 
-//begin experimental progress bar
+// progress bar code
 const progress = document.getElementById('progress')
-// const prev = <HTMLButtonElement>document.getElementById('prev')
-// const next = <HTMLButtonElement>document.getElementById('next')
 const circles = document.querySelectorAll('.circle')
 
 let currentActive = 1
-
-// next.addEventListener('click', () => {
-//     currentActive++
-
-//     if (currentActive > circles.length) {
-//         currentActive = circles.length
-//     }
-
-//     update()
-// })
 
 function nextState() {
     currentActive++
@@ -370,15 +364,6 @@ function nextState() {
     update()
 }
 
-// prev.addEventListener('click', () => {
-//     currentActive--
-
-//     if (currentActive < 1) {
-//         currentActive = 1
-//     }
-
-//     update()
-// })
 
 function prevState() {
     currentActive--
@@ -403,13 +388,87 @@ function update() {
 
     progress.style.width = (actives.length - 1) / (circles.length - 1) * 100 + '%'
 
-    // if (currentActive === 1) {
-    //     prev.disabled = true
-    // } else if (currentActive === circles.length) {
-    //     next.disabled = true
-    // } else {
-    //     prev.disabled = false
-    //     next.disabled = false
-    // }
 }
-//end experimental progress bar
+
+document.addEventListener('DOMContentLoaded', (event) => {
+
+    function handleDragStart(e: any) {
+        this.style.opacity = '0.4';
+        dragSrcEl = this;
+        if (this.getElementsByTagName("div").length !== 0) {
+            dragID = this.getElementsByTagName("div")[0].id
+        } else {
+            dragID = this.getElementsByTagName("canvas")[0].id
+        }
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', dragID);
+    }
+
+
+    function handleDragEnd(e: any) {
+        this.style.opacity = '1';
+
+        items.forEach(function (item) {
+            item.classList.remove('over');
+        });
+        center.classList.remove('over');
+    }
+
+    function handleDragOver(e: any) {
+        if (e.preventDefault) {
+            e.preventDefault();
+        }
+
+        return false;
+    }
+
+    function handleDragEnter(e: any) {
+        this.classList.add('over');
+    }
+
+    function handleDragLeave(e: any) {
+        this.classList.remove('over');
+    }
+
+    function handleDrop(e: any) {
+        e.stopPropagation(); // stops the browser from redirecting.
+        let id = e.dataTransfer.getData('text/plain');
+        let replaceid;
+        if (this.getElementsByTagName("div").length !== 0) {
+            replaceid = this.getElementsByTagName("div")[0].id
+        } else {
+            replaceid = this.getElementsByTagName("canvas")[0].id
+        }
+        if (dragSrcEl !== this) {
+            dragSrcEl.appendChild(document.getElementById(replaceid));
+            this.appendChild(document.getElementById(dragID));
+        }
+        charts.lowgimu_accel.resize();
+        charts.lowgimu_gyro.resize();
+        charts.lowgimu_mag.resize();
+        charts.gps.resize();
+        charts.temp.resize();
+        charts.highg_h3l_accel.resize();
+        charts.baro_altitude.resize();
+        charts.signal.resize();
+        return false;
+    }
+
+
+    let items = document.querySelectorAll('.grid-container .grid-item');
+    items.forEach(function (item) {
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragover', handleDragOver);
+        item.addEventListener('dragenter', handleDragEnter);
+        item.addEventListener('dragleave', handleDragLeave);
+        item.addEventListener('dragend', handleDragEnd);
+        item.addEventListener('drop', handleDrop);
+    });
+    let center = document.querySelector('.panel1');
+    center.addEventListener('dragstart', handleDragStart);
+    center.addEventListener('dragover', handleDragOver);
+    center.addEventListener('dragenter', handleDragEnter);
+    center.addEventListener('dragleave', handleDragLeave);
+    center.addEventListener('dragend', handleDragEnd);
+    center.addEventListener('drop', handleDrop);
+});

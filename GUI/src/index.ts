@@ -312,6 +312,10 @@ ipcMain.on('load_coords', (evt) => {
     gpswindow?.webContents?.send('csv', JSON.stringify(data.split("\n")), latitude, longitude, altitude);
 });
 
+ipcMain.on('debugger', (evt, message) => {
+    console.log(message);
+});
+
 // setInterval(() => {
 
 //     const val = Math.cos(Math.random());

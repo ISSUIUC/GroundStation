@@ -5,7 +5,7 @@
 <link id="style" rel="stylesheet" type="text/css" href="serial.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
-<div id="map" style="height: 525px;"></div>
+<div id="map" style="height: 70vh;"></div>
 <table>
     <tr>
         <td>
@@ -15,7 +15,7 @@
             <div id="lat"></div>
         </td>
         <td>
-            <div>Alt: </div>
+            <div style="margin-left: 5vw;">Altitude: </div>
         </td>
         <td>
             <div id="alt"></div>
@@ -29,14 +29,15 @@
             <div id="long"></div>
         </td>
         <td>
-            <div>Distance: </div>
+            <div style="margin-left: 5vw;">Distance: </div>
         </td>
         <td>
             <div id="distance"></div>
         </td>
     </tr>
 </table>
-<button id="center" class="button1">Center</button>
+<div style="margin-top:4vh"><button id="center" class="button1">Center</button></div>
+
 
 <script>
     require('./gps.js');
