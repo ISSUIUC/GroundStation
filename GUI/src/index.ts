@@ -44,9 +44,7 @@ const second = (ss < 10) ? "0" + ss : ss;
 let time = year + "-" + month + "-" + day + "--" + hour + "-" + minute + "-" + second + "-" + ms;
 
 if (isMac) {
-
     csv = new CSVWriter(app.getPath("logs") + "/" + time + ".csv")
-    // csv = new CSVWriter(app.getPath("logs") + "/2022-3-12--14-43-14-36.csv"); //TESTING DELETE LATER
 } else {
     csv = new CSVWriter(app.getPath("logs") + "\\" + time + ".csv")
 }
@@ -266,7 +264,6 @@ ipcMain.on('connect', (evt, message, baud) => {
     serialWindow.close();
     console.log(`Connecting to serial port ${message}`);
     let baudrate = parseInt(baud);
-    // serial_port = new SerialPort(message, {baudRate : baudrate});
     serial_port = new SerialPort(message);
     const parser = new SerialPort.parsers.Readline({ delimiter: '\n' });
     serial_port.pipe(parser);
@@ -276,7 +273,6 @@ ipcMain.on('connect', (evt, message, baud) => {
 ipcMain.on('disconnect', (evt, message, baud) => {
     serialWindow.close();
     console.log(`Disconnecting from serial port ${message}`);
-    // serial_port = new SerialPort(message, {baudRate : baudrate});
     serial_port.close(function (err) {
         console.log('port closed', err);
     });
