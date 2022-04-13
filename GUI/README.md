@@ -15,11 +15,13 @@ Telemetry Ground Station
        - Download the zip files of the map tiles
        - Unzip them and place them in the ```/GUI/build/``` folder [^2]
 
-4. Build typescript
+4. Install the font pack [^3]
+
+5. Build typescript
   
        npm run build
       
-5. Run the electron application
+6. Run the electron application
 
         npm start
 
@@ -32,3 +34,4 @@ Telemetry Ground Station
 
 [^1]: In the past we have had issues where not all packages install on the first go. Thus, it is recommended to run this at least twice.
 [^2]: Ensure that the ```Satellite/``` and ```Terrain/``` FOLDER contains subfolders ```1/``` to ```18/``` and not another folder called Satellite/Terrain. If this happens move the inner folder into the build/ folder instead.
+[^3]: Although not an important step it is highly recommended due to its monospace nature and most of the formatting in this software utilizes it heavily.

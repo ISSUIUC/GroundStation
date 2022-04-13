@@ -280,73 +280,7 @@ canvas.over {
     height: 90vh;
 }
 
-
-/* PROGRESS BAR ACTIVITY */
-
-.Section {
-    text-align: center;
-    /* max-width: 400px; */
-    margin: 0 auto;
-    /* margin-top: 20px; */
-    /* padding: 5px; */
-}
-
-#ProgressBar {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    width: 1000px;
-    margin: 0 auto;
-    margin-bottom: 40px;
-}
-
-.step {
-    text-align: center;
-    padding: auto;
-}
-
-.text {
-    margin-bottom: 10px;
-    color: white;
-}
-
-.bullets {
-    border: 1px solid var(--outliine);
-    height: 20px;
-    width: 20px;
-    border-radius: 100%;
-    color: var(--outliine);
-    display: inline-block;
-    position: relative;
-    transition: background-color 5s, right 3s ease;
-    line-height: 20px;
-}
-
-.bullets.completed::after {
-    content: "";
-    position: absolute;
-    right: -300px;
-    bottom: 8px;
-    height: 5px;
-    width: 300px;
-    background-color: var(--outliine);
-}
-
-
-/*          start            */
-
-
-/* experimental progress bar */
-
-
-/*                           */
-
 @import url('https://fonts.googleapis.com/css?family=Muli&display=swap');
-
-/* * {
-  box-sizing: border-box;
-} */
-
 .container {
     text-align: center;
     width: 80%;
@@ -391,6 +325,16 @@ canvas.over {
     margin: auto;
 }
 
+.step {
+    text-align: center;
+    padding: auto;
+}
+
+.text {
+    margin-bottom: 10px;
+    color: white;
+}
+
 .circle {
     background-color: var(--bg);
     color: var(--outliine);
@@ -409,37 +353,3 @@ canvas.over {
 .circle.active {
     border-color: var(--line-border-fill);
 }
-
-.btn {
-    background-color: var(--line-border-fill);
-    color: #fff;
-    border: 0;
-    border-radius: 6px;
-    cursor: pointer;
-    font-family: inherit;
-    padding: 8px 30px;
-    margin: 5px;
-    font-size: 14px;
-}
-
-.btn:active {
-    transform: scale(0.98);
-}
-
-.btn:focus {
-    outline: 0;
-}
-
-.btn:disabled {
-    background-color: var(--line-border-empty);
-    cursor: not-allowed;
-}
-
-
-/*                           */
-
-
-/* experimental progress bar */
-
-
-/*           end             */

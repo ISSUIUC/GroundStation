@@ -5,7 +5,7 @@ import { makeMainMenu, makeSerialMenu } from './menuTemplate';
 import { WebSocket, WebSocketServer } from 'ws';
 import * as fs from 'fs';
 import { write } from 'original-fs';
-import CSVWriter from './csv';
+import CSVWriter, { readDemo } from './csv';
 import { SerialResponse } from './serialResponse';
 
 
@@ -227,6 +227,12 @@ export function callAbort() {
     }
 }
 
+export function actuateFlaps() {
+    console.log(`Actuating Flaps`);
+    serial_port.write(`COMMAND FOR ACTUATING FLAPS GOES HERE\n`);
+    serial_port.flush();
+}
+
 ipcMain.on('frequency', (evt, frequency) => {
     freqwindow.close();
     let int_Frequency = parseInt(frequency);
@@ -312,36 +318,107 @@ ipcMain.on('debugger', (evt, message) => {
     console.log(message);
 });
 
-// setInterval(() => {
+export function demo() {
+    let filename = dialog.showOpenDialogSync({ properties: ['openFile'] })[0];
+    let filedump = readDemo(filename).split("\n");
+    let packets: SerialResponse[] = [];
+    for (let i = 1; i < filedump.length - 1; i++) {
+        let data: string[] = filedump.at(i).split(",");
+        const temp: SerialResponse = {
+            type: 'data',
+            value: {
+                LSM_IMU_mx: parseFloat(data[1]),
+                LSM_IMU_my: parseFloat(data[2]),
+                LSM_IMU_mz: parseFloat(data[3]),
+                LSM_IMU_gx: parseFloat(data[4]),
+                LSM_IMU_gy: parseFloat(data[5]),
+                LSM_IMU_gz: parseFloat(data[6]),
+                LSM_IMU_ax: parseFloat(data[7]),
+                LSM_IMU_ay: parseFloat(data[8]),
+                LSM_IMU_az: parseFloat(data[9]),
+                gps_lat: parseFloat(data[10]),
+                gps_long: parseFloat(data[11]),
+                gps_alt: parseFloat(data[12]),
+                KX_IMU_ax: parseFloat(data[13]),
+                KX_IMU_ay: parseFloat(data[14]),
+                KX_IMU_az: parseFloat(data[15]),
+                H3L_IMU_ax: parseFloat(data[16]),
+                H3L_IMU_ay: parseFloat(data[17]),
+                H3L_IMU_az: parseFloat(data[18]),
+                TEMP: parseFloat(data[19]),
+                barometer_alt: parseFloat(data[20]),
+                sign: data[21],
+                FSM_state: parseFloat(data[22]),
+                RSSI: parseFloat(data[23]),
+                Voltage: parseFloat(data[24]),
+                frequency: parseFloat(data[25])
+            }
+        }
+        console.log(temp);
+        packets.push(temp);
+        
+    }
+    let index = 0;
+    myLoop(packets);
+    // setInterval(() => {
+
+        // const val = Math.cos(Math.random());
+        // const rand = Math.sin(Math.random());
+        // const data: SerialResponse = packets[index];
+        // index++;
+        // console.log(JSON.stringify(data));
+        // on_serial_data(JSON.stringify(data));
+    // }, 100);
+}
+
+var i = 0;
+
+function myLoop(packets: SerialResponse[]) {   
+    //  create a loop function
+    setTimeout(function() {   //  call a 3s setTimeout when the loop is called
+        const data: SerialResponse = packets[i];
+        i++;
+        console.log(JSON.stringify(data));
+        on_serial_data(JSON.stringify(data));   //  your code here
+      i++;                    //  increment the counter
+      if (i < packets.length) {           //  if the counter < 10, call the loop function
+        myLoop(packets);             //  ..  again which will trigger another 
+      }                       //  ..  setTimeout()
+    }, 200)
+  }
+
+//   setInterval(()=>{
 
 //     const val = Math.cos(Math.random());
 //     const rand = Math.sin(Math.random());
+
 //     const data: SerialResponse = {
 //         type: 'data',
 //         value: {
-//             LSM_IMU_mx: val,
-//             LSM_IMU_my: val,
-//             LSM_IMU_mz: val,
-//             LSM_IMU_gx: val,
-//             LSM_IMU_gy: val,
-//             LSM_IMU_gz: val,
-//             LSM_IMU_ax: val,
-//             LSM_IMU_ay: val,
-//             LSM_IMU_az: val,
-//             gps_lat: (40.1119 + (val / 1000)),
-//             gps_long: (-88.2282 + (rand / 1000)),
-//             gps_alt: 45000*val,
-//             KX_IMU_ax: val,
-//             KX_IMU_ay: val,
-//             KX_IMU_az: val,
-//             H3L_IMU_ax: val,
-//             H3L_IMU_ay: val,
-//             H3L_IMU_az: val,
-//             barometer_alt: val,
+//             LSM_IMU_mx : val,
+//             LSM_IMU_my : rand,
+//             LSM_IMU_mz : val * rand,
+//             LSM_IMU_gx : val,
+//             LSM_IMU_gy : rand,
+//             LSM_IMU_gz : val * rand,
+//             LSM_IMU_ax : val,
+//             LSM_IMU_ay : rand,
+//             LSM_IMU_az : val * rand,
+//             gps_lat : 40.1119 + val/1000,
+//             gps_long : -88.2282 + rand/1000,
+//             gps_alt : val * rand * 45000,
+//             KX_IMU_ax : val,
+//             KX_IMU_ay : rand,
+//             KX_IMU_az : val * rand,
+//             H3L_IMU_ax : val,
+//             H3L_IMU_ay : rand,
+//             H3L_IMU_az : val + rand,
+//             barometer_alt : val,
+//             RSSI : val,
 //             sign: "qxqxlol",
-//             FSM_state: 7 * val,
-//             RSSI: val,
+//             FSM_state: val*7,
 //             Voltage: val,
+//             TEMP: val,
 //             frequency: val
 //         }
 //     }

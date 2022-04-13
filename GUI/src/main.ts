@@ -30,9 +30,9 @@ const DP_GPS_LAT = Array(starting_length).fill(0);
 const DP_GPS_LONG = Array(starting_length).fill(0);
 const DP_GPS_ALT = Array(starting_length).fill(0);
 
-// const DP_KXAX = Array(starting_length).fill(0);
-// const DP_KXAY = Array(starting_length).fill(0);
-// const DP_KXAZ = Array(starting_length).fill(0);
+const DP_KXAX = Array(starting_length).fill(0);
+const DP_KXAY = Array(starting_length).fill(0);
+const DP_KXAZ = Array(starting_length).fill(0);
 
 const DP_TEMP = Array(starting_length).fill(0);
 
@@ -49,7 +49,7 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
     LOWGGX: number, LOWGGY: number, LOWGGZ: number,
     LOWGAX: number, LOWGAY: number, LOWGAZ: number,
     GPS_LAT: number, GPS_LONG: number, GPS_ALT: number,
-    TEMP: number,
+    TEMP: number, KXAX: number, KXAY: number, KXAZ: number,
     H3LAX: number, H3LAY: number, H3LAZ: number,
     BAROMETER: number, SIGNAL: number) {
    
@@ -61,7 +61,7 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
         { chart: charts.baro_altitude, val: [BAROMETER] },
         { chart: charts.gps, val: [GPS_LAT, GPS_LONG, GPS_ALT] },
         { chart: charts.highg_h3l_accel, val: [H3LAX, H3LAY, H3LAZ] },
-        { chart: charts.temp, val: [TEMP] },
+        { chart: charts.kx, val: [KXAX, KXAY, KXAZ] },
         { chart: charts.lowgimu_accel, val: [LOWGAX, LOWGAY, LOWGAZ] },
         { chart: charts.lowgimu_gyro, val: [LOWGGX, LOWGGY, LOWGGZ] },
         { chart: charts.lowgimu_mag, val: [LOWGMX, LOWGMY, LOWGMZ] },
@@ -99,7 +99,7 @@ let charts: {
     lowgimu_gyro?: Chart,
     lowgimu_mag?: Chart,
     gps?: Chart,
-    temp?: Chart,
+    kx?: Chart,
     highg_h3l_accel?: Chart,
     baro_altitude?: Chart,
     signal: Chart
@@ -136,7 +136,7 @@ function make_chart_options(units: string, name: string, datasets: number[][]): 
         // Configuration options go here
         options: {
             animation: false,
-            responsive: false,
+            responsive: true,
             maintainAspectRatio: false,
             datasets: {
                 line: {
@@ -211,7 +211,7 @@ function setup_charts() {
         lowgimu_gyro: make_chart_multiaxis("DPS", "lowgimuG", "LowG IMU gyroscope", DP_LOWGGX, DP_LOWGGY, DP_LOWGGZ),
         lowgimu_mag: make_chart_multiaxis("Gauss", "lowgimuM", "LowG IMU magnetometer", DP_LOWGMX, DP_LOWGMY, DP_LOWGMZ),
         gps: make_chart_multiaxis("Meters", "gps", "GPS altitude", DP_GPS_LAT, DP_GPS_LONG, DP_GPS_ALT),
-        temp: make_chart("C", "temp", "Temperature", DP_TEMP),
+        kx: make_chart_multiaxis("G", "temp", "KX134", DP_KXAX, DP_KXAY, DP_KXAZ),
         highg_h3l_accel: make_chart_multiaxis("G", "H3LIS331DL", "H3L acceleration", DP_H3LAX, DP_H3LAY, DP_H3LAZ),
         baro_altitude: make_chart("Meters", "barometer", "Barometer altitude", DP_BAROMETER),
         signal: make_chart("dBmW", "signal_data", "Signal Strength (RSSI)", DP_SIGNAL)
@@ -264,7 +264,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 m["LSM_IMU_gx"], m["LSM_IMU_gy"], m["LSM_IMU_gz"],
                 m["LSM_IMU_ax"], m["LSM_IMU_ay"], m["LSM_IMU_az"],
                 m["gps_lat"], m["gps_long"], m["gps_alt"],
-                m["TEMP"],
+                m["TEMP"], m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],
                 m["H3L_IMU_ax"], m["H3L_IMU_ay"], m["H3L_IMU_az"],
                 m["barometer_alt"], m["RSSI"]);
 
@@ -283,6 +283,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                     currentActive = m["FSM_state"];
                 }
             }
+            resize_charts();
         }
 
         if (masterJSON.type == "init_error") {
@@ -297,7 +298,7 @@ function resize_charts() {
     charts.lowgimu_gyro.resize();
     charts.lowgimu_mag.resize();
     charts.gps.resize();
-    charts.temp.resize();
+    charts.kx.resize();
     charts.highg_h3l_accel.resize();
     charts.baro_altitude.resize();
     charts.signal.resize();
@@ -447,7 +448,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         charts.lowgimu_gyro.resize();
         charts.lowgimu_mag.resize();
         charts.gps.resize();
-        charts.temp.resize();
+        charts.kx.resize();
         charts.highg_h3l_accel.resize();
         charts.baro_altitude.resize();
         charts.signal.resize();

@@ -6,8 +6,9 @@ const CSV_HEADERS = ["Time", "LSM_IMU_mx", "LSM_IMU_my", "LSM_IMU_mz",
     "LSM_IMU_ax", "LSM_IMU_ay", "LSM_IMU_az",
     "gps_lat", "gps_long", "gps_alt",
     "KX_IMU_ax", "KX_IMU_ay", "KX_IMU_az",
-    "H3L_IMU_ax", "H3L_IMU_ay", "H3L_IMU_az",
-    "barometer_alt", "sign", "signal"]
+    "H3L_IMU_ax", "H3L_IMU_ay", "H3L_IMU_az", "TEMP", 
+    "barometer_alt", "sign", "FSM_state", "RSSI", 
+    "Voltage", "frequency"]
 
 
 
@@ -29,6 +30,14 @@ export default class CSVWriter {
     read_data() {
         return fs.readFileSync(this.file_name, "utf8");
     }
+
+    readDemo(filename: string) {
+        return fs.readFileSync(filename, 'utf-8');
+    }
+}
+
+export function readDemo(filename: string) {
+    return fs.readFileSync(filename, 'utf-8');
 }
 
 function refresh_time() {

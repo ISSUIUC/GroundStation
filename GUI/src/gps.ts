@@ -25,31 +25,12 @@ var color_scale = chroma.scale(['#0302FC', '#2A00D5', '#63009E', '#A1015D', '#D8
 let has_moved = false;
 //MAP WORK
 
-
-
-
-
-// L.circle([40.1129, -88.2292], circle_options).setStyle({color:altColor(10000)}).addTo(map).on('mouseover', function (e) {
-//     lat_element.innerHTML = "40.1119";
-//     long_element.innerHTML = "-88.2282";
-// });
+//41°29'17.4"N 89°30'02.8"W APRIL LAUNCH
+//
 
 ipcRenderer.send("load_coords");
 
 export function run_frontend(serverConnection: ServerConnection, registerables: readonly ChartComponentLike[]) {
-    /* LOADS ALL THE CHARTS AFTER WINDOW LOADS 
-    BUT WILL BE MOVED LATER TO AFTER GSS 
-    ESTABLISHES CONNNECTION TO FEATHER */
-
-    // serverConnection.on("csv", (message) => {
-    //     L.marker([40.1129, -88.2292]).addTo(map);
-    //     // const data = JSON.parse(message);
-    //     // for (var i = 1; i < data.length; i++) {
-    //     //     let parse = data.at(i).split(",");
-    //     //     L.marker([parseFloat(parse.at(11)), parseFloat(parse.at(12))]).addTo(map);
-
-    //     // }
-    // });
 
     serverConnection.on("data", (message) => {
         const masterJSON = JSON.parse(message);
@@ -84,7 +65,7 @@ ipcRenderer.on("csv", (something, message, lat, long, alt) => {
     path_options = { "color": "#d9ba3f" };
 
     lastAlt = alt;
-    pathLine = L.polyline(c, path_options).addTo(map);
+    
 
     var baseMaps = {
         "<span style='color: black'>Satellite</span>": sat,
@@ -101,7 +82,8 @@ ipcRenderer.on("csv", (something, message, lat, long, alt) => {
         alt_element.innerHTML = alt;
         distance_element.innerHTML = '0';
     });
-
+    c.push(L.latLng(lat,long));
+    pathLine = L.polyline(c, path_options).addTo(map);
     const data = JSON.parse(message);
     for (var i = 1; i < data.length - 1; i++) {
         let parse = data.at(i).split(",");

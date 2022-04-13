@@ -1,5 +1,5 @@
 import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from 'electron';
-import { callAbort, changeCallSignWindow, changeFrequencyWindow, changeHomePoints, changeLocalFrequencyWindow, change_contrast, createGPSWindow, createSerialWindow, openAboutWindow } from './index';
+import { actuateFlaps, callAbort, changeCallSignWindow, changeFrequencyWindow, changeHomePoints, changeLocalFrequencyWindow, change_contrast, createGPSWindow, createSerialWindow, demo, openAboutWindow } from './index';
 const isMac = process.platform === 'darwin';
 
 export function makeSerialMenu(window: BrowserWindow) {
@@ -94,6 +94,14 @@ function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[]
                 {
                     label: 'Set Home',
                     click() { changeHomePoints(); }
+                },
+                {
+                    label: 'Actuate Flaps',
+                    click() { actuateFlaps(); }
+                },
+                {
+                    label: 'Demonstrate',
+                    click() { demo(); }
                 }
             ]
         },
