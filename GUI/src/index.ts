@@ -5,20 +5,26 @@ import { makeMainMenu, makeSerialMenu } from './menuTemplate';
 import { WebSocket, WebSocketServer } from 'ws';
 import * as fs from 'fs';
 import { write } from 'original-fs';
-import CSVWriter from './csv';
+import CSVWriter, { readDemo } from './csv';
 import { SerialResponse } from './serialResponse';
 
 
 // Initializes windows as main windows.
 let mainWindow: BrowserWindow;
+let aboutWindow: BrowserWindow;
 let serialWindow: BrowserWindow;
 let gpswindow: BrowserWindow;
 let freqwindow: BrowserWindow;
+let localfreqwindow: BrowserWindow;
 let callsignwindow: BrowserWindow;
+let homepointswindow: BrowserWindow;
 let serial_port: SerialPort;
 let server: WebSocketServer;
 let web_sockets: WebSocket[] = [];
 let csv: CSVWriter;
+let latitude = 0;
+let longitude = 0;
+let altitude = 0;
 const isMac = process.platform === 'darwin';
 
 const date = new Date();
@@ -38,7 +44,6 @@ const second = (ss < 10) ? "0" + ss : ss;
 let time = year + "-" + month + "-" + day + "--" + hour + "-" + minute + "-" + second + "-" + ms;
 
 if (isMac) {
-
     csv = new CSVWriter(app.getPath("logs") + "/" + time + ".csv")
 } else {
     csv = new CSVWriter(app.getPath("logs") + "\\" + time + ".csv")
@@ -56,10 +61,7 @@ app.on('ready', () => {
         },
         icon: __dirname + '/iss_logo.png',
     });
-    mainWindow.once('ready-to-show', () => {
-        mainWindow.show();
-        mainWindow.maximize();
-    });
+    mainWindow.maximize();
 
     const indexHTML = path.join(__dirname + '/index.html');
     mainWindow.loadFile(indexHTML);
@@ -118,6 +120,11 @@ export function createSerialWindow() {
 }
 
 export function createGPSWindow() {
+    if (latitude === 0 && longitude === 0 && altitude === 0) {
+        changeHomePoints();
+        homepointswindow.addListener("closed", createGPSWindow);
+        return;
+    }
     gpswindow = new BrowserWindow({
         width: 800,
         height: 800,
@@ -129,6 +136,9 @@ export function createGPSWindow() {
         }
     });
     gpswindow.loadURL(`file://${__dirname}/gps.html`);
+    if (isMac) {
+        Menu.setApplicationMenu(makeMainMenu(gpswindow));
+    }
     // serialWindow.setMenu(makeSerialMenu(serialWindow)); May use it for future commands 
 }
 
@@ -146,6 +156,20 @@ export function changeFrequencyWindow() {
     freqwindow.loadURL(`file://${__dirname}/changefreq.html`);
 }
 
+export function changeLocalFrequencyWindow() {
+    localfreqwindow = new BrowserWindow({
+        width: 500,
+        height: 450,
+        title: 'Change Frequency',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+        }
+    });
+    localfreqwindow.loadURL(`file://${__dirname}/changelocalfreq.html`);
+}
+
 export function changeCallSignWindow() {
     callsignwindow = new BrowserWindow({
         width: 500,
@@ -160,6 +184,34 @@ export function changeCallSignWindow() {
     callsignwindow.loadURL(`file://${__dirname}/callsign.html`);
 }
 
+export function changeHomePoints() {
+    homepointswindow = new BrowserWindow({
+        width: 500,
+        height: 450,
+        title: 'Change Home Coords',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+        }
+    });
+    homepointswindow.loadURL(`file://${__dirname}/homecoords.html`);
+}
+
+export function openAboutWindow() {
+    aboutWindow = new BrowserWindow({
+        width: 500,
+        height: 450,
+        title: 'About',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+        }
+    });
+    aboutWindow.loadURL(`file://${__dirname}/about.html`);
+}
+
 export function callAbort() {
 
     let response = dialog.showMessageBoxSync(this, {
@@ -169,17 +221,16 @@ export function callAbort() {
         message: 'Are you sure you want to Abort?'
     });
 
-    serial_port.write('ABORT \n');
     if (response === 0) {
         console.log("CALLING ABORT!");
-        // serial_port.write('ABORT \n', function(err) {
-        //     console.log("err: " + err);
-        // });
-        // serial_port.flush();
+        serial_port.write('ABORT \n');
     }
+}
 
-    // console.log(app.getPath("logs"));
-    // mainWindow.webContents.send("write_to_csv", app.getPath("logs"));
+export function actuateFlaps() {
+    console.log(`Actuating Flaps`);
+    serial_port.write(`COMMAND FOR ACTUATING FLAPS GOES HERE\n`);
+    serial_port.flush();
 }
 
 ipcMain.on('frequency', (evt, frequency) => {
@@ -190,6 +241,14 @@ ipcMain.on('frequency', (evt, frequency) => {
     serial_port.flush();
 });
 
+ipcMain.on('local_frequency', (evt, frequency) => {
+    localfreqwindow.close();
+    let int_Frequency = parseInt(frequency);
+    console.log(`Changing frequency to ${int_Frequency}`);
+    serial_port.write(`FLOC ${int_Frequency}\n`);
+    serial_port.flush();
+});
+
 ipcMain.on('call_sign', (evt, call_sign) => {
     callsignwindow.close();
     console.log(`Changing Call Sign to ${call_sign}`);
@@ -197,11 +256,20 @@ ipcMain.on('call_sign', (evt, call_sign) => {
     serial_port.flush();
 });
 
+ipcMain.on('homecoords', (evt, lat, long, alt) => {
+    homepointswindow.close();
+    latitude = lat;
+    longitude = long;
+    altitude = alt;
+    console.log("Latitude: " + latitude);
+    console.log("Longitude: " + longitude);
+    console.log("Altitude: " + altitude);
+});
+
 ipcMain.on('connect', (evt, message, baud) => {
     serialWindow.close();
     console.log(`Connecting to serial port ${message}`);
     let baudrate = parseInt(baud);
-    // serial_port = new SerialPort(message, {baudRate : baudrate});
     serial_port = new SerialPort(message);
     const parser = new SerialPort.parsers.Readline({ delimiter: '\n' });
     serial_port.pipe(parser);
@@ -211,19 +279,25 @@ ipcMain.on('connect', (evt, message, baud) => {
 ipcMain.on('disconnect', (evt, message, baud) => {
     serialWindow.close();
     console.log(`Disconnecting from serial port ${message}`);
-    // serial_port = new SerialPort(message, {baudRate : baudrate});
     serial_port.close(function (err) {
         console.log('port closed', err);
     });
 });
 
 function on_serial_data(data: string) {
-    console.log(data);
+    if (JSON.parse(data)["type"] != "data") {
+        console.log(data);
+    }
     send_frontends_data('data', data.toString());
+    if (gpswindow != null) {
+        if (!gpswindow.isDestroyed()) {
+            gpswindow.webContents.send('data', data.toString());
+        }
+    }
     try {
         csv.write_data(JSON.parse(data));
     } catch (e: any) {
-        console.error(`couldn't parase ${data}`)
+        console.error(`couldn't parse ${data}`)
     }
 }
 
@@ -232,36 +306,120 @@ function send_frontends_data(tag: string, data: string) {
     for (const ws of web_sockets) {
         ws.send(JSON.stringify({ event: tag, message: data }));
     }
+
 }
 
-// setInterval(()=>{
+ipcMain.on('load_coords', (evt) => {
+    let data = csv.read_data();
+    gpswindow?.webContents?.send('csv', JSON.stringify(data.split("\n")), latitude, longitude, altitude);
+});
+
+ipcMain.on('debugger', (evt, message) => {
+    console.log(message);
+});
+
+export function demo() {
+    let filename = dialog.showOpenDialogSync({ properties: ['openFile'] })[0];
+    let filedump = readDemo(filename).split("\n");
+    let packets: SerialResponse[] = [];
+    for (let i = 1; i < filedump.length - 1; i++) {
+        let data: string[] = filedump.at(i).split(",");
+        const temp: SerialResponse = {
+            type: 'data',
+            value: {
+                LSM_IMU_mx: parseFloat(data[1]),
+                LSM_IMU_my: parseFloat(data[2]),
+                LSM_IMU_mz: parseFloat(data[3]),
+                LSM_IMU_gx: parseFloat(data[4]),
+                LSM_IMU_gy: parseFloat(data[5]),
+                LSM_IMU_gz: parseFloat(data[6]),
+                LSM_IMU_ax: parseFloat(data[7]),
+                LSM_IMU_ay: parseFloat(data[8]),
+                LSM_IMU_az: parseFloat(data[9]),
+                gps_lat: parseFloat(data[10]),
+                gps_long: parseFloat(data[11]),
+                gps_alt: parseFloat(data[12]),
+                KX_IMU_ax: parseFloat(data[13]),
+                KX_IMU_ay: parseFloat(data[14]),
+                KX_IMU_az: parseFloat(data[15]),
+                H3L_IMU_ax: parseFloat(data[16]),
+                H3L_IMU_ay: parseFloat(data[17]),
+                H3L_IMU_az: parseFloat(data[18]),
+                TEMP: parseFloat(data[19]),
+                barometer_alt: parseFloat(data[20]),
+                sign: data[21],
+                FSM_state: parseFloat(data[22]),
+                RSSI: parseFloat(data[23]),
+                Voltage: parseFloat(data[24]),
+                frequency: parseFloat(data[25])
+            }
+        }
+        console.log(temp);
+        packets.push(temp);
+        
+    }
+    let index = 0;
+    myLoop(packets);
+    // setInterval(() => {
+
+        // const val = Math.cos(Math.random());
+        // const rand = Math.sin(Math.random());
+        // const data: SerialResponse = packets[index];
+        // index++;
+        // console.log(JSON.stringify(data));
+        // on_serial_data(JSON.stringify(data));
+    // }, 100);
+}
+
+var i = 0;
+
+function myLoop(packets: SerialResponse[]) {   
+    //  create a loop function
+    setTimeout(function() {   //  call a 3s setTimeout when the loop is called
+        const data: SerialResponse = packets[i];
+        i++;
+        console.log(JSON.stringify(data));
+        on_serial_data(JSON.stringify(data));   //  your code here
+      i++;                    //  increment the counter
+      if (i < packets.length) {           //  if the counter < 10, call the loop function
+        myLoop(packets);             //  ..  again which will trigger another 
+      }                       //  ..  setTimeout()
+    }, 200)
+  }
+
+//   setInterval(()=>{
 
 //     const val = Math.cos(Math.random());
+//     const rand = Math.sin(Math.random());
+
 //     const data: SerialResponse = {
 //         type: 'data',
-//         value:{
+//         value: {
 //             LSM_IMU_mx : val,
-//             LSM_IMU_my : val,
-//             LSM_IMU_mz : val,
+//             LSM_IMU_my : rand,
+//             LSM_IMU_mz : val * rand,
 //             LSM_IMU_gx : val,
-//             LSM_IMU_gy : val,
-//             LSM_IMU_gz : val,
+//             LSM_IMU_gy : rand,
+//             LSM_IMU_gz : val * rand,
 //             LSM_IMU_ax : val,
-//             LSM_IMU_ay : val,
-//             LSM_IMU_az : val,
-//             gps_lat : val,
-//             gps_long : val,
-//             gps_alt : val,
+//             LSM_IMU_ay : rand,
+//             LSM_IMU_az : val * rand,
+//             gps_lat : 40.1119 + val/1000,
+//             gps_long : -88.2282 + rand/1000,
+//             gps_alt : val * rand * 45000,
 //             KX_IMU_ax : val,
-//             KX_IMU_ay : val,
-//             KX_IMU_az : val,
+//             KX_IMU_ay : rand,
+//             KX_IMU_az : val * rand,
 //             H3L_IMU_ax : val,
-//             H3L_IMU_ay : val,
-//             H3L_IMU_az : val,
+//             H3L_IMU_ay : rand,
+//             H3L_IMU_az : val + rand,
 //             barometer_alt : val,
-//             signal : val,
+//             RSSI : val,
 //             sign: "qxqxlol",
-//             FSM_state: 1
+//             FSM_state: val*7,
+//             Voltage: val,
+//             TEMP: val,
+//             frequency: val
 //         }
 //     }
 

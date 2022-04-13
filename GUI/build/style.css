@@ -5,13 +5,14 @@
     --outliine: rgba(217, 186, 63, 0.8);
     --line-border-fill: rgb(217, 186, 63);
     --line-border-empty: #e0e0e0;
+    --font: "Causten", "Helvetica", monospace;
 }
 
-
-/* html {
-    -webkit-filter: invert(1);
-    filter: invert(1);
-} */
+html {
+    overflow: hidden;
+    /* -webkit-filter: invert(1);
+    filter: invert(1); */
+}
 
 
 /* Styling for the body of the app */
@@ -26,22 +27,38 @@ body {
 h1 {
     font-size: 45px;
     text-align: center;
-    font-family: "Causten", "Helvetica", monospace;
+    font-family: var(--font);
+    color: rgb(255, 255, 255);
+}
+
+h2 {
+    font-size: 18px;
+    text-align: center;
+    font-family: var(--font);
     color: rgb(255, 255, 255);
 }
 
 td {
-    padding: 5px 5px 5px 5px;
-    max-width: auto;
-    min-width: 35px;
+    padding: 0.5vh 0.5vh 0.5vh 0.2vh;
+    /* max-width: auto;
+    min-width: 35px; */
     text-align: left;
 }
 
 div {
-    margin-top: 4px;
-    font-size: 14px;
+    margin-top: auto;
+    font-size: 1.7vh;
     /* text-align: left; */
-    font-family: "Causten", "Futura", monospace;
+    font-family: var(--font);
+    color: rgb(255, 255, 255);
+}
+
+a {
+    margin-top: 4px;
+    margin-left: 4px;
+    font-size: 15px;
+    text-align: center;
+    font-family: var(--font);
     color: rgb(255, 255, 255);
 }
 
@@ -49,7 +66,7 @@ label {
     margin-top: 20px;
     font-size: 25px;
     text-align: left;
-    font-family: "Causten", "Futura", monospace;
+    font-family: var(--font);
     color: rgb(255, 255, 255);
 }
 
@@ -59,7 +76,7 @@ p {
     margin-bottom: auto;
     font-size: 14px;
     text-align: center;
-    font-family: "Causten", "Futura", monospace;
+    font-family: var(--font);
     color: rgb(255, 255, 255);
     position: absolute;
 }
@@ -69,7 +86,7 @@ input {
     resize: vertical;
     padding: 15px;
     border-radius: 5px;
-    font-family: "Causten", monospace;
+    font-family: var(--font);
     font-size: 18;
     border: 0;
     box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.06);
@@ -78,7 +95,13 @@ input {
 }
 
 canvas {
-    width: 22vw;
+    width: auto;
+    height: auto;
+    cursor: grab;
+}
+
+canvas.over {
+    border: 3px dotted var(--outliine);
 }
 
 
@@ -86,6 +109,7 @@ canvas {
 
 .button1 {
     display: inline-block;
+    font-family: var(--font);
     padding: 15px 25px;
     font-size: 25px;
     text-align: center;
@@ -111,7 +135,7 @@ canvas {
 /* Hover effect for ON button */
 
 .button1:hover {
-    background-color: rgb(62, 142, 65)
+    background-color: rgb(223, 167, 13)
 }
 
 
@@ -121,10 +145,11 @@ canvas {
     display: inline-block;
     padding: 15px 25px;
     font-size: 25px;
+    font-family: var(--font);
     text-align: center;
     outline: none;
     color: rgb(255, 255, 255);
-    background-color: rgb(70, 130, 134);
+    background-color: rgb(70, 134, 78);
     border: none;
     border-radius: 5px;
     width: 100%;
@@ -136,7 +161,7 @@ canvas {
 /* Button press effect for OFF button */
 
 .button2:active {
-    box-shadow: 0 5px rgb(104, 99, 99);
+    box-shadow: 0 5px rgb(99, 104, 99);
     transform: translateY(4px);
 }
 
@@ -144,7 +169,7 @@ canvas {
 /* Hover effect for OFF button */
 
 .button2:hover {
-    background-color: rgb(179, 44, 44)
+    background-color: rgb(42, 189, 13)
 }
 
 
@@ -155,6 +180,7 @@ canvas {
     font-size: 25px;
     text-align: center;
     outline: none;
+    font-family: var(--font);
     color: rgb(255, 255, 255);
     background-color: rgb(194, 70, 47);
     border: none;
@@ -169,39 +195,57 @@ canvas {
     display: grid;
     grid-template-columns: auto auto auto auto;
     /* background-color: #2196F3; */
-    padding: 2px;
+    padding: 1vh;
+    width: auto;
+    height: fit-content;
 }
 
 .grid-container>div {
-    /* background-color: rgba(255, 255, 255, 0.8); */
     border: 1px solid var(--outliine);
     padding: 2px;
     font-size: 30px;
     text-align: center;
-    /* width:250px; */
     margin: 4px;
     border-radius: 3px;
+}
+
+.grid-item {
+    /* width: auto;
+    height: auto; */
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    height: 25vh;
+    cursor: grab;
+}
+
+.grid-item.over {
+    border: 3px dotted var(--outliine);
 }
 
 .panel1 {
     grid-column-start: 2;
     grid-column-end: 4;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    height: 25vh;
+    cursor: grab;
+}
+
+.panel1.over {
+    border: 3px dotted var(--outliine);
 }
 
 .control {
     margin-top: 2px;
     margin-bottom: 10px;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
     font-size: 20px;
     /* text-align: left; */
-    font-family: "Causten", "Futura", monospace;
-    color: rgb(255, 255, 255);
-}
-
-.clock {
-    margin-top: 2px;
-    font-size: 15px;
-    /* text-align: left; */
-    font-family: "Causten", "Futura", monospace;
+    font-family: var(--font);
     color: rgb(255, 255, 255);
 }
 
@@ -211,8 +255,11 @@ canvas {
     grid-row-end: 4;
     white-space: nowrap;
     overflow: hidden;
+    min-width: 0;
+    min-height: 0;
     text-overflow: ellipsis;
     max-width: auto;
+    height: 52vh;
     /* max-width: 327px; alt option if ^ does'nt work*/
 }
 
@@ -224,91 +271,16 @@ canvas {
     text-align: center;
     /* width:250px; */
     height: auto;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
 }
 
 #map {
-    height: 100vh;
+    height: 90vh;
 }
-
-
-/* PROGRESS BAR ACTIVITY */
-
-.Section {
-    text-align: center;
-    /* max-width: 400px; */
-    margin: 0 auto;
-    /* margin-top: 20px; */
-    /* padding: 5px; */
-}
-
-#ProgressBar {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    width: 1000px;
-    margin: 0 auto;
-    margin-bottom: 40px;
-}
-
-.step {
-    text-align: center;
-    padding: auto;
-}
-
-.text {
-    margin-bottom: 10px;
-    color: white;
-}
-
-.bullets {
-    border: 1px solid var(--outliine);
-    height: 20px;
-    width: 20px;
-    border-radius: 100%;
-    color: var(--outliine);
-    display: inline-block;
-    position: relative;
-    transition: background-color 5s, right 3s ease;
-    line-height: 20px;
-}
-
-.bullets.completed::after {
-    content: "";
-    position: absolute;
-    right: -300px;
-    bottom: 8px;
-    height: 5px;
-    width: 300px;
-    background-color: var(--outliine);
-}
-
-
-/*          start            */
-
-
-/* experimental progress bar */
-
-
-/*                           */
 
 @import url('https://fonts.googleapis.com/css?family=Muli&display=swap');
-
-/* * {
-  box-sizing: border-box;
-} */
-
-
-/* body {
-  background-color: #f6f7fb;
-  font-family: 'Muli', sans-serif;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  overflow: hidden;
-  margin: 0;
-} */
-
 .container {
     text-align: center;
     width: 80%;
@@ -320,7 +292,8 @@ canvas {
     justify-content: space-between;
     /* justify-content: space-evenly; */
     position: relative;
-    margin-bottom: 30px;
+    margin-top: 1vmax;
+    margin-bottom: 1vmax;
     max-width: 100%;
     width: auto;
     /* margin-left: 30px;
@@ -352,6 +325,16 @@ canvas {
     margin: auto;
 }
 
+.step {
+    text-align: center;
+    padding: auto;
+}
+
+.text {
+    margin-bottom: 10px;
+    color: white;
+}
+
 .circle {
     background-color: var(--bg);
     color: var(--outliine);
@@ -370,37 +353,3 @@ canvas {
 .circle.active {
     border-color: var(--line-border-fill);
 }
-
-.btn {
-    background-color: var(--line-border-fill);
-    color: #fff;
-    border: 0;
-    border-radius: 6px;
-    cursor: pointer;
-    font-family: inherit;
-    padding: 8px 30px;
-    margin: 5px;
-    font-size: 14px;
-}
-
-.btn:active {
-    transform: scale(0.98);
-}
-
-.btn:focus {
-    outline: 0;
-}
-
-.btn:disabled {
-    background-color: var(--line-border-empty);
-    cursor: not-allowed;
-}
-
-
-/*                           */
-
-
-/* experimental progress bar */
-
-
-/*           end             */

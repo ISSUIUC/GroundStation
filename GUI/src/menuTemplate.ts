@@ -1,5 +1,5 @@
 import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from 'electron';
-import { callAbort, changeCallSignWindow, changeFrequencyWindow, change_contrast, createGPSWindow, createSerialWindow } from './index';
+import { actuateFlaps, callAbort, changeCallSignWindow, changeFrequencyWindow, changeHomePoints, changeLocalFrequencyWindow, change_contrast, createGPSWindow, createSerialWindow, demo, openAboutWindow } from './index';
 const isMac = process.platform === 'darwin';
 
 export function makeSerialMenu(window: BrowserWindow) {
@@ -22,9 +22,8 @@ function fileMenu(window: BrowserWindow): MenuItemConstructorOptions {
         label: 'File',
         submenu: [
             {
-                label: 'Quit',
-                accelerator: 'ctrl+Q',
-                click() { app.quit(); }
+                label: 'About',
+                click() { openAboutWindow() }
             },
             {
                 label: 'Debug',
@@ -35,6 +34,11 @@ function fileMenu(window: BrowserWindow): MenuItemConstructorOptions {
                 label: 'Reload',
                 accelerator: 'F5',
                 click() { window.reload(); }
+            },
+            {
+                label: 'Quit',
+                accelerator: 'ctrl+Q',
+                click() { app.quit(); }
             }
         ]
     };
@@ -71,11 +75,33 @@ function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[]
                 },
                 {
                     label: 'Frequency',
-                    click() { changeFrequencyWindow(); }
+                    submenu: [
+                        {
+                            label: 'Both',
+                            click() { changeFrequencyWindow(); }
+                        },
+                        {
+                            label: 'Local',
+                            click() { changeLocalFrequencyWindow(); }
+                        }
+                    ]
+
                 },
                 {
                     label: 'Change Contrast',
                     click() { change_contrast(); }
+                },
+                {
+                    label: 'Set Home',
+                    click() { changeHomePoints(); }
+                },
+                {
+                    label: 'Actuate Flaps',
+                    click() { actuateFlaps(); }
+                },
+                {
+                    label: 'Demonstrate',
+                    click() { demo(); }
                 }
             ]
         },

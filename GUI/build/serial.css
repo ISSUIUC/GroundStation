@@ -1,5 +1,6 @@
 :root {
     --bg: rgb(15, 21, 35);
+    --font: "Causten", "Helvetica", monospace;
 }
 
 
@@ -103,6 +104,7 @@ h1 {
 
 .button1 {
     display: inline-block;
+    font-family: var(--font);
     padding: 15px 25px;
     font-size: 20px;
     text-align: center;
@@ -136,6 +138,7 @@ h1 {
 
 .button2 {
     display: inline-block;
+    font-family: var(--font);
     padding: 10px 25px;
     font-size: 20px;
     text-align: center;
@@ -168,6 +171,7 @@ h1 {
 /* Styling for Disconnect button */
 
 .button3 {
+    font-family: var(--font);
     display: inline-block;
     padding: 10px 25px;
     font-size: 20px;
@@ -205,4 +209,5 @@ h1 {
     border: none;
     margin: auto;
     display: grid;
+    font-family: var(--font);
 }

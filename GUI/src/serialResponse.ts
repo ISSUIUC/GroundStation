@@ -6,12 +6,13 @@ export type SerialResponse =
         gps_long:number,
         gps_alt:number,
         barometer_alt:number,
-        KX_IMU_ax:number,
-        KX_IMU_ay:number,
-        KX_IMU_az:number,
+        TEMP:number,
         H3L_IMU_ax:number,
         H3L_IMU_ay:number,
         H3L_IMU_az:number,
+        KX_IMU_ax:number,
+        KX_IMU_ay:number,
+        KX_IMU_az:number,
         LSM_IMU_ax:number,
         LSM_IMU_ay:number,
         LSM_IMU_az:number,
@@ -23,7 +24,9 @@ export type SerialResponse =
         LSM_IMU_mz:number,
         FSM_state:number,
         sign:string,
-        signal:number
+        RSSI:number,
+        Voltage:number,
+        frequency:number
     }
 } | {
     type: "command_success"
