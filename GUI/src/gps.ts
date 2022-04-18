@@ -82,6 +82,12 @@ ipcRenderer.on("csv", (something, message, lat, long, alt) => {
         alt_element.innerHTML = alt;
         distance_element.innerHTML = '0';
     });
+    lastMarker = L.marker([lat, long]).addTo(map).on('mouseover', function (e) {
+        lat_element.innerHTML = lat;
+        long_element.innerHTML = long;
+        alt_element.innerHTML = alt;
+        distance_element.innerHTML = '0';
+    });
     c.push(L.latLng(lat,long));
     pathLine = L.polyline(c, path_options).addTo(map);
     const data = JSON.parse(message);
