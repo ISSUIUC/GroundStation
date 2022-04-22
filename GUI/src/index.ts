@@ -229,7 +229,7 @@ export function callAbort() {
 
 export function actuateFlaps() {
     console.log(`Actuating Flaps`);
-    serial_port.write(`COMMAND FOR ACTUATING FLAPS GOES HERE\n`);
+    serial_port.write(`FLAP \n`);
     serial_port.flush();
 }
 
@@ -318,7 +318,7 @@ ipcMain.on('debugger', (evt, message) => {
     console.log(message);
 });
 
-export function demo() {
+export function playback() {
     let filename = dialog.showOpenDialogSync({ properties: ['openFile'] })[0];
     let filedump = readDemo(filename).split("\n");
     let packets: SerialResponse[] = [];
@@ -356,72 +356,74 @@ export function demo() {
         }
         console.log(temp);
         packets.push(temp);
-        
+
     }
     let index = 0;
     myLoop(packets);
-    // setInterval(() => {
-
-        // const val = Math.cos(Math.random());
-        // const rand = Math.sin(Math.random());
-        // const data: SerialResponse = packets[index];
-        // index++;
-        // console.log(JSON.stringify(data));
-        // on_serial_data(JSON.stringify(data));
-    // }, 100);
 }
 
 var i = 0;
 
-function myLoop(packets: SerialResponse[]) {   
+function myLoop(packets: SerialResponse[]) {
     //  create a loop function
-    setTimeout(function() {   //  call a 3s setTimeout when the loop is called
+    setTimeout(function () {   //  call a 3s setTimeout when the loop is called
         const data: SerialResponse = packets[i];
         i++;
-        console.log(JSON.stringify(data));
         on_serial_data(JSON.stringify(data));   //  your code here
-      i++;                    //  increment the counter
-      if (i < packets.length) {           //  if the counter < 10, call the loop function
-        myLoop(packets);             //  ..  again which will trigger another 
-      }                       //  ..  setTimeout()
+        i++;                    //  increment the counter
+        if (i < packets.length) {           //  if the counter < 10, call the loop function
+            myLoop(packets);             //  ..  again which will trigger another 
+        }                       //  ..  setTimeout()
     }, 200)
-  }
+}
 
-//   setInterval(()=>{
+export function demo() {
+    var num = 0;
+    var interval = setInterval(() => {
+        num++;
+        if (num > 150) {
+            clearInterval(interval);
+        }
 
-//     const val = Math.cos(Math.random());
-//     const rand = Math.sin(Math.random());
+        const val = Math.cos(num/10);
+        const rand = Math.sin(num/10);
 
-//     const data: SerialResponse = {
-//         type: 'data',
-//         value: {
-//             LSM_IMU_mx : val,
-//             LSM_IMU_my : rand,
-//             LSM_IMU_mz : val * rand,
-//             LSM_IMU_gx : val,
-//             LSM_IMU_gy : rand,
-//             LSM_IMU_gz : val * rand,
-//             LSM_IMU_ax : val,
-//             LSM_IMU_ay : rand,
-//             LSM_IMU_az : val * rand,
-//             gps_lat : 40.1119 + val/1000,
-//             gps_long : -88.2282 + rand/1000,
-//             gps_alt : val * rand * 45000,
-//             KX_IMU_ax : val,
-//             KX_IMU_ay : rand,
-//             KX_IMU_az : val * rand,
-//             H3L_IMU_ax : val,
-//             H3L_IMU_ay : rand,
-//             H3L_IMU_az : val + rand,
-//             barometer_alt : val,
-//             RSSI : val,
-//             sign: "qxqxlol",
-//             FSM_state: val*7,
-//             Voltage: val,
-//             TEMP: val,
-//             frequency: val
-//         }
-//     }
+        // const val = Math.random();
+        // const rand = 1 - Math.random();
 
-//     on_serial_data(JSON.stringify(data));
-// }, 1000);
+        const data: SerialResponse = {
+            type: 'data',
+            value: {
+                LSM_IMU_mx: val,
+                LSM_IMU_my: rand,
+                LSM_IMU_mz: val * rand,
+                LSM_IMU_gx: val,
+                LSM_IMU_gy: rand,
+                LSM_IMU_gz: val * rand,
+                LSM_IMU_ax: val,
+                LSM_IMU_ay: rand,
+                LSM_IMU_az: val * rand,
+                // gps_lat: 40.1119 + val / 1000, //Talbot Lat
+                // gps_long: -88.2282 + rand / 1000, //Talbot Long
+                gps_lat: 41.488167 + val / 1000, //QRCS
+                gps_long: -89.500778 + rand / 1000, //QRCS
+                gps_alt: (num/150) * 45000,
+                KX_IMU_ax: val,
+                KX_IMU_ay: rand,
+                KX_IMU_az: val * rand,
+                H3L_IMU_ax: val,
+                H3L_IMU_ay: rand,
+                H3L_IMU_az: val + rand,
+                barometer_alt: val,
+                RSSI: val,
+                sign: "qxqxlol",
+                FSM_state: num * (8/150),
+                Voltage: val,
+                TEMP: val,
+                frequency: val
+            }
+        }
+
+        on_serial_data(JSON.stringify(data));
+    }, 200);
+}

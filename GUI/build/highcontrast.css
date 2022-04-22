@@ -53,7 +53,19 @@ div {
     color: rgb(255, 255, 255);
 }
 
-a {
+div.legendx {
+    color: rgb(255, 7, 58);
+}
+
+div.legendy {
+    color: rgb(0, 150, 255);
+}
+
+div.legendz {
+    color: rgb(0, 225, 127);
+}
+
+div a {
     margin-top: 4px;
     margin-left: 4px;
     font-size: 15px;
@@ -97,6 +109,11 @@ input {
 canvas {
     width: auto;
     height: auto;
+    cursor: grab;
+}
+
+canvas.over {
+    border: 3px dotted var(--outliine);
 }
 
 
@@ -211,6 +228,11 @@ canvas {
     min-height: 0;
     overflow: hidden;
     height: 25vh;
+    cursor: grab;
+}
+
+.grid-item.over {
+    border: 3px dotted var(--outliine);
 }
 
 .panel1 {
@@ -220,6 +242,11 @@ canvas {
     min-height: 0;
     overflow: hidden;
     height: 25vh;
+    cursor: grab;
+}
+
+.panel1.over {
+    border: 3px dotted var(--outliine);
 }
 
 .control {
@@ -265,73 +292,7 @@ canvas {
     height: 90vh;
 }
 
-
-/* PROGRESS BAR ACTIVITY */
-
-.Section {
-    text-align: center;
-    /* max-width: 400px; */
-    margin: 0 auto;
-    /* margin-top: 20px; */
-    /* padding: 5px; */
-}
-
-#ProgressBar {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    width: 1000px;
-    margin: 0 auto;
-    margin-bottom: 40px;
-}
-
-.step {
-    text-align: center;
-    padding: auto;
-}
-
-.text {
-    margin-bottom: 10px;
-    color: white;
-}
-
-.bullets {
-    border: 1px solid var(--outliine);
-    height: 20px;
-    width: 20px;
-    border-radius: 100%;
-    color: var(--outliine);
-    display: inline-block;
-    position: relative;
-    transition: background-color 5s, right 3s ease;
-    line-height: 20px;
-}
-
-.bullets.completed::after {
-    content: "";
-    position: absolute;
-    right: -300px;
-    bottom: 8px;
-    height: 5px;
-    width: 300px;
-    background-color: var(--outliine);
-}
-
-
-/*          start            */
-
-
-/* experimental progress bar */
-
-
-/*                           */
-
 @import url('https://fonts.googleapis.com/css?family=Muli&display=swap');
-
-/* * {
-  box-sizing: border-box;
-} */
-
 .container {
     text-align: center;
     width: 80%;
@@ -343,7 +304,8 @@ canvas {
     justify-content: space-between;
     /* justify-content: space-evenly; */
     position: relative;
-    margin-bottom: 30px;
+    margin-top: 1vmax;
+    margin-bottom: 1vmax;
     max-width: 100%;
     width: auto;
     /* margin-left: 30px;
@@ -375,6 +337,16 @@ canvas {
     margin: auto;
 }
 
+.step {
+    text-align: center;
+    padding: auto;
+}
+
+.text {
+    margin-bottom: 10px;
+    color: white;
+}
+
 .circle {
     background-color: var(--bg);
     color: var(--outliine);
@@ -393,37 +365,3 @@ canvas {
 .circle.active {
     border-color: var(--line-border-fill);
 }
-
-.btn {
-    background-color: var(--line-border-fill);
-    color: #fff;
-    border: 0;
-    border-radius: 6px;
-    cursor: pointer;
-    font-family: inherit;
-    padding: 8px 30px;
-    margin: 5px;
-    font-size: 14px;
-}
-
-.btn:active {
-    transform: scale(0.98);
-}
-
-.btn:focus {
-    outline: 0;
-}
-
-.btn:disabled {
-    background-color: var(--line-border-empty);
-    cursor: not-allowed;
-}
-
-
-/*                           */
-
-
-/* experimental progress bar */
-
-
-/*           end             */

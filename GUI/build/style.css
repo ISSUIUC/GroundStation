@@ -53,7 +53,19 @@ div {
     color: rgb(255, 255, 255);
 }
 
-a {
+div.legendx {
+    color: rgb(255, 7, 58);
+}
+
+div.legendy {
+    color: rgb(0, 150, 255);
+}
+
+div.legendz {
+    color: rgb(0, 225, 127);
+}
+
+div a {
     margin-top: 4px;
     margin-left: 4px;
     font-size: 15px;

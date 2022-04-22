@@ -26,6 +26,7 @@ let has_moved = false;
 //MAP WORK
 
 //41°29'17.4"N 89°30'02.8"W APRIL LAUNCH
+//Lat: 41.488167, Long: -89.500778
 //
 
 ipcRenderer.send("load_coords");

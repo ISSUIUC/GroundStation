@@ -7,7 +7,7 @@ import { ipcRenderer } from 'electron';
 
 const stylesheetopt = <HTMLLinkElement>document.getElementById("style");
 let contrast = false;
-let time = 9;
+let time = 0;
 let current_time = new Date();
 let dragSrcEl: any;
 let dragID: string;
@@ -43,7 +43,7 @@ const DP_H3LAZ = Array(starting_length).fill(0);
 const DP_BAROMETER = Array(starting_length).fill(0);
 const DP_SIGNAL = Array(starting_length).fill(0);
 
-let labels = Array(starting_length).fill(0).map((_, i) => i);
+let labels = Array(starting_length).fill(0);
 
 function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
     LOWGGX: number, LOWGGY: number, LOWGGZ: number,
@@ -59,7 +59,7 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
 
     const chart_arr = [
         { chart: charts.baro_altitude, val: [BAROMETER] },
-        { chart: charts.gps, val: [GPS_LAT, GPS_LONG, GPS_ALT] },
+        { chart: charts.gps, val: [GPS_ALT] },
         { chart: charts.highg_h3l_accel, val: [H3LAX, H3LAY, H3LAZ] },
         { chart: charts.kx, val: [KXAX, KXAY, KXAZ] },
         { chart: charts.lowgimu_accel, val: [LOWGAX, LOWGAY, LOWGAZ] },
@@ -73,15 +73,22 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
             const { chart, val } = c;
             for (let coord = 0; coord < val.length; coord++) {
                 const arr = chart.data.datasets[coord].data;
-                for (let i = 0; i + 1 < arr.length; i++) {
-                    arr[i] = arr[i + 1];
-                }
-                arr[arr.length - 1] = val[coord];
+                // chart.config.data.labels.push(time);
+                // chart.config.data.labels.splice(0, 1);
+                // chart.config.data.labels.shift();
+                chart.data.datasets[coord].data.push(val[coord]);
+                // chart.data.datasets[coord].data.splice(0, 1);
+                chart.data.datasets[coord].data.shift();
+                // for (let i = 0; i + 1 < arr.length; i++) {
+                //     arr[i] = arr[i + 1];
+                // }
+                // arr[arr.length - 1] = val[coord];
+                // chart.update();
             }
-
-            chart.update();
+            // chart.update();
         }
     )
+    update_charts();
 }
 
 function make_new_dataset(data: number[], name: string) {
@@ -116,7 +123,8 @@ function make_chart(units: string, element_id: string, name: string, data: numbe
 }
 
 function make_chart_options(units: string, name: string, datasets: number[][]): ChartConfiguration {
-    const colors = ['rgb(255, 99, 132)', 'rgb(99, 132, 255)', 'rgb(132, 255, 99)'];
+    // const colors = ['rgb(255, 99, 132)', 'rgb(99, 132, 255)', 'rgb(132, 255, 99)'];
+    const colors = ['rgb(255, 7, 58)', 'rgb(0, 150, 255)', 'rgb(0, 225, 127)'];
 
     return {
         // The type of chart we want to create
@@ -135,7 +143,12 @@ function make_chart_options(units: string, name: string, datasets: number[][]): 
         },
         // Configuration options go here
         options: {
-            animation: false,
+            animation: {
+                delay: 0,
+                duration: 150,
+                easing: 'linear'
+            },
+            // animation: false,
             responsive: true,
             maintainAspectRatio: false,
             datasets: {
@@ -210,7 +223,7 @@ function setup_charts() {
         lowgimu_accel: make_chart_multiaxis("G", "lowgimuA", "LowG IMU acceleration", DP_LOWGAX, DP_LOWGAY, DP_LOWGAZ),
         lowgimu_gyro: make_chart_multiaxis("DPS", "lowgimuG", "LowG IMU gyroscope", DP_LOWGGX, DP_LOWGGY, DP_LOWGGZ),
         lowgimu_mag: make_chart_multiaxis("Gauss", "lowgimuM", "LowG IMU magnetometer", DP_LOWGMX, DP_LOWGMY, DP_LOWGMZ),
-        gps: make_chart_multiaxis("Meters", "gps", "GPS altitude", DP_GPS_LAT, DP_GPS_LONG, DP_GPS_ALT),
+        gps: make_chart("Meters", "gps", "GPS altitude", DP_GPS_ALT),
         kx: make_chart_multiaxis("G", "temp", "KX134", DP_KXAX, DP_KXAY, DP_KXAZ),
         highg_h3l_accel: make_chart_multiaxis("G", "H3LIS331DL", "H3L acceleration", DP_H3LAX, DP_H3LAY, DP_H3LAZ),
         baro_altitude: make_chart("Meters", "barometer", "Barometer altitude", DP_BAROMETER),
@@ -254,10 +267,15 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 if (key == "response_ID") {
                     continue;
                 }
-                if (typeof (((m as any)[key])) === "string") {
-                    document.getElementById(key).innerText = (m as any)[key];
-                } else {
+                // if (typeof (((m as any)[key])) === "string") {
+                //     document.getElementById(key).innerText = (m as any)[key];
+                // } else {
+                //     document.getElementById(key).innerText = ((m as any)[key]).toFixed(3);
+                // }
+                if (typeof (((m as any)[key])) === "number") {
                     document.getElementById(key).innerText = ((m as any)[key]).toFixed(3);
+                } else {
+                    document.getElementById(key).innerText = (m as any)[key];
                 }
             }
             updateData(m["LSM_IMU_mx"], m["LSM_IMU_my"], m["LSM_IMU_mz"],
@@ -302,6 +320,17 @@ function resize_charts() {
     charts.highg_h3l_accel.resize();
     charts.baro_altitude.resize();
     charts.signal.resize();
+}
+
+function update_charts() {
+    charts.lowgimu_accel.update();
+    charts.lowgimu_gyro.update();
+    charts.lowgimu_mag.update();
+    charts.gps.update();
+    charts.kx.update();
+    charts.highg_h3l_accel.update();
+    charts.baro_altitude.update();
+    charts.signal.update();
 }
 
 function get_current_time_full() {
