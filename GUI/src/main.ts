@@ -145,7 +145,7 @@ function make_chart_options(units: string, name: string, datasets: number[][]): 
         options: {
             animation: {
                 delay: 0,
-                duration: 150,
+                duration: 100,
                 easing: 'linear'
             },
             // animation: false,
