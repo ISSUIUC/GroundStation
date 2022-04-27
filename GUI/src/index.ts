@@ -319,8 +319,11 @@ ipcMain.on('debugger', (evt, message) => {
 });
 
 export function playback() {
-    let filename = dialog.showOpenDialogSync({ properties: ['openFile'] })[0];
-    let filedump = readDemo(filename).split("\n");
+    let filename = dialog.showOpenDialogSync({ properties: ['openFile'] });
+    if (filename == undefined) {
+        return;
+    }
+    let filedump = readDemo(filename[0]).split("\n");
     let packets: SerialResponse[] = [];
     for (let i = 1; i < filedump.length - 1; i++) {
         let data: string[] = filedump.at(i).split(",");
