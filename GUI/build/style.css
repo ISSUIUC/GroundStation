@@ -39,7 +39,7 @@ h2 {
 }
 
 td {
-    padding: 0.5vh 0.5vh 0.5vh 0.2vh;
+    /* padding: 0.5vh 0.5vh 0.5vh 0.2vh; */
     /* max-width: auto;
     min-width: 35px; */
     text-align: left;
@@ -51,6 +51,10 @@ div {
     /* text-align: left; */
     font-family: var(--font);
     color: rgb(255, 255, 255);
+}
+
+table {
+    height: inherit;
 }
 
 div.legendx {
@@ -65,7 +69,11 @@ div.legendz {
     color: rgb(0, 225, 127);
 }
 
-div a {
+div.legendplus {
+    color: rgb(255, 191, 0);
+}
+
+a {
     margin-top: 4px;
     margin-left: 4px;
     font-size: 15px;
@@ -214,7 +222,8 @@ canvas.over {
 
 .grid-container>div {
     border: 1px solid var(--outliine);
-    padding: 2px;
+    padding: 1vh;
+    /* padding: 2px; */
     font-size: 30px;
     text-align: center;
     margin: 4px;
@@ -271,7 +280,10 @@ canvas.over {
     min-height: 0;
     text-overflow: ellipsis;
     max-width: auto;
-    height: 52vh;
+    display: flex;
+    flex-flow: column wrap;
+    justify-content: space-around;
+    table-layout: fixed;
     /* max-width: 327px; alt option if ^ does'nt work*/
 }
 

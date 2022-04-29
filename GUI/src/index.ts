@@ -342,9 +342,9 @@ export function playback() {
                 gps_lat: parseFloat(data[10]),
                 gps_long: parseFloat(data[11]),
                 gps_alt: parseFloat(data[12]),
-                KX_IMU_ax: parseFloat(data[13]),
-                KX_IMU_ay: parseFloat(data[14]),
-                KX_IMU_az: parseFloat(data[15]),
+                STE_ALT: parseFloat(data[13]),
+                STE_VEL: parseFloat(data[14]),
+                STE_ACC: parseFloat(data[15]),
                 H3L_IMU_ax: parseFloat(data[16]),
                 H3L_IMU_ay: parseFloat(data[17]),
                 H3L_IMU_az: parseFloat(data[18]),
@@ -354,7 +354,9 @@ export function playback() {
                 FSM_state: parseFloat(data[22]),
                 RSSI: parseFloat(data[23]),
                 Voltage: parseFloat(data[24]),
-                frequency: parseFloat(data[25])
+                frequency: parseFloat(data[25]),
+                flap_extension: parseFloat(data[26]),
+                STE_APO: parseFloat(data[27])
             }
         }
         console.log(temp);
@@ -411,9 +413,10 @@ export function demo() {
                 gps_lat: 41.488167 + val / 1000, //QRCS
                 gps_long: -89.500778 + rand / 1000, //QRCS
                 gps_alt: (num/150) * 45000,
-                KX_IMU_ax: val,
-                KX_IMU_ay: rand,
-                KX_IMU_az: val * rand,
+                STE_ALT: val,
+                STE_VEL: rand,
+                STE_ACC: val * rand,
+                STE_APO: rand*val*2,
                 H3L_IMU_ax: val,
                 H3L_IMU_ay: rand,
                 H3L_IMU_az: val + rand,
@@ -423,7 +426,8 @@ export function demo() {
                 FSM_state: num * (8/150),
                 Voltage: val,
                 TEMP: val,
-                frequency: val
+                frequency: val,
+                flap_extension: rand/val
             }
         }
 

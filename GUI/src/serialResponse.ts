@@ -10,9 +10,9 @@ export type SerialResponse =
         H3L_IMU_ax:number,
         H3L_IMU_ay:number,
         H3L_IMU_az:number,
-        KX_IMU_ax:number,
-        KX_IMU_ay:number,
-        KX_IMU_az:number,
+        STE_ALT:number,
+        STE_VEL:number,
+        STE_ACC:number,
         LSM_IMU_ax:number,
         LSM_IMU_ay:number,
         LSM_IMU_az:number,
@@ -26,7 +26,9 @@ export type SerialResponse =
         sign:string,
         RSSI:number,
         Voltage:number,
-        frequency:number
+        frequency:number,
+        flap_extension:number,
+        STE_APO: number
     }
 } | {
     type: "command_success"
