@@ -57,7 +57,7 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
     GPS_LAT: number, GPS_LONG: number, GPS_ALT: number,
     TEMP: number, 
     STE_ALT: number, STE_VEL: number, STE_ACC: number, STE_APO:number,
-    H3LAX: number, H3LAY: number, H3LAZ: number,
+    KXAX: number, KXAY: number, KXAZ: number,
     BAROMETER: number, SIGNAL: number) {
    
     labels.splice(0, 1);
@@ -67,7 +67,7 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
     const chart_arr = [
         { chart: charts.baro_altitude, val: [BAROMETER] },
         { chart: charts.gps, val: [GPS_ALT] },
-        { chart: charts.highg_h3l_accel, val: [H3LAX, H3LAY, H3LAZ] },
+        { chart: charts.highg_kx_accel, val: [KXAX, KXAY, KXAZ] },
         { chart: charts.se, val: [STE_ALT, STE_VEL, STE_ACC, STE_APO] },
         { chart: charts.lowgimu_accel, val: [LOWGAX, LOWGAY, LOWGAZ] },
         { chart: charts.lowgimu_gyro, val: [LOWGGX, LOWGGY, LOWGGZ] },
@@ -104,7 +104,7 @@ let charts: {
     lowgimu_mag?: Chart,
     gps?: Chart,
     se?: Chart,
-    highg_h3l_accel?: Chart,
+    highg_kx_accel?: Chart,
     baro_altitude?: Chart,
     signal: Chart
 }
@@ -222,7 +222,7 @@ function setup_charts() {
         lowgimu_mag: make_chart_multiaxis("Gauss", "lowgimuM", "LowG IMU magnetometer", [DP_LOWGMX, DP_LOWGMY, DP_LOWGMZ]),
         gps: make_chart("Meters", "gps", "GPS altitude", DP_GPS_ALT),
         se: make_chart_multiaxis("Meters", "se", "State Estimation", [DP_STE_ALT, DP_STE_VEL, DP_STE_ACC, DP_STE_APO]),
-        highg_h3l_accel: make_chart_multiaxis("G", "H3LIS331DL", "H3L acceleration", [DP_H3LAX, DP_H3LAY, DP_H3LAZ]),
+        highg_kx_accel: make_chart_multiaxis("G", "KX134", "KX acceleration", [DP_KXAX, DP_KXAY, DP_KXAZ]),
         baro_altitude: make_chart("Meters", "barometer", "Barometer altitude", DP_BAROMETER),
         signal: make_chart("dBmW", "signal_data", "Signal Strength (RSSI)", DP_SIGNAL)
     };
@@ -243,8 +243,10 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
     serverConnection.on("contrast", () => {
         if (!contrast) {
             stylesheetopt.href = "highcontrast.css";
+            // document.documentElement.style.setProperty('--inversion', '100%');
             contrast = true;
         } else {
+            // document.documentElement.style.setProperty('--inversion', '0');
             stylesheetopt.href = "style.css";
             contrast = false;
         }
@@ -281,7 +283,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 m["gps_lat"], m["gps_long"], m["gps_alt"],
                 m["TEMP"], 
                 m["STE_ALT"], m["STE_VEL"], m["STE_ACC"], m["STE_APO"],
-                m["H3L_IMU_ax"], m["H3L_IMU_ay"], m["H3L_IMU_az"],
+                m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],
                 m["barometer_alt"], m["RSSI"]);
                 //Change KX_IMU_a$ to State Estimation Variables
 
@@ -316,7 +318,7 @@ function resize_charts() {
     charts.lowgimu_mag.resize();
     charts.gps.resize();
     charts.se.resize();
-    charts.highg_h3l_accel.resize();
+    charts.highg_kx_accel.resize();
     charts.baro_altitude.resize();
     charts.signal.resize();
 }
@@ -327,7 +329,7 @@ function update_charts() {
     charts.lowgimu_mag.update();
     charts.gps.update();
     charts.se.update();
-    charts.highg_h3l_accel.update();
+    charts.highg_kx_accel.update();
     charts.baro_altitude.update();
     charts.signal.update();
 }
@@ -477,7 +479,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         charts.lowgimu_mag.resize();
         charts.gps.resize();
         charts.se.resize();
-        charts.highg_h3l_accel.resize();
+        charts.highg_kx_accel.resize();
         charts.baro_altitude.resize();
         charts.signal.resize();
         return false;

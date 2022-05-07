@@ -83,6 +83,7 @@ ipcRenderer.on("csv", (something, message, lat, long, alt) => {
         alt_element.innerHTML = alt;
         distance_element.innerHTML = '0';
     });
+    map.setView(L.latLng(lat, long));
     lastMarker = L.marker([lat, long]).addTo(map).on('mouseover', function (e) {
         lat_element.innerHTML = lat;
         long_element.innerHTML = long;
@@ -94,7 +95,7 @@ ipcRenderer.on("csv", (something, message, lat, long, alt) => {
     const data = JSON.parse(message);
     for (var i = 1; i < data.length - 1; i++) {
         let parse = data.at(i).split(",");
-        if (i === 1) {
+        if (i === 1 && parseFloat(parse.at(10)) != 0 && parseFloat(parse.at(11)) != 0) {
             lastMarker = L.marker([parseFloat(parse.at(10)), parseFloat(parse.at(11))]).addTo(map).on('mouseover', function (e) {
                 lat_element.innerHTML = parse.at(10);
                 long_element.innerHTML = parse.at(11);
@@ -113,7 +114,7 @@ ipcRenderer.on("data", (something, message) => {
         const m = masterJSON["value"];
         marker_options.title = "Now";
         updateTrail(m["gps_lat"], m["gps_long"], m["gps_alt"]);
-        if (!has_moved) {
+        if (!has_moved && m["gps_lat"] != 0 && m["gps_long"] != 0) {
             map.setView(L.latLng(m["gps_lat"], m["gps_long"]));
         }
     }
@@ -121,6 +122,9 @@ ipcRenderer.on("data", (something, message) => {
 });
 
 function updateTrail(lat: number, long: number, alt: number) {
+    if (lat == 0 && long == 0) {
+        return;
+    }
     let temp = lastMarker;
     let copyalt = lastAlt;
     L.circle(temp.getLatLng(), circle_options).setStyle({ color: altColor(lastAlt) }).addTo(map).on('mouseover', function (e) {

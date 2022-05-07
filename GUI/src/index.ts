@@ -345,21 +345,20 @@ export function playback() {
                 STE_ALT: parseFloat(data[13]),
                 STE_VEL: parseFloat(data[14]),
                 STE_ACC: parseFloat(data[15]),
-                H3L_IMU_ax: parseFloat(data[16]),
-                H3L_IMU_ay: parseFloat(data[17]),
-                H3L_IMU_az: parseFloat(data[18]),
-                TEMP: parseFloat(data[19]),
-                barometer_alt: parseFloat(data[20]),
-                sign: data[21],
-                FSM_state: parseFloat(data[22]),
-                RSSI: parseFloat(data[23]),
-                Voltage: parseFloat(data[24]),
-                frequency: parseFloat(data[25]),
-                flap_extension: parseFloat(data[26]),
-                STE_APO: parseFloat(data[27])
+                STE_APO: parseFloat(data[16]),
+                KX_IMU_ax: parseFloat(data[17]),
+                KX_IMU_ay: parseFloat(data[18]),
+                KX_IMU_az: parseFloat(data[19]),
+                TEMP: parseFloat(data[20]),
+                barometer_alt: parseFloat(data[21]),
+                sign: data[22],
+                FSM_state: parseFloat(data[23]),
+                RSSI: parseFloat(data[24]),
+                Voltage: parseFloat(data[25]),
+                frequency: parseFloat(data[26]),
+                flap_extension: parseFloat(data[27])
             }
         }
-        console.log(temp);
         packets.push(temp);
 
     }
@@ -373,7 +372,6 @@ function myLoop(packets: SerialResponse[]) {
     //  create a loop function
     setTimeout(function () {   //  call a 3s setTimeout when the loop is called
         const data: SerialResponse = packets[i];
-        i++;
         on_serial_data(JSON.stringify(data));   //  your code here
         i++;                    //  increment the counter
         if (i < packets.length) {           //  if the counter < 10, call the loop function
@@ -410,16 +408,18 @@ export function demo() {
                 LSM_IMU_az: val * rand,
                 // gps_lat: 40.1119 + val / 1000, //Talbot Lat
                 // gps_long: -88.2282 + rand / 1000, //Talbot Long
-                gps_lat: 41.488167 + val / 1000, //QRCS
-                gps_long: -89.500778 + rand / 1000, //QRCS
+                // gps_lat: 41.488167 + val / 1000, //QRCS
+                // gps_long: -89.500778 + rand / 1000, //QRCS
+                gps_lat: 0,
+                gps_long: 0,
                 gps_alt: (num/150) * 45000,
                 STE_ALT: val,
                 STE_VEL: rand,
                 STE_ACC: val * rand,
                 STE_APO: rand*val*2,
-                H3L_IMU_ax: val,
-                H3L_IMU_ay: rand,
-                H3L_IMU_az: val + rand,
+                KX_IMU_ax: val,
+                KX_IMU_ay: rand,
+                KX_IMU_az: val + rand,
                 barometer_alt: val,
                 RSSI: val,
                 sign: "qxqxlol",
