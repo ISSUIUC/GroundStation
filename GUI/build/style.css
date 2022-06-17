@@ -1,7 +1,6 @@
 /* Global Variables */
 
 :root {
-    --inversion: 0;
     --bg: rgb(23, 26, 28);
     --outliine: rgba(217, 186, 63, 0.8);
     --line-border-fill: rgb(217, 186, 63);
@@ -11,7 +10,7 @@
 
 html {
     overflow: hidden;
-    filter: invert(var(--inversion));
+    /* filter: invert(var(--inversion)); */
     /* -webkit-filter: invert(1);
     filter: invert(1); */
 }
