@@ -356,7 +356,8 @@ export function playback() {
                 RSSI: parseFloat(data[24]),
                 Voltage: parseFloat(data[25]),
                 frequency: parseFloat(data[26]),
-                flap_extension: parseFloat(data[27])
+                flap_extension: parseFloat(data[27]),
+                pressure: parseFloat(data[28]) //CHANGE AFTER ADDING PRESSURE TO GSS
             }
         }
         packets.push(temp);
@@ -410,8 +411,10 @@ export function demo() {
                 // gps_long: -88.2282 + rand / 1000, //Talbot Long
                 // gps_lat: 41.488167 + val / 1000, //QRCS
                 // gps_long: -89.500778 + rand / 1000, //QRCS
-                gps_lat: 0,
-                gps_long: 0,
+                gps_lat: 32.990 + val / 1000, //IREC
+                gps_long: -106.9754 + rand / 1000, //IREC
+                // gps_lat: 0,
+                // gps_long: 0,
                 gps_alt: (num/150) * 45000,
                 STE_ALT: val,
                 STE_VEL: rand,
@@ -427,7 +430,8 @@ export function demo() {
                 Voltage: val,
                 TEMP: val,
                 frequency: val,
-                flap_extension: rand/val
+                flap_extension: rand/val,
+                pressure: 918
             }
         }
 

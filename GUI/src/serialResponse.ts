@@ -28,7 +28,8 @@ export type SerialResponse =
         RSSI:number,
         Voltage:number,
         frequency:number,
-        flap_extension:number
+        flap_extension:number,
+        pressure: number
     }
 } | {
     type: "command_success"

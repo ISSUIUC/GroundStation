@@ -271,7 +271,11 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 // } else {
                 //     document.getElementById(key).innerText = ((m as any)[key]).toFixed(3);
                 // }
-                if (typeof (((m as any)[key])) === "number") {
+                if (key == "gps_lat" || key == "gps_long") {
+                    document.getElementById(key).innerText = ((m as any)[key]).toFixed(5);
+                } else if (key == "gps_alt") {
+                    document.getElementById(key).innerText = (((m as any)[key]) / 1000).toFixed(3);
+                } else if (typeof (((m as any)[key])) === "number") {
                     document.getElementById(key).innerText = ((m as any)[key]).toFixed(3);
                 } else {
                     document.getElementById(key).innerText = (m as any)[key];
@@ -280,7 +284,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
             updateData(m["LSM_IMU_mx"], m["LSM_IMU_my"], m["LSM_IMU_mz"],
                 m["LSM_IMU_gx"], m["LSM_IMU_gy"], m["LSM_IMU_gz"],
                 m["LSM_IMU_ax"], m["LSM_IMU_ay"], m["LSM_IMU_az"],
-                m["gps_lat"], m["gps_long"], m["gps_alt"],
+                m["gps_lat"], m["gps_long"], m["gps_alt"] / 1000,
                 m["TEMP"], 
                 m["STE_ALT"], m["STE_VEL"], m["STE_ACC"], m["STE_APO"],
                 m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],

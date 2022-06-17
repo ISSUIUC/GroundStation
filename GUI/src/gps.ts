@@ -46,18 +46,18 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
 
 ipcRenderer.on("csv", (something, message, lat, long, alt) => {
     let centerCoord: number[] = [];
-    var ter = L.tileLayer('../build/terrain/{z}/{x}/{y}.png', {
+    var ter = L.tileLayer('../build/Terrain/{z}/{x}/{y}.png', {
         minZoom: 1,
-        maxZoom: 18,
+        maxZoom: 17,
     });
-    var sat = L.tileLayer('../build/satellite/{z}/{x}/{y}.png', {
+    var sat = L.tileLayer('../build/Satellite/{z}/{x}/{y}.png', {
         minZoom: 1,
-        maxZoom: 18,
+        maxZoom: 17,
     });
     centerCoord = [lat, long];
     map = L.map('map', {
         center: L.latLng(centerCoord[0], centerCoord[1]),
-        zoom: 18,
+        zoom: 17,
         layers: [sat, ter]
     });
 

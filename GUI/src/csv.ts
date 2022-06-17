@@ -8,7 +8,7 @@ const CSV_HEADERS = ["Time", "LSM_IMU_mx", "LSM_IMU_my", "LSM_IMU_mz",
     "STE_ALT", "STE_VEL", "STE_ACC", "STE_APO",
     "KX_IMU_ax", "KX_IMU_ay", "KX_IMU_az", "TEMP", 
     "barometer_alt", "sign", "FSM_state", "RSSI", 
-    "Voltage", "frequency", "flap_extension"]
+    "Voltage", "frequency", "flap_extension", "pressure"]
 
 
 
