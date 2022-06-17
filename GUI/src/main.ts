@@ -242,12 +242,12 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
 
     serverConnection.on("contrast", () => {
         if (!contrast) {
-            stylesheetopt.href = "highcontrast.css";
-            // document.documentElement.style.setProperty('--inversion', '100%');
+            // stylesheetopt.href = "highcontrast.css"; // Backup incase below code doesn't work
+            document.documentElement.style.setProperty('filter', 'invert(1)');
             contrast = true;
         } else {
-            // document.documentElement.style.setProperty('--inversion', '0');
-            stylesheetopt.href = "style.css";
+            document.documentElement.style.removeProperty('filter')
+            // stylesheetopt.href = "style.css"; // Backup incase above code doesn't work
             contrast = false;
         }
     });
