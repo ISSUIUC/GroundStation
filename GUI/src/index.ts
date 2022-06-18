@@ -235,17 +235,17 @@ export function actuateFlaps() {
 
 ipcMain.on('frequency', (evt, frequency) => {
     freqwindow.close();
-    let int_Frequency = parseInt(frequency);
-    console.log(`Changing frequency to ${int_Frequency}`);
-    serial_port.write(`FREQ ${int_Frequency}\n`);
+    let float_Frequency = parseFloat(frequency);
+    console.log(`Changing frequency to ${float_Frequency}`);
+    serial_port.write(`FREQ ${float_Frequency}\n`);
     serial_port.flush();
 });
 
 ipcMain.on('local_frequency', (evt, frequency) => {
     localfreqwindow.close();
-    let int_Frequency = parseInt(frequency);
-    console.log(`Changing frequency to ${int_Frequency}`);
-    serial_port.write(`FLOC ${int_Frequency}\n`);
+    let float_Frequency = parseFloat(frequency);
+    console.log(`Changing frequency to ${float_Frequency}`);
+    serial_port.write(`FLOC ${float_Frequency}\n`);
     serial_port.flush();
 });
 
