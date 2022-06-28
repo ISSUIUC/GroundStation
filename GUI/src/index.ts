@@ -357,7 +357,7 @@ export function playback() {
                 Voltage: parseFloat(data[25]),
                 frequency: parseFloat(data[26]),
                 flap_extension: parseFloat(data[27]),
-                pressure: parseFloat(data[28]) //CHANGE AFTER ADDING PRESSURE TO GSS
+                pressure: parseFloat(data[28])
             }
         }
         packets.push(temp);
@@ -391,9 +391,6 @@ export function demo() {
 
         const val = Math.cos(num/10);
         const rand = Math.sin(num/10);
-
-        // const val = Math.random();
-        // const rand = 1 - Math.random();
 
         const data: SerialResponse = {
             type: 'data',
