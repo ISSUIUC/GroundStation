@@ -37,7 +37,7 @@ function fileMenu(window: BrowserWindow): MenuItemConstructorOptions {
             },
             {
                 label: 'Quit',
-                accelerator: 'ctrl+Q',
+                accelerator: 'cmdOrctrl+Q',
                 click() { app.quit(); }
             }
         ]
