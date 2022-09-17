@@ -9,7 +9,7 @@ mainwiki.addEventListener('click', () => {
 })
 
 gsswiki.addEventListener('click', () => {
-    shell.openExternal("https://wiki.illinois.edu/wiki/display/ILSPACESOC/Ground+Station+Software");
+    shell.openExternal("https://wiki.illinois.edu/wiki/display/ILSPACESOC/Ground+Station+GUI+Software");
 })
 
 github.addEventListener('click', () => {
