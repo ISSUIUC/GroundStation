@@ -18,6 +18,7 @@ let freqwindow: BrowserWindow;
 let localfreqwindow: BrowserWindow;
 let callsignwindow: BrowserWindow;
 let homepointswindow: BrowserWindow;
+let rawjsonwindow: BrowserWindow;
 let serial_port: SerialPort;
 let server: WebSocketServer;
 let web_sockets: WebSocket[] = [];
@@ -210,6 +211,20 @@ export function openAboutWindow() {
         }
     });
     aboutWindow.loadURL(`file://${__dirname}/about.html`);
+}
+
+export function openRawJSONWindow() {
+    aboutWindow = new BrowserWindow({
+        width: 1000,
+        height: 1000,
+        title: 'Rocket Connection Status',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+        }
+    });
+    aboutWindow.loadURL(`file://${__dirname}/rawjson.html`);
 }
 
 export function callAbort() {
