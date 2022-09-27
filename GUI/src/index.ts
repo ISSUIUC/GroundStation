@@ -214,7 +214,7 @@ export function openAboutWindow() {
 }
 
 export function openRawJSONWindow() {
-    aboutWindow = new BrowserWindow({
+    rawjsonwindow = new BrowserWindow({
         width: 1000,
         height: 1000,
         title: 'Rocket Connection Status',
@@ -224,7 +224,10 @@ export function openRawJSONWindow() {
             contextIsolation: false,
         }
     });
-    aboutWindow.loadURL(`file://${__dirname}/rawjson.html`);
+    rawjsonwindow.loadURL(`file://${__dirname}/rawjson.html`);
+    if (isMac) {
+        Menu.setApplicationMenu(makeMainMenu(aboutWindow));
+    }
 }
 
 export function callAbort() {
@@ -321,6 +324,7 @@ function send_frontends_data(tag: string, data: string) {
     for (const ws of web_sockets) {
         ws.send(JSON.stringify({ event: tag, message: data }));
     }
+    rawjsonwindow?.webContents?.send(tag, data);
 
 }
 
