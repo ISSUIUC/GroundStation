@@ -97,8 +97,8 @@ app.on('ready', () => {
   })
 })
 
-function sendIDToPopout () {
-    popoutWindow.webContents.send('idMessage', popoutID);
+function sendIDToPopout() {
+    popoutWindow?.webContents?.send('idMessage', popoutID);
 }
 
 function serial_communicate(window: BrowserWindow) {
@@ -260,9 +260,10 @@ export function openGraphPopout() {
       contextIsolation: false
     }
   });
-  popoutWindow.maximize()
-  popoutWindow.loadURL(`file://${__dirname}/popout.html`)
-  sendIDToPopout();
+  popoutWindow.maximize();
+  popoutWindow.loadURL(`file://${__dirname}/popout.html`).then(() => {
+    sendIDToPopout();
+  })
 }
 
 ipcMain.on('popoutGraph', (evt, id) => {

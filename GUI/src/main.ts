@@ -586,15 +586,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
   function handleClick(e: any) {
     if (e.altKey) {
-
       clickSrcEl = this
       if (this.getElementsByTagName('div').length !== 0) {
         clickID = this.getElementsByTagName('div')[0].id
       } else {
         clickID = this.getElementsByTagName('canvas')[0].id
       }
-      ipcRenderer.send('popoutGraph', clickID);
-      
+      ipcRenderer.send('popoutGraph', clickID)
     }
   }
 
