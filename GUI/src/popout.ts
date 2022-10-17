@@ -48,6 +48,12 @@ let chartKey: { [key: string]: Array<any> } = {
     'DPS',
     'LowG IMU gyroscope',
     [paramKey.DP_LOWGGX, paramKey.DP_LOWGGY, paramKey.DP_LOWGGZ]
+  ],
+  lowgimuM: [
+    true,
+    'Gauss',
+    'LowG IMU magnetometer',
+    [paramKey.DP_LOWGMX, paramKey.DP_LOWGMY, paramKey.DP_LOWGMZ]
   ]
 }
 
