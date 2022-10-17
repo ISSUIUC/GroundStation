@@ -1,30 +1,73 @@
-<html>
-<link id="style" rel="stylesheet" type="text/css" href="style.css">
-<h1>
-    Set Home Coordinates
-</h1>
-<table>
-    <tr>
-        <td>
-            <div style="font-size: 20px">Latitude:</div>
-        </td>
-        <td>
-            <div style="font-size: 20px">Longitude:</div>
-        </td>
-        <td>
-            <div style="font-size: 20px">Altitude:</div>
-        </td>
-    </tr>
-    <tr>
-        <td><input style="width:100%; margin: 2px;" id="lat" type="number"></td>
-        <td><input style="width:100%; margin: 2px;" id="long" type="number"></td>
-        <td><input style="width:100%; margin: 2px;" id="alt" type="number"></td>
-    </tr>
-</table>
+<html lang="en">
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../node_modules/bootstrap-select/dist/css/bootstrap-select.min.css">
+    
+    
+    
+    <div>
+        <body style="background-color:black; overflow-x: hidden; overflow-y: hidden">
+            <div class="container-fluid text-white">
+                <div class="row justify-content-center mt-1 mb-1 p-2">
+                    <h1 class=" bold text-center">
+                    Set Home Coordinates
+                    </h1>
+                </div>
 
-<button id="submit" class="button2">Submit</button>
-<script>
-    require('./homecoords.js');
-</script>
+                <hr/>
+
+                <div class="row mt-1 mb-1 p-1 justify-content-center">
+                    <div class="col-3 col-md-2 p-1 m-0"> 
+                        <div class = "row p-0 m-0">
+                            <h4 class = "text-white text-center">Longitude</h4>
+                        </div>
+                        <div class = "row p-0 m-0 justify-content-center">
+                            <input class="" id="lat" type="number" style = "width: 75%" placeholder="">
+
+                        </div>
+                    </div>
+                    <div class="col-3 col-md-2 p-1 m-0">
+                        <div class = "row p-0 m-0">
+                            <h4 class = "text-white text-center">Latitude</h4>
+                        </div>
+                        <div class = "row p-0 m-0 justify-content-center">
+                            <input class="" id="long" type="number" style = "width: 75%">
+
+                        </div>
+                    </div>
+                    <div class="col-3 col-md-2 p-1 m-0">
+                        <div class = "row p-0 m-0">
+                            <h4 class = "text-white text-center">Altitude</h4>
+                        </div>
+                        <div class = "row p-0 m-0 justify-content-center">
+                            <input class="" id="alt" type="number" style = "width: 75%">
+
+                        </div>
+                    </div>
+                    <div class="col-3 col-md-2">
+                        <div class = "row p-0 m-0 align-items-center" style= "height: 100%">
+                            <button class= "btn btn-lg btn-success" id = "submit" type="button" >Submit!</button>
+                        </div>
+                        
+                    </div>
+                </div>
+
+                <div class="row justify-content-center mt-1 mb-1 p-2">
+                    <div class="col-auto">
+                        <select id="changeloc" class="selectpicker">
+                        </select>
+                    </div>
+                </div>
+
+                <hr/>
+            </div>
+        </body>
+    </div>
+
+    <script src="../node_modules/jquery/dist/jquery.js"></script>
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
+    <script src="../node_modules/bootstrap-select/dist/js/bootstrap-select.js"></script>
+    
+    <script>require('./homecoords.js')</script>
+    
 
 </html>
