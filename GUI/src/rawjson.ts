@@ -2,7 +2,32 @@ import { ChartComponentLike } from 'chart.js'
 import { ipcRenderer } from 'electron'
 import { ServerConnection } from './serverConnection'
 
+const progress = document.getElementById('progress')
+const circles = document.querySelectorAll('.circle')
+
+let currentActive = 1
+
+
+ipcRenderer.on('feather', (evt) => {
+  if (currentActive == 1) {
+    nextState();
+  }
+});
+
+ipcRenderer.on('no_data', (evt) => {
+  if (currentActive == 3) {
+    prevState();
+  }
+})
+
+ipcRenderer.on('disc_feather', (evt) => {
+  prevState();
+  prevState();
+})
+
 ipcRenderer.on('data', (evt, message) => {
+  nextState();
+  nextState();
   function get_current_time_full() {
     const date = new Date()
     const year = date.getFullYear()
@@ -92,13 +117,41 @@ ipcRenderer.on('data', (evt, message) => {
   dataFeed.insertBefore(timeP, addedP)
 })
 
-// export function run_frontend(serverConnection: ServerConnection, registerables: readonly ChartComponentLike[]) {
+// progress bar code
 
-//     serverConnection.on("data", (message) => {
-//         const masterJSON = JSON.parse(message);
-//         const m = masterJSON["gps_lat"];
-//         document.getElementById("data_feed").innerText = m;
 
-//     });
+function nextState() {
+    currentActive++
 
-// }
+    if (currentActive > circles.length) {
+        currentActive = circles.length
+    }
+
+    update()
+}
+
+
+function prevState() {
+    currentActive--
+
+    if (currentActive < 1) {
+        currentActive = 1
+    }
+
+    update()
+}
+
+function update() {
+    circles.forEach((circle, idx) => {
+        if (idx < currentActive) {
+            circle.classList.add('active')
+        } else {
+            circle.classList.remove('active')
+        }
+    })
+
+    const actives = document.querySelectorAll('.active')
+
+    progress.style.width = (actives.length - 1) / (circles.length - 1) * 100 + '%'
+
+}

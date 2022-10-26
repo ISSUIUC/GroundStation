@@ -362,6 +362,9 @@ function diff_time() {
     let current = new Date();
     let diff = current.getTime() - current_time.getTime();
     document.getElementById("packetstats").innerText = Math.round(diff / 1000) + suffix;
+    if (diff / 1000 > 3) {
+        ipcRenderer.send('long_time_no_see')
+    }
     var t = setTimeout(function () { diff_time() }, 1000);
 }
 

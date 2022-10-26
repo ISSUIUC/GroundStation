@@ -125,6 +125,7 @@ function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[]
                 },
                 {
                     label: 'Rocket Connection Status',
+                    accelerator: 'ctrl+shift+s',
                     click() { openRawJSONWindow(); }
                 }
             ]

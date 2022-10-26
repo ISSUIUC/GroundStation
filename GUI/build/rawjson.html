@@ -1,5 +1,6 @@
 <html lang="en">
 <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="rawjson.css">
 <div>
 
     <body style="background-color:black; overflow-x: hidden; overflow-y: hidden">
@@ -10,16 +11,45 @@
         <div class="container">
             <div class="row col-md-12 col-sm-12" id="rawjsoninput">
                 <p style="color: white;">YYYY - MM - DD -- HH - MM - SS - MS</p>
-                <div id="data_feed" class="container-fluid box overflow-auto text-wrap text-break" style="height: 50vh;">
+                <div id="data_feed" class="container-fluid box overflow-auto text-wrap text-break" style="height: 75vh;">
                 </div>
             </div>
             <div class="row col-md-12 col-sm-12">
-                <div id="state_bar" class="container-fluid box" style="background-color:pink;height: 25vh;">
-                    STATE BAR GOES HERE
-                </div>
+
             </div>
         </div>
+        <div class="container" id="progcontainer">
+            <div class="progress-container">
 
+                <div class="progress" id="progress"></div>
+
+                <div class="step">
+                    <p class="text">No Connection</p>
+                    <div class="circle active">1</div>
+                </div>
+                <div class="step">
+                    <p class="text">Feather</p>
+                    <div class="circle">2</div>
+                </div>
+                <div class="step">
+                    <p class="text">Rocket</p>
+                    <div class="circle">3</div>
+                </div>
+            </div>
+
+            <script>
+                if (!(window && window.process && window.process.type)) {
+                    const a = document.createElement("script");
+                    a.src = "./bundle.js";
+                    document.body.appendChild(a);
+                } else {
+                    const a = document.createElement("script");
+                    a.innerHTML = `require("./electronMain.js")`;
+                    document.body.appendChild(a);
+                }
+            </script>
+
+        </div>
 
 
         <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js "></script>
