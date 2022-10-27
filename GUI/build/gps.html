@@ -1,44 +1,41 @@
 <html>
-<h1 id="title">
-    GPS Viewer
-</h1>
-<link id="style" rel="stylesheet" type="text/css" href="serial.css">
+<!-- <link id="style" rel="stylesheet" type="text/css" href="serial.css"> -->
+<link id="style" rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
-<div id="map" style="height: 70vh;"></div>
-<table>
-    <tr>
-        <td>
-            <div>Lat: </div>
-        </td>
-        <td>
-            <div id="lat"></div>
-        </td>
-        <td>
-            <div style="margin-left: 5vw;">Altitude: </div>
-        </td>
-        <td>
-            <div id="alt"></div>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <div>Long: </div>
-        </td>
-        <td>
-            <div id="long"></div>
-        </td>
-        <td>
-            <div style="margin-left: 5vw;">Distance: </div>
-        </td>
-        <td>
-            <div id="distance"></div>
-        </td>
-    </tr>
-</table>
-<div style="margin-top:4vh"><button id="center" class="button1">Center</button></div>
 
+<div>
+    <body style="overflow-y: hidden">
+        <div class="text-bg-dark p-3">
+            <div id="map" class="border border-1 rounded" style="height: 97vh;">
+            </div>
+        </div>
 
+        <div id="data_card" class="card text-dark fixed-bottom bottom-0 m-3" style="width: 18vw;">
+            <div class="card-body">
+                <div class="container-fluid">
+                    <div class="col-sm-12">
+                        <div class="row">
+                            <div class="col-sm-12">Latitude: <span id="lat"></span></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">Altitude: <span id="alt"></span></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">Longitude: <span id="long"></span></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-12">Distance: <span id="distance"></span></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12"><button type="button" class="btn btn-secondary" id="center">Center</button></div>
+                </div>
+            </div>
+        </div>
+    </body>
+</div>
+
+<script src="../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
 <script>
     require('./gps.js');
 </script>

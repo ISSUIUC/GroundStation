@@ -321,20 +321,23 @@ ipcMain.on('disconnect', (evt, message, baud) => {
 });
 
 function on_serial_data(data: string) {
-    if (JSON.parse(data)["type"] != "data") {
-        console.log(data);
-    }
-    // console.log(data.toString());
-    send_frontends_data('data', data.toString());
-    if (gpswindow != null) {
-        if (!gpswindow.isDestroyed()) {
-            gpswindow.webContents.send('data', data.toString());
-        }
-    }
     try {
-        csv.write_data(JSON.parse(data));
-    } catch (e: any) {
-        console.error(`couldn't parse ${data}`)
+        if (JSON.parse(data)["type"] != "data") {
+            console.log(data);
+        }
+        send_frontends_data('data', data.toString());
+        if (gpswindow != null) {
+            if (!gpswindow.isDestroyed()) {
+                gpswindow.webContents.send('data', data.toString());
+            }
+        }
+        try {
+            csv.write_data(JSON.parse(data));
+        } catch (e: any) {
+            console.error(`couldn't parse ${data}`)
+        }
+    } catch (e) {
+        console.log(e);
     }
 }
 
