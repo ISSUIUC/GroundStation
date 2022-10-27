@@ -291,7 +291,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 m["barometer_alt"], m["RSSI"]);
                 //Change KX_IMU_a$ to State Estimation Variables
             
-            const fsm_index_map = [1,2,2,3,3,4,4,5,5,6,6,7,7,8,9];
+            const fsm_index_map = [1,2,2,3,3,4,4,4,5,5,6,6,7,7,8,9];
             if(m["FSM_state"] >= 0 && m["FSM_state"] < fsm_index_map.length){
                 m["FSM_state"] = fsm_index_map[m["FSM_state"]];
             }
