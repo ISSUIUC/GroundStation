@@ -18,6 +18,7 @@ let freqwindow: BrowserWindow;
 let localfreqwindow: BrowserWindow;
 let callsignwindow: BrowserWindow;
 let homepointswindow: BrowserWindow;
+let rawjsonwindow: BrowserWindow;
 let serial_port: SerialPort;
 let server: WebSocketServer;
 let web_sockets: WebSocket[] = [];
@@ -212,6 +213,23 @@ export function openAboutWindow() {
     aboutWindow.loadURL(`file://${__dirname}/about.html`);
 }
 
+export function openRawJSONWindow() {
+    rawjsonwindow = new BrowserWindow({
+        width: 800,
+        height: 800,
+        title: 'Rocket Connection Status',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+        }
+    });
+    rawjsonwindow.loadURL(`file://${__dirname}/rawjson.html`);
+    if (isMac) {
+        Menu.setApplicationMenu(makeMainMenu(rawjsonwindow));
+    }
+}
+
 export function callAbort() {
 
     let response = dialog.showMessageBoxSync(this, {
@@ -232,6 +250,8 @@ export function actuateFlaps() {
     serial_port.write(`FLAP \n`);
     serial_port.flush();
 }
+
+
 
 ipcMain.on('frequency', (evt, frequency) => {
     freqwindow.close();
@@ -268,10 +288,25 @@ ipcMain.on('homecoords', (evt, lat, long, alt) => {
 
 ipcMain.on('connect', (evt, message, baud) => {
     serialWindow.close();
+    try {
+        if (serial_port.isOpen) {
+            serial_port.close();
+        }
+    } catch (e) {
+        
+    }
     console.log(`Connecting to serial port ${message}`);
     let baudrate = parseInt(baud);
     serial_port = new SerialPort(message);
     const parser = new SerialPort.parsers.Readline({ delimiter: '\n' });
+    try {
+        rawjsonwindow?.webContents?.send('feather')
+    } catch (e) {
+
+    }
+    serial_port.addListener('close', () => {
+        rawjsonwindow?.webContents?.send('disc_feather')
+    })
     serial_port.pipe(parser);
     parser.on('data', on_serial_data);
 });
@@ -282,6 +317,7 @@ ipcMain.on('disconnect', (evt, message, baud) => {
     serial_port.close(function (err) {
         console.log('port closed', err);
     });
+    serial_port = undefined;
 });
 
 function on_serial_data(data: string) {
@@ -310,6 +346,7 @@ function send_frontends_data(tag: string, data: string) {
     for (const ws of web_sockets) {
         ws.send(JSON.stringify({ event: tag, message: data }));
     }
+    rawjsonwindow?.webContents?.send(tag, data);
 
 }
 
@@ -321,6 +358,15 @@ ipcMain.on('load_coords', (evt) => {
 ipcMain.on('debugger', (evt, message) => {
     console.log(message);
 });
+
+ipcMain.on('long_time_no_see', (evt) => {
+    try {
+        rawjsonwindow?.webContents?.send('no_data')
+    } catch (e) {
+
+    }
+    
+})
 
 export function playback() {
     let filename = dialog.showOpenDialogSync({ properties: ['openFile'] });
@@ -410,10 +456,10 @@ export function demo() {
                 LSM_IMU_az: val * rand,
                 // gps_lat: 40.1119 + val / 1000, //Talbot Lat
                 // gps_long: -88.2282 + rand / 1000, //Talbot Long
-                // gps_lat: 41.488167 + val / 1000, //QRCS
-                // gps_long: -89.500778 + rand / 1000, //QRCS
-                gps_lat: 32.990 + val / 1000, //IREC
-                gps_long: -106.9754 + rand / 1000, //IREC
+                gps_lat: 41.488167 + val / 1000, //QRCS
+                gps_long: -89.500778 + rand / 1000, //QRCS
+                // gps_lat: 32.990 + val / 1000, //IREC
+                // gps_long: -106.9754 + rand / 1000, //IREC
                 // gps_lat: 0,
                 // gps_long: 0,
                 gps_alt: (num/150) * 45000,

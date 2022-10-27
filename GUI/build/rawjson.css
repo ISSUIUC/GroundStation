@@ -1,0 +1,92 @@
+:root {
+    --bg: rgb(23, 26, 28);
+    --outliine: rgba(28, 242, 140, 0.8);
+    --line-border-fill: rgb(28, 242, 140);
+    --line-border-empty: #e0e0e0;
+    --font: "Causten", "Helvetica", monospace;
+}
+
+p.text {
+    margin: auto;
+    padding: auto;
+    margin-bottom: auto;
+    font-size: 14px;
+    text-align: center;
+    font-family: var(--font);
+    color: rgb(255, 255, 255);
+    position: absolute;
+}
+
+@import url('https://fonts.googleapis.com/css?family=Muli&display=swap');
+.container#progcontainer {
+    text-align: center;
+    width: 80%;
+    margin: auto;
+}
+
+.progress-container {
+    display: flex;
+    justify-content: space-between;
+    /* justify-content: space-evenly; */
+    position: relative;
+    margin-top: 1vmax;
+    margin-bottom: 1vmax;
+    max-width: 100%;
+    width: auto;
+    /* margin-left: 30px;
+    margin-right: 30px; */
+}
+
+.progress-container::before {
+    content: '';
+    background-color: var(--line-border-empty);
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    height: 4px;
+    /* width: 100%; */
+    z-index: -1;
+}
+
+.progress {
+    background-color: var(--line-border-fill);
+    position: absolute;
+    top: 70%;
+    left: 0;
+    transform: translateY(-50%);
+    height: 4px;
+    width: 0%;
+    z-index: -1;
+    transition: 1s ease;
+    margin: auto;
+}
+
+.step {
+    text-align: center;
+    padding: auto;
+}
+
+.text {
+    margin-bottom: 10px;
+    color: white;
+}
+
+.circle {
+    background-color: var(--bg);
+    color: var(--outliine);
+    border-radius: 50%;
+    height: 30px;
+    width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--line-border-empty);
+    transition: 0.4s ease;
+    margin: auto;
+    margin-top: 30px;
+}
+
+.circle.active {
+    border-color: var(--line-border-fill);
+}

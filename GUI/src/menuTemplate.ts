@@ -1,5 +1,5 @@
 import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from 'electron';
-import { actuateFlaps, callAbort, changeCallSignWindow, changeFrequencyWindow, changeHomePoints, changeLocalFrequencyWindow, change_contrast, createGPSWindow, createSerialWindow, demo, openAboutWindow, playback } from './index';
+import { actuateFlaps, callAbort, changeCallSignWindow, changeFrequencyWindow, changeHomePoints, changeLocalFrequencyWindow, change_contrast, createGPSWindow, createSerialWindow, demo, openAboutWindow, openRawJSONWindow, playback } from './index';
 const isMac = process.platform === 'darwin';
 
 export function makeSerialMenu(window: BrowserWindow) {
@@ -122,6 +122,11 @@ function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[]
                     label: 'Demonstrate',
                     accelerator: 'ctrl+shift+D',
                     click() { demo(); }
+                },
+                {
+                    label: 'Rocket Connection Status',
+                    accelerator: 'ctrl+shift+s',
+                    click() { openRawJSONWindow(); }
                 }
             ]
         }
