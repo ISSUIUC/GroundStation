@@ -79,13 +79,16 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
         c => {
             const { chart, val } = c;
             for (let coord = 0; coord < val.length; coord++) {
-                const arr = chart.data.datasets[coord].data;
+                // const arr = chart.data.datasets[coord].data;
                 chart.data.datasets[coord].data.push(val[coord]);
                 chart.data.datasets[coord].data.shift();
+                // chart.data.datasets[coord].data.push(val[coord]);
+                // chart.data.datasets[coord].data.splice(0,1);
+                chart.update();
             }
         }
     )
-    update_charts();
+    // update_charts();
 }
 
 function make_new_dataset(data: number[], name: string) {
@@ -134,18 +137,19 @@ function make_chart_options(units: string, name: string, datasets: number[][]): 
                 return {
                     label: name,
                     borderColor: colors[i],
-                    data: d
+                    data: d,
+                    pointRadius: 0
                 }
             })
         },
         // Configuration options go here
         options: {
-            animation: {
-                delay: 0,
-                duration: 100,
-                easing: 'linear'
-            },
-            // animation: false,
+            // animation: {
+            //     delay: 0,
+            //     duration: 50,
+            //     easing: 'linear'
+            // },
+            animation: false,
             responsive: true,
             maintainAspectRatio: false,
             datasets: {

@@ -60,7 +60,7 @@ app.on('ready', () => {
             nodeIntegrationInWorker: true,
             contextIsolation: false,
         },
-        icon: __dirname + '/iss_logo.png',
+        icon: __dirname + '../build/iss_logo.png',
     });
     mainWindow.maximize();
 
@@ -456,8 +456,8 @@ export function demo() {
                 LSM_IMU_az: val * rand,
                 // gps_lat: 40.1119 + val / 1000, //Talbot Lat
                 // gps_long: -88.2282 + rand / 1000, //Talbot Long
-                gps_lat: 41.488167 + val / 1000, //QRCS
-                gps_long: -89.500778 + rand / 1000, //QRCS
+                gps_lat: 41.488167 + val / 1000, //QCRC
+                gps_long: -89.500778 + rand / 1000, //QCRC
                 // gps_lat: 32.990 + val / 1000, //IREC
                 // gps_long: -106.9754 + rand / 1000, //IREC
                 // gps_lat: 0,
@@ -473,7 +473,7 @@ export function demo() {
                 barometer_alt: val,
                 RSSI: val,
                 sign: "qxqxlol",
-                FSM_state: num * (8/150),
+                FSM_state: num * (15/150),
                 Voltage: val,
                 TEMP: val,
                 frequency: val,
@@ -483,5 +483,5 @@ export function demo() {
         }
 
         on_serial_data(JSON.stringify(data));
-    }, 200);
+    }, 66);
 }
