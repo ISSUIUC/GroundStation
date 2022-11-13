@@ -3,6 +3,8 @@ Telemetry Ground Station
 
 ## How to start
 
+# Before Starting, ensure you have Node.js installed from [here](https://nodejs.org/en/) 
+
 1. Install all packages [^1]
    
         npm install
