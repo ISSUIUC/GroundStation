@@ -19,6 +19,7 @@ let localfreqwindow: BrowserWindow;
 let callsignwindow: BrowserWindow;
 let homepointswindow: BrowserWindow;
 let rawjsonwindow: BrowserWindow;
+let orientationWindow: BrowserWindow;
 let serial_port: SerialPort;
 let server: WebSocketServer;
 let web_sockets: WebSocket[] = [];
@@ -227,6 +228,23 @@ export function openRawJSONWindow() {
     rawjsonwindow.loadURL(`file://${__dirname}/rawjson.html`);
     if (isMac) {
         Menu.setApplicationMenu(makeMainMenu(rawjsonwindow));
+    }
+}
+
+export function showOrientationData() {
+    orientationWindow = new BrowserWindow({
+        width: 800,
+        height: 800,
+        title: 'Orientation Data',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+        }
+    });
+    orientationWindow.loadURL(`file://${__dirname}/bno.html`);
+    if (isMac) {
+        Menu.setApplicationMenu(makeSerialMenu(orientationWindow));
     }
 }
 

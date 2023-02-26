@@ -378,3 +378,10 @@ canvas.over {
 .circle.active {
     border-color: var(--line-border-fill);
 }
+
+.animation-container {
+    position: relative;
+    height: 80vh;
+    width: 100%;
+    margin: 10px auto;
+}

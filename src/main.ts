@@ -2,10 +2,13 @@ import { Chart, ChartComponentLike, ChartConfiguration } from 'chart.js';
 import { SerialResponse } from './serialResponse';
 import { ServerConnection } from './serverConnection';
 
+import * as THREE from 'three';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
 import { ipcRenderer } from 'electron';
 
 
 const stylesheetopt = <HTMLLinkElement>document.getElementById("style");
+const canvas = <HTMLCanvasElement>document.getElementById('bno');
 let contrast = false;
 let time = 0;
 let current_time = new Date();
@@ -50,6 +53,8 @@ const DP_BAROMETER = Array(starting_length).fill(0);
 const DP_SIGNAL = Array(starting_length).fill(0);
 
 let labels = Array(starting_length).fill(0);
+
+let quaternion = [1, 0, 0, 0];
 
 function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
     LOWGGX: number, LOWGGY: number, LOWGGZ: number,
@@ -518,3 +523,78 @@ document.addEventListener('DOMContentLoaded', (event) => {
     center.addEventListener('dragend', handleDragEnd);
     center.addEventListener('drop', handleDrop);
 });
+
+
+// BNO Render stuff
+// let bunny: { setRotationFromQuaternion: (arg0: THREE.Quaternion) => void; };
+let bunny: any;
+
+const renderer = new THREE.WebGLRenderer({ canvas });
+
+const camera = new THREE.PerspectiveCamera(45, canvas.width / canvas.height, 0.1, 100);
+camera.position.set(0, 0, 30);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('black'); {
+    const skyColor = 0xB1E1FF; // light blue
+    const groundColor = 0x666666; // black
+    const intensity = 0.5;
+    const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
+    scene.add(light);
+}
+
+{
+    const color = 0xFFFFFF;
+    const intensity = 1;
+    const light = new THREE.DirectionalLight(color, intensity);
+    light.position.set(0, 10, 0);
+    light.target.position.set(-5, 0, 0);
+    scene.add(light);
+    scene.add(light.target);
+}
+
+{
+    const objLoader = new OBJLoader();
+    objLoader.load('assets/rocket.obj', (root: any) => {
+        bunny = root;
+        scene.add(root);
+    });
+}
+
+async function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function finishDrawing() {
+    return new Promise(requestAnimationFrame);
+}
+
+function resizeRendererToDisplaySize(renderer: THREE.WebGLRenderer) {
+    const canvas = renderer.domElement;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const needResize = canvas.width !== width || canvas.height !== height;
+    if (needResize) {
+        renderer.setSize(width, height, false);
+    }
+    return needResize;
+}
+
+async function render() {
+    if (resizeRendererToDisplaySize(renderer)) {
+        const canvas = renderer.domElement;
+        camera.aspect = canvas.clientWidth / canvas.clientHeight;
+        camera.updateProjectionMatrix();
+    }
+
+    if (bunny != undefined) {
+        let rotationQuaternion = new THREE.Quaternion(quaternion[1], quaternion[3], -quaternion[2], quaternion[0]);
+        bunny.setRotationFromQuaternion(rotationQuaternion);
+    }
+    // bunny.scale.set(0.5, 0.5, 0.5)
+    renderer.render(scene, camera);
+    // updateCalibration();
+    await sleep(10); // Allow 10ms for UI updates
+    await finishDrawing();
+    await render();
+}
