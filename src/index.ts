@@ -355,6 +355,7 @@ function on_serial_data(data: string) {
             console.error(`couldn't parse ${data}`)
         }
     } catch (e) {
+        console.log(data);
         console.log(e);
     }
 }
