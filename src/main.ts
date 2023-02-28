@@ -2,11 +2,9 @@ import { Chart, ChartComponentLike, ChartConfiguration } from 'chart.js';
 import { SerialResponse } from './serialResponse';
 import { ServerConnection } from './serverConnection';
 
-import * as THREE from 'three';
-import { OBJLoader } from './OBJLoader'
-import { ipcRenderer } from 'electron';
-import { setQuaternionFromProperEuler } from 'three/src/math/MathUtils';
 
+import { ipcRenderer } from 'electron';
+import { RocketRender } from './render';
 
 const stylesheetopt = <HTMLLinkElement>document.getElementById("style");
 let contrast = false;
@@ -54,6 +52,9 @@ const DP_H3LAZ = Array(starting_length).fill(0);
 const DP_BAROMETER = Array(starting_length).fill(0);
 const DP_SIGNAL = Array(starting_length).fill(0);
 
+const canvas = <HTMLCanvasElement>document.getElementById('bno');
+const rocket_renderer = new RocketRender(canvas);
+
 let labels = Array(starting_length).fill(0);
 
 function updateData(IMUGX: number, IMUGY: number, IMUGZ: number,
@@ -96,9 +97,9 @@ function updateData(IMUGX: number, IMUGY: number, IMUGZ: number,
             }
         }
     )
+    rocket_renderer.updateOrientation(BNO_ROLL, BNO_PITCH, BNO_YAW);
     // update_charts();
-    let q = eulertoquaternion(BNO_ROLL,BNO_PITCH,BNO_YAW);
-    render(q);
+
 }
 
 function calc_altitude(pressure: number, temp: number) {
@@ -536,68 +537,3 @@ document.addEventListener('DOMContentLoaded', (event) => {
     center.addEventListener('dragend', handleDragEnd);
     center.addEventListener('drop', handleDrop);
 });
-
-let rocket: any;
-const canvas = <HTMLCanvasElement>document.getElementById('bno');
-// canvas.width = canvas.parentElement.offsetWidth;
-canvas.height = canvas.parentElement.offsetHeight;
-let w = canvas.width;
-let h = canvas.height;
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 75, canvas.width / canvas.height, 0.1, 10000);
-const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true});
-renderer.setSize(window.innerWidth*2, window.innerHeight*2);
-renderer.domElement.style.width = w.toString();
-renderer.domElement.style.height = h.toString();
-renderer.domElement.width = w
-renderer.domElement.height = h
-const loader = new OBJLoader();
-renderer.setSize(canvas.width, canvas.height);
-scene.background = new THREE.Color(23/255, 26/255, 28/255);
-camera.position.set(0, -1, 200);
-
-
-const color = new THREE.Color(135/255, 206/255, 235/255);
-const intensity = 1.4;
-const light = new THREE.DirectionalLight(color, intensity);
-light.position.set(0, -1, 200);
-light.target.position.set(-5, 0, 0);
-scene.add(light);
-scene.add(light.target);
-
-
-
-function animate() {
-    requestAnimationFrame( animate );
-    renderer.render( scene, camera );
-}
-animate();
-
-
-
-loader.load("assets\\rocket.obj", (root: THREE.Object3D<THREE.Event>) => {  
-    rocket = root  
-    scene.add(root);
-    // setInterval(()=>{
-    //     root.rotateX(0.01);
-    // }, 16);
-    // rocket.rotateX(-1);
-});
-
-function render(quaternion: any[]) {
-    if (rocket != undefined) {
-        let rotationQuaternion = new THREE.Quaternion(quaternion[1], quaternion[3], -quaternion[2], quaternion[0]);
-        rocket.setRotationFromQuaternion(rotationQuaternion);
-    }
-    // bunny.scale.set(0.5, 0.5, 0.5)
-    renderer.render(scene, camera);
-    // updateCalibration();
-}
-
-function eulertoquaternion(roll: number, pitch: number, yaw: number) {
-    let qx = Math.sin(roll/2) * Math.cos(pitch/2) * Math.cos(yaw/2) - Math.cos(roll/2) * Math.sin(pitch/2) * Math.sin(yaw/2)
-    let qy = Math.cos(roll/2) * Math.sin(pitch/2) * Math.cos(yaw/2) + Math.sin(roll/2) * Math.cos(pitch/2) * Math.sin(yaw/2)
-    let qz = Math.cos(roll/2) * Math.cos(pitch/2) * Math.sin(yaw/2) - Math.sin(roll/2) * Math.sin(pitch/2) * Math.cos(yaw/2)
-    let qw = Math.cos(roll/2) * Math.cos(pitch/2) * Math.cos(yaw/2) + Math.sin(roll/2) * Math.sin(pitch/2) * Math.sin(yaw/2)
-    return [qx, qy, qz, qw]
-}
