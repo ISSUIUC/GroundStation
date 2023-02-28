@@ -240,6 +240,7 @@ export function showOrientationData() {
             nodeIntegration: true,
             nodeIntegrationInWorker: true,
             contextIsolation: false,
+            
         }
     });
     orientationWindow.loadURL(`file://${__dirname}/bno.html`);

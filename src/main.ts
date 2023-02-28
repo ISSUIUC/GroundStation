@@ -527,74 +527,74 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
 // BNO Render stuff
 // let bunny: { setRotationFromQuaternion: (arg0: THREE.Quaternion) => void; };
-let bunny: any;
+// let bunny: any;
 
-const renderer = new THREE.WebGLRenderer({ canvas });
+// const renderer = new THREE.WebGLRenderer({ canvas });
 
-const camera = new THREE.PerspectiveCamera(45, canvas.width / canvas.height, 0.1, 100);
-camera.position.set(0, 0, 30);
+// const camera = new THREE.PerspectiveCamera(45, canvas.width / canvas.height, 0.1, 100);
+// camera.position.set(0, 0, 30);
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color('black'); {
-    const skyColor = 0xB1E1FF; // light blue
-    const groundColor = 0x666666; // black
-    const intensity = 0.5;
-    const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
-    scene.add(light);
-}
+// const scene = new THREE.Scene();
+// scene.background = new THREE.Color('black'); {
+//     const skyColor = 0xB1E1FF; // light blue
+//     const groundColor = 0x666666; // black
+//     const intensity = 0.5;
+//     const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
+//     scene.add(light);
+// }
 
-{
-    const color = 0xFFFFFF;
-    const intensity = 1;
-    const light = new THREE.DirectionalLight(color, intensity);
-    light.position.set(0, 10, 0);
-    light.target.position.set(-5, 0, 0);
-    scene.add(light);
-    scene.add(light.target);
-}
+// {
+//     const color = 0xFFFFFF;
+//     const intensity = 1;
+//     const light = new THREE.DirectionalLight(color, intensity);
+//     light.position.set(0, 10, 0);
+//     light.target.position.set(-5, 0, 0);
+//     scene.add(light);
+//     scene.add(light.target);
+// }
 
-{
-    const objLoader = new OBJLoader();
-    objLoader.load('assets/rocket.obj', (root: any) => {
-        bunny = root;
-        scene.add(root);
-    });
-}
+// {
+//     const objLoader = new OBJLoader();
+//     objLoader.load('assets/rocket.obj', (root: any) => {
+//         bunny = root;
+//         scene.add(root);
+//     });
+// }
 
-async function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+// async function sleep(ms: number) {
+//     return new Promise(resolve => setTimeout(resolve, ms));
+// }
 
-async function finishDrawing() {
-    return new Promise(requestAnimationFrame);
-}
+// async function finishDrawing() {
+//     return new Promise(requestAnimationFrame);
+// }
 
-function resizeRendererToDisplaySize(renderer: THREE.WebGLRenderer) {
-    const canvas = renderer.domElement;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    const needResize = canvas.width !== width || canvas.height !== height;
-    if (needResize) {
-        renderer.setSize(width, height, false);
-    }
-    return needResize;
-}
+// function resizeRendererToDisplaySize(renderer: THREE.WebGLRenderer) {
+//     const canvas = renderer.domElement;
+//     const width = canvas.clientWidth;
+//     const height = canvas.clientHeight;
+//     const needResize = canvas.width !== width || canvas.height !== height;
+//     if (needResize) {
+//         renderer.setSize(width, height, false);
+//     }
+//     return needResize;
+// }
 
-async function render() {
-    if (resizeRendererToDisplaySize(renderer)) {
-        const canvas = renderer.domElement;
-        camera.aspect = canvas.clientWidth / canvas.clientHeight;
-        camera.updateProjectionMatrix();
-    }
+// async function render() {
+//     if (resizeRendererToDisplaySize(renderer)) {
+//         const canvas = renderer.domElement;
+//         camera.aspect = canvas.clientWidth / canvas.clientHeight;
+//         camera.updateProjectionMatrix();
+//     }
 
-    if (bunny != undefined) {
-        let rotationQuaternion = new THREE.Quaternion(quaternion[1], quaternion[3], -quaternion[2], quaternion[0]);
-        bunny.setRotationFromQuaternion(rotationQuaternion);
-    }
-    // bunny.scale.set(0.5, 0.5, 0.5)
-    renderer.render(scene, camera);
-    // updateCalibration();
-    await sleep(10); // Allow 10ms for UI updates
-    await finishDrawing();
-    await render();
-}
+//     if (bunny != undefined) {
+//         let rotationQuaternion = new THREE.Quaternion(quaternion[1], quaternion[3], -quaternion[2], quaternion[0]);
+//         bunny.setRotationFromQuaternion(rotationQuaternion);
+//     }
+//     // bunny.scale.set(0.5, 0.5, 0.5)
+//     renderer.render(scene, camera);
+//     // updateCalibration();
+//     await sleep(10); // Allow 10ms for UI updates
+//     await finishDrawing();
+//     await render();
+// }
