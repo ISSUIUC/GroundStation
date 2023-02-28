@@ -9,7 +9,6 @@ import { setQuaternionFromProperEuler } from 'three/src/math/MathUtils';
 
 
 const stylesheetopt = <HTMLLinkElement>document.getElementById("style");
-const canvas = <HTMLCanvasElement>document.getElementById('bno');
 let contrast = false;
 let time = 0;
 let current_time = new Date();
@@ -539,22 +538,29 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 let rocket: any;
-
-canvas.width = canvas.parentElement.clientWidth
-canvas.height = canvas.parentElement.clientHeight
+const canvas = <HTMLCanvasElement>document.getElementById('bno');
+// canvas.width = canvas.parentElement.offsetWidth;
+canvas.height = canvas.parentElement.offsetHeight;
+let w = canvas.width;
+let h = canvas.height;
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 10000);
-const renderer = new THREE.WebGLRenderer({ canvas: canvas});
+const camera = new THREE.PerspectiveCamera( 75, canvas.width / canvas.height, 0.1, 10000);
+const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true});
+renderer.setSize(window.innerWidth*2, window.innerHeight*2);
+renderer.domElement.style.width = w.toString();
+renderer.domElement.style.height = h.toString();
+renderer.domElement.width = w
+renderer.domElement.height = h
 const loader = new OBJLoader();
 renderer.setSize(canvas.width, canvas.height);
 scene.background = new THREE.Color(23/255, 26/255, 28/255);
-camera.position.set(0, -1, 50);
+camera.position.set(0, -1, 200);
 
 
-const color = new THREE.Color(1,1,1);
-const intensity = 1;
+const color = new THREE.Color(135/255, 206/255, 235/255);
+const intensity = 1.4;
 const light = new THREE.DirectionalLight(color, intensity);
-light.position.set(0, 10, 20);
+light.position.set(0, -1, 200);
 light.target.position.set(-5, 0, 0);
 scene.add(light);
 scene.add(light.target);
@@ -569,7 +575,7 @@ animate();
 
 
 
-loader.load("assets\\smallrocket.obj", (root: THREE.Object3D<THREE.Event>) => {  
+loader.load("assets\\rocket.obj", (root: THREE.Object3D<THREE.Event>) => {  
     rocket = root  
     scene.add(root);
     // setInterval(()=>{
@@ -584,7 +590,7 @@ function render(quaternion: any[]) {
         rocket.setRotationFromQuaternion(rotationQuaternion);
     }
     // bunny.scale.set(0.5, 0.5, 0.5)
-    rocket.render(scene, camera);
+    renderer.render(scene, camera);
     // updateCalibration();
 }
 

@@ -115,6 +115,10 @@ input {
     margin: 10px;
 }
 
+canvas.bnoc {
+    cursor: default;
+}
+
 canvas {
     width: auto;
     height: auto;
@@ -238,7 +242,7 @@ canvas.over {
     min-height: 0;
     overflow: hidden;
     height: 25vh;
-    cursor: grab;
+    /* cursor: grab; */
 }
 
 .grid-item.over {

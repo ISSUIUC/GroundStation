@@ -109,10 +109,6 @@ function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[]
                     label: 'GPS Window',
                     click() { createGPSWindow(); }
                 },
-                {
-                    label: 'Orientation Data',
-                    click() { showOrientationData(); }
-                }
             ]
         },
         {
