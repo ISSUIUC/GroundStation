@@ -5,9 +5,9 @@
     <title>ISS Ground Station</title>
 </head>
 <div class="grid-container" id="parent-container">
-    <div class="grid-item" draggable="true"><canvas id="lowgimuA"></canvas></div>
-    <div class="grid-item" draggable="true"><canvas id="lowgimuG"></canvas></div>
-    <div class="grid-item" draggable="true"><canvas id="lowgimuM"></canvas></div>
+    <div class="grid-item" draggable="true"><canvas id="imuA"></canvas></div>
+    <div class="grid-item" draggable="true"><canvas id="imuG"></canvas></div>
+    <div class="grid-item" draggable="true"><canvas id="imuM"></canvas></div>
     <div class="grid-item" draggable="true">
         <canvas id="signal_data"></canvas>
     </div>
@@ -40,48 +40,6 @@
                     <div>Acceleration (g):</div>
                 </td>
                 <td>
-                    <div id="LSM_IMU_ax">0</div>
-                </td>
-                <td>
-                    <div id="LSM_IMU_ay">0</div>
-                </td>
-                <td>
-                    <div id="LSM_IMU_az">0</div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div>Gyroscope (DPS):</div>
-                </td>
-                <td>
-                    <div id="LSM_IMU_gx">0</div>
-                </td>
-                <td>
-                    <div id="LSM_IMU_gy">0</div>
-                </td>
-                <td>
-                    <div id="LSM_IMU_gz">0</div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div>Magnetometer (Gauss):</div>
-                </td>
-                <td>
-                    <div id="LSM_IMU_mx">0</div>
-                </td>
-                <td>
-                    <div id="LSM_IMU_my">0</div>
-                </td>
-                <td>
-                    <div id="LSM_IMU_mz">0</div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div>KX134 Acceleration (g):</div>
-                </td>
-                <td>
                     <div id="KX_IMU_ax">0</div>
                 </td>
                 <td>
@@ -89,6 +47,48 @@
                 </td>
                 <td>
                     <div id="KX_IMU_az">0</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div>Gyroscope (DPS):</div>
+                </td>
+                <td>
+                    <div id="IMU_gx">0</div>
+                </td>
+                <td>
+                    <div id="IMU_gy">0</div>
+                </td>
+                <td>
+                    <div id="IMU_gz">0</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div>Magnetometer (Gauss):</div>
+                </td>
+                <td>
+                    <div id="IMU_mx">0</div>
+                </td>
+                <td>
+                    <div id="IMU_my">0</div>
+                </td>
+                <td>
+                    <div id="IMU_mz">0</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div>Orientation (rad):</div>
+                </td>
+                <td>
+                    <div id="BNO_YAW">0</div>
+                </td>
+                <td>
+                    <div id="BNO_PITCH">0</div>
+                </td>
+                <td>
+                    <div id="BNO_ROLL">0</div>
                 </td>
             </tr>
         </table>
@@ -103,7 +103,7 @@
                     <div>Longitude</div>
                 </td>
                 <td>
-                    <div class="legendx">Altitude (m)</div>
+                    <div class="legendx">Altitude (ft)</div>
                 </td>
             </tr>
             <tr>
@@ -126,7 +126,7 @@
                 <table>
                     <tr>
                         <td>
-                            <div class="legendx">Altitude (m)</div>
+                            <div class="legendx">Altitude (ft)</div>
                         </td>
                         <td>
                             <div class="legendy">Veloctiy (m/s)</div>
@@ -135,7 +135,7 @@
                             <div class="legendz">Acceleration</div>
                         </td>
                         <td>
-                            <div class="legendplus">Apogee</div>
+                            <div class="legendplus">Apogee (ft)</div>
                         </td>
                     </tr>
                     <tr>
@@ -160,7 +160,7 @@
                             <div>Temperature: </div>
                         </td>
                         <td>
-                            <div class="legendx">Barometer:</div>
+                            <div>Barometer:</div>
                         </td>
                         <td>
                             <div>FSM:</div>
@@ -174,7 +174,7 @@
                             <div id="TEMP">0</div>
                         </td>
                         <td>
-                            <div id="barometer_alt">0</div>
+                            <div id="pressure">0</div>
                         </td>
                         <td>
                             <div id="FSM_state">0</div>
@@ -211,7 +211,7 @@
                             <div id="frequency">0</div>
                         </td>
                     </tr>
-                    <tr>
+                    <!-- <tr>
                         <td>
                             <div>Pressure:</div>
                         </td>
@@ -220,13 +220,13 @@
                         <td>
                             <div id="pressure">0</div>
                         </td>
-                    </tr>
+                    </tr> -->
                 </table>
 
 
     </div>
     <div class="grid-item" draggable="true"><canvas id="se"></canvas></div>
-    <div class="grid-item" draggable="true"><canvas id="KX134"></canvas></div>
+    <div class="grid-item" draggable="true"><canvas id="BNO"></canvas></div>
     <div class="grid-item" draggable="true"><canvas id="barometer"></canvas></div>
 </div>
 

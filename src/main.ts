@@ -12,6 +12,8 @@ let current_time = new Date();
 let dragSrcEl: any;
 let dragID: string;
 
+const meter_to_feet = 3.28084;
+
 const starting_length = 100;
 // ALL VALUES ARE DEMO FOR NOW BUT THESE ARE THE VARIABLES THAT WILL BE PASSED TO THE CHART
 const DP_LOWGMX = Array(starting_length).fill(0);
@@ -30,9 +32,9 @@ const DP_GPS_LAT = Array(starting_length).fill(0);
 const DP_GPS_LONG = Array(starting_length).fill(0);
 const DP_GPS_ALT = Array(starting_length).fill(0);
 
-const DP_KXAX = Array(starting_length).fill(0);
-const DP_KXAY = Array(starting_length).fill(0);
-const DP_KXAZ = Array(starting_length).fill(0);
+const DP_BNOY = Array(starting_length).fill(0);
+const DP_BNOP = Array(starting_length).fill(0);
+const DP_BNOR = Array(starting_length).fill(0);
 
 //STATE ESTIMATION ARRAY PLACEHOLDERS
 const DP_STE_ALT = Array(starting_length).fill(0);
@@ -51,27 +53,30 @@ const DP_SIGNAL = Array(starting_length).fill(0);
 
 let labels = Array(starting_length).fill(0);
 
-function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
-    LOWGGX: number, LOWGGY: number, LOWGGZ: number,
-    LOWGAX: number, LOWGAY: number, LOWGAZ: number,
+function updateData(IMUGX: number, IMUGY: number, IMUGZ: number,
+    IMUMX: number, IMUMY: number, IMUMZ: number,
+    IMUAX: number, IMUAY: number, IMUAZ: number,
     GPS_LAT: number, GPS_LONG: number, GPS_ALT: number,
     TEMP: number, 
     STE_ALT: number, STE_VEL: number, STE_ACC: number, STE_APO:number,
-    KXAX: number, KXAY: number, KXAZ: number,
-    BAROMETER: number, SIGNAL: number) {
+    BNO_YAW: number, BNO_PITCH: number, BNO_ROLL: number,
+    PRESSURE: number, SIGNAL: number) {
    
     labels.splice(0, 1);
     time++;
     labels.push(time);
-
+    GPS_ALT *= meter_to_feet;
+    STE_ALT *= meter_to_feet;
+    STE_APO *= meter_to_feet;
+    let BAROMETER = calc_altitude(PRESSURE, TEMP);
     const chart_arr = [
         { chart: charts.baro_altitude, val: [BAROMETER] },
         { chart: charts.gps, val: [GPS_ALT] },
-        { chart: charts.highg_kx_accel, val: [KXAX, KXAY, KXAZ] },
+        { chart: charts.bno, val: [BNO_YAW, BNO_PITCH, BNO_ROLL] },
         { chart: charts.se, val: [STE_ALT, STE_VEL, STE_ACC, STE_APO] },
-        { chart: charts.lowgimu_accel, val: [LOWGAX, LOWGAY, LOWGAZ] },
-        { chart: charts.lowgimu_gyro, val: [LOWGGX, LOWGGY, LOWGGZ] },
-        { chart: charts.lowgimu_mag, val: [LOWGMX, LOWGMY, LOWGMZ] },
+        { chart: charts.imu_accel, val: [IMUAX, IMUAY, IMUAZ] },
+        { chart: charts.imu_gyro, val: [IMUGX, IMUGY, IMUGZ] },
+        { chart: charts.imu_mag, val: [IMUMX, IMUMY, IMUMZ] },
         { chart: charts.signal, val: [SIGNAL] }
     ]
 
@@ -91,6 +96,10 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
     // update_charts();
 }
 
+function calc_altitude(pressure: number, temp: number) {
+    return (-Math.log(pressure * 0.000987) * (temp + 273.15) * 29.254) * meter_to_feet;
+}
+
 function make_new_dataset(data: number[], name: string) {
     return {
         label: name,
@@ -102,12 +111,12 @@ function make_new_dataset(data: number[], name: string) {
 
 
 let charts: {
-    lowgimu_accel?: Chart,
-    lowgimu_gyro?: Chart,
-    lowgimu_mag?: Chart,
+    imu_accel?: Chart,
+    imu_gyro?: Chart,
+    imu_mag?: Chart,
     gps?: Chart,
     se?: Chart,
-    highg_kx_accel?: Chart,
+    bno?: Chart,
     baro_altitude?: Chart,
     signal: Chart
 }
@@ -221,12 +230,12 @@ function make_chart_multiaxis(units: string, element_id: string, name: string, d
 
 function setup_charts() {
     return {
-        lowgimu_accel: make_chart_multiaxis("G", "lowgimuA", "LowG IMU acceleration", [DP_LOWGAX, DP_LOWGAY, DP_LOWGAZ]),
-        lowgimu_gyro: make_chart_multiaxis("DPS", "lowgimuG", "LowG IMU gyroscope", [DP_LOWGGX, DP_LOWGGY, DP_LOWGGZ]),
-        lowgimu_mag: make_chart_multiaxis("Gauss", "lowgimuM", "LowG IMU magnetometer", [DP_LOWGMX, DP_LOWGMY, DP_LOWGMZ]),
+        imu_accel: make_chart_multiaxis("G", "imuA", "KX acceleration", [DP_LOWGAX, DP_LOWGAY, DP_LOWGAZ]),
+        imu_gyro: make_chart_multiaxis("DPS", "imuG", "IMU gyroscope", [DP_LOWGGX, DP_LOWGGY, DP_LOWGGZ]),
+        imu_mag: make_chart_multiaxis("Gauss", "imuM", "IMU magnetometer", [DP_LOWGMX, DP_LOWGMY, DP_LOWGMZ]),
         gps: make_chart("Meters", "gps", "GPS altitude", DP_GPS_ALT),
         se: make_chart_multiaxis("Meters", "se", "State Estimation", [DP_STE_ALT, DP_STE_VEL, DP_STE_ACC, DP_STE_APO]),
-        highg_kx_accel: make_chart_multiaxis("G", "KX134", "KX acceleration", [DP_KXAX, DP_KXAY, DP_KXAZ]),
+        bno: make_chart_multiaxis("Radians", "BNO", "Orientation", [DP_BNOY, DP_BNOP, DP_BNOR]),
         baro_altitude: make_chart("Meters", "barometer", "Barometer altitude", DP_BAROMETER),
         signal: make_chart("dBmW", "signal_data", "Signal Strength (RSSI)", DP_SIGNAL)
     };
@@ -278,21 +287,25 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 if (key == "gps_lat" || key == "gps_long") {
                     document.getElementById(key).innerText = ((m as any)[key]).toFixed(5);
                 } else if (key == "gps_alt") {
-                    document.getElementById(key).innerText = (((m as any)[key]) / 1000).toFixed(3);
+                    document.getElementById(key).innerText = ((((m as any)[key]) / 1000) * meter_to_feet).toFixed(3);
+                } else if (key == "STE_ALT" || key == "STE_APO" || key == "barometer_alt") {
+                    let temp: number = parseFloat((m as any)[key]);
+                    temp *= meter_to_feet;
+                    document.getElementById(key).innerText = temp.toFixed(3);
                 } else if (typeof (((m as any)[key])) === "number") {
                     document.getElementById(key).innerText = ((m as any)[key]).toFixed(3);
                 } else {
                     document.getElementById(key).innerText = (m as any)[key];
                 }
             }
-            updateData(m["LSM_IMU_mx"], m["LSM_IMU_my"], m["LSM_IMU_mz"],
-                m["LSM_IMU_gx"], m["LSM_IMU_gy"], m["LSM_IMU_gz"],
-                m["LSM_IMU_ax"], m["LSM_IMU_ay"], m["LSM_IMU_az"],
+            updateData(m["IMU_gx"], m["IMU_gy"], m["IMU_gz"],
+                m["IMU_mx"], m["IMU_my"], m["IMU_mz"],
+                m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],
                 m["gps_lat"], m["gps_long"], m["gps_alt"] / 1000,
                 m["TEMP"], 
                 m["STE_ALT"], m["STE_VEL"], m["STE_ACC"], m["STE_APO"],
-                m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],
-                m["barometer_alt"], m["RSSI"]);
+                m["BNO_YAW"], m["BNO_PITCH"], m["BNO_ROLL"],
+                m["pressure"], m["RSSI"]);
                 //Change KX_IMU_a$ to State Estimation Variables
             
             const fsm_index_map = [1,2,2,3,3,4,4,4,5,5,6,6,7,7,8,9];
@@ -325,23 +338,23 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
 }
 
 function resize_charts() {
-    charts.lowgimu_accel.resize();
-    charts.lowgimu_gyro.resize();
-    charts.lowgimu_mag.resize();
+    charts.imu_accel.resize();
+    charts.imu_gyro.resize();
+    charts.imu_mag.resize();
     charts.gps.resize();
     charts.se.resize();
-    charts.highg_kx_accel.resize();
+    charts.bno.resize();
     charts.baro_altitude.resize();
     charts.signal.resize();
 }
 
 function update_charts() {
-    charts.lowgimu_accel.update();
-    charts.lowgimu_gyro.update();
-    charts.lowgimu_mag.update();
+    charts.imu_accel.update();
+    charts.imu_gyro.update();
+    charts.imu_mag.update();
     charts.gps.update();
     charts.se.update();
-    charts.highg_kx_accel.update();
+    charts.bno.update();
     charts.baro_altitude.update();
     charts.signal.update();
 }
@@ -489,12 +502,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
             dragSrcEl.appendChild(document.getElementById(replaceid));
             this.appendChild(document.getElementById(dragID));
         }
-        charts.lowgimu_accel.resize();
-        charts.lowgimu_gyro.resize();
-        charts.lowgimu_mag.resize();
+        charts.imu_accel.resize();
+        charts.imu_gyro.resize();
+        charts.imu_mag.resize();
         charts.gps.resize();
         charts.se.resize();
-        charts.highg_kx_accel.resize();
+        charts.bno.resize();
         charts.baro_altitude.resize();
         charts.signal.resize();
         return false;
