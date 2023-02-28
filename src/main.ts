@@ -548,7 +548,7 @@ const renderer = new THREE.WebGLRenderer({ canvas: canvas});
 const loader = new OBJLoader();
 renderer.setSize(canvas.width, canvas.height);
 scene.background = new THREE.Color(23/255, 26/255, 28/255);
-camera.position.set(0, -5, 20);
+camera.position.set(0, -3, 25);
 
 
 const color = new THREE.Color(1,1,1);
@@ -569,12 +569,13 @@ animate();
 
 
 
-loader.load("assets\\smallestrocket.obj", (root: THREE.Object3D<THREE.Event>) => {  
+loader.load("assets\\saturn.obj", (root: THREE.Object3D<THREE.Event>) => {  
     rocket = root  
     scene.add(root);
     // setInterval(()=>{
     //     root.rotateX(0.01);
     // }, 16);
+    rocket.rotateX(-1);
 });
 
 function render(quaternion: any[]) {
