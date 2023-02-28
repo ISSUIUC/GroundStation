@@ -1,14 +1,35 @@
 import * as fs from "fs";
 import { SerialResponse } from "./serialResponse";
 
-const CSV_HEADERS = ["Time", "LSM_IMU_mx", "LSM_IMU_my", "LSM_IMU_mz",
-    "LSM_IMU_gx", "LSM_IMU_gy", "LSM_IMU_gz",
-    "LSM_IMU_ax", "LSM_IMU_ay", "LSM_IMU_az",
-    "gps_lat", "gps_long", "gps_alt",
-    "STE_ALT", "STE_VEL", "STE_ACC", "STE_APO",
-    "KX_IMU_ax", "KX_IMU_ay", "KX_IMU_az", "TEMP", 
-    "barometer_alt", "sign", "FSM_state", "RSSI", 
-    "Voltage", "frequency", "flap_extension", "pressure"]
+export const CSV_HEADERS = [
+        "Time", 
+        "gps_lat",
+        "gps_long",
+        "gps_alt",
+        "TEMP",
+        "KX_IMU_ax",
+        "KX_IMU_ay",
+        "KX_IMU_az",
+        "STE_ALT",
+        "STE_VEL",
+        "STE_ACC",
+        "STE_APO",
+        "BNO_YAW",
+        "BNO_PITCH",
+        "BNO_ROLL",
+        "IMU_gx",
+        "IMU_gy",
+        "IMU_gz",
+        "IMU_mx",
+        "IMU_my",
+        "IMU_mz",
+        "FSM_state",
+        "sign",
+        "RSSI",
+        "Voltage",
+        "frequency",
+        "flap_extension",
+        "pressure"]
 
 
 
