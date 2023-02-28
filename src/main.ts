@@ -5,6 +5,7 @@ import { ServerConnection } from './serverConnection';
 import * as THREE from 'three';
 import { OBJLoader } from './OBJLoader'
 import { ipcRenderer } from 'electron';
+import { setQuaternionFromProperEuler } from 'three/src/math/MathUtils';
 
 
 const stylesheetopt = <HTMLLinkElement>document.getElementById("style");
@@ -54,7 +55,6 @@ const DP_SIGNAL = Array(starting_length).fill(0);
 
 let labels = Array(starting_length).fill(0);
 
-let quaternion = [1, 0, 0, 0];
 
 function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
     LOWGGX: number, LOWGGY: number, LOWGGZ: number,
@@ -94,6 +94,8 @@ function updateData(LOWGMX: number, LOWGMY: number, LOWGMZ: number,
         }
     )
     // update_charts();
+    let q = eulertoquaternion(LOWGAX,LOWGAY,LOWGAZ);
+    render(q);
 }
 
 function make_new_dataset(data: number[], name: string) {
@@ -524,117 +526,59 @@ document.addEventListener('DOMContentLoaded', (event) => {
     center.addEventListener('drop', handleDrop);
 });
 
-function setup_canvas(){
-    canvas.width = canvas.parentElement.clientWidth
-    canvas.height = canvas.parentElement.clientHeight
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 10000);
-    const renderer = new THREE.WebGLRenderer({ canvas: canvas});
-    const loader = new OBJLoader();
-    renderer.setSize(canvas.width, canvas.height);
-    scene.background = new THREE.Color(23/255, 26/255, 28/255);
-    camera.position.set(0, -5, 20);
+let rocket: any;
+
+canvas.width = canvas.parentElement.clientWidth
+canvas.height = canvas.parentElement.clientHeight
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 10000);
+const renderer = new THREE.WebGLRenderer({ canvas: canvas});
+const loader = new OBJLoader();
+renderer.setSize(canvas.width, canvas.height);
+scene.background = new THREE.Color(23/255, 26/255, 28/255);
+camera.position.set(0, -5, 20);
 
 
-    const color = new THREE.Color(1,1,1);
-    const intensity = 1;
-    const light = new THREE.DirectionalLight(color, intensity);
-    light.position.set(0, 10, 20);
-    light.target.position.set(-5, 0, 0);
-    scene.add(light);
-    scene.add(light.target);
+const color = new THREE.Color(1,1,1);
+const intensity = 1;
+const light = new THREE.DirectionalLight(color, intensity);
+light.position.set(0, 10, 20);
+light.target.position.set(-5, 0, 0);
+scene.add(light);
+scene.add(light.target);
 
 
 
-    function animate() {
-        requestAnimationFrame( animate );
-        renderer.render( scene, camera );
+function animate() {
+    requestAnimationFrame( animate );
+    renderer.render( scene, camera );
+}
+animate();
+
+
+
+loader.load("assets\\smallestrocket.obj", (root: THREE.Object3D<THREE.Event>) => {  
+    rocket = root  
+    scene.add(root);
+    // setInterval(()=>{
+    //     root.rotateX(0.01);
+    // }, 16);
+});
+
+function render(quaternion: any[]) {
+    if (rocket != undefined) {
+        let rotationQuaternion = new THREE.Quaternion(quaternion[1], quaternion[3], -quaternion[2], quaternion[0]);
+        rocket.setRotationFromQuaternion(rotationQuaternion);
     }
-    animate();
-
-
-
-    loader.load("assets\\smallestrocket.obj", (root: THREE.Object3D<THREE.Event>) => {    
-        scene.add(root);
-        setInterval(()=>{
-            root.rotateX(0.01);
-        }, 16);
-    });
+    // bunny.scale.set(0.5, 0.5, 0.5)
+    rocket.render(scene, camera);
+    // updateCalibration();
 }
 
-
-setup_canvas();
-
-// BNO Render stuff
-// let bunny: { setRotationFromQuaternion: (arg0: THREE.Quaternion) => void; };
-// let bunny: any;
-
-// const renderer = new THREE.WebGLRenderer({ canvas });
-
-// const camera = new THREE.PerspectiveCamera(45, canvas.width / canvas.height, 0.1, 100);
-// camera.position.set(0, 0, 30);
-
-// const scene = new THREE.Scene();
-// scene.background = new THREE.Color('black'); {
-//     const skyColor = 0xB1E1FF; // light blue
-//     const groundColor = 0x666666; // black
-//     const intensity = 0.5;
-//     const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
-//     scene.add(light);
-// }
-
-// {
-//     const color = 0xFFFFFF;
-//     const intensity = 1;
-//     const light = new THREE.DirectionalLight(color, intensity);
-//     light.position.set(0, 10, 0);
-//     light.target.position.set(-5, 0, 0);
-//     scene.add(light);
-//     scene.add(light.target);
-// }
-
-// {
-//     const objLoader = new OBJLoader();
-//     objLoader.load('assets/rocket.obj', (root: any) => {
-//         bunny = root;
-//         scene.add(root);
-//     });
-// }
-
-// async function sleep(ms: number) {
-//     return new Promise(resolve => setTimeout(resolve, ms));
-// }
-
-// async function finishDrawing() {
-//     return new Promise(requestAnimationFrame);
-// }
-
-// function resizeRendererToDisplaySize(renderer: THREE.WebGLRenderer) {
-//     const canvas = renderer.domElement;
-//     const width = canvas.clientWidth;
-//     const height = canvas.clientHeight;
-//     const needResize = canvas.width !== width || canvas.height !== height;
-//     if (needResize) {
-//         renderer.setSize(width, height, false);
-//     }
-//     return needResize;
-// }
-
-// async function render() {
-//     if (resizeRendererToDisplaySize(renderer)) {
-//         const canvas = renderer.domElement;
-//         camera.aspect = canvas.clientWidth / canvas.clientHeight;
-//         camera.updateProjectionMatrix();
-//     }
-
-//     if (bunny != undefined) {
-//         let rotationQuaternion = new THREE.Quaternion(quaternion[1], quaternion[3], -quaternion[2], quaternion[0]);
-//         bunny.setRotationFromQuaternion(rotationQuaternion);
-//     }
-//     // bunny.scale.set(0.5, 0.5, 0.5)
-//     renderer.render(scene, camera);
-//     // updateCalibration();
-//     await sleep(10); // Allow 10ms for UI updates
-//     await finishDrawing();
-//     await render();
-// }
+function eulertoquaternion(roll: number, pitch: number, yaw: number) {
+    let qx = Math.sin(roll/2) * Math.cos(pitch/2) * Math.cos(yaw/2) - Math.cos(roll/2) * Math.sin(pitch/2) * Math.sin(yaw/2)
+    let qy = Math.cos(roll/2) * Math.sin(pitch/2) * Math.cos(yaw/2) + Math.sin(roll/2) * Math.cos(pitch/2) * Math.sin(yaw/2)
+    let qz = Math.cos(roll/2) * Math.cos(pitch/2) * Math.sin(yaw/2) - Math.sin(roll/2) * Math.sin(pitch/2) * Math.cos(yaw/2)
+    let qw = Math.cos(roll/2) * Math.cos(pitch/2) * Math.cos(yaw/2) + Math.sin(roll/2) * Math.sin(pitch/2) * Math.sin(yaw/2)
+    return [qx, qy, qz, qw]
+}
