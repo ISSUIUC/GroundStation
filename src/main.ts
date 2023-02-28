@@ -3,7 +3,7 @@ import { SerialResponse } from './serialResponse';
 import { ServerConnection } from './serverConnection';
 
 import * as THREE from 'three';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
+import { OBJLoader } from './OBJLoader'
 import { ipcRenderer } from 'electron';
 
 
@@ -524,6 +524,46 @@ document.addEventListener('DOMContentLoaded', (event) => {
     center.addEventListener('drop', handleDrop);
 });
 
+function setup_canvas(){
+    canvas.width = canvas.parentElement.clientWidth
+    canvas.height = canvas.parentElement.clientHeight
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 10000);
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas});
+    const loader = new OBJLoader();
+    renderer.setSize(canvas.width, canvas.height);
+    scene.background = new THREE.Color(23/255, 26/255, 28/255);
+    camera.position.set(0, -5, 20);
+
+
+    const color = new THREE.Color(1,1,1);
+    const intensity = 1;
+    const light = new THREE.DirectionalLight(color, intensity);
+    light.position.set(0, 10, 20);
+    light.target.position.set(-5, 0, 0);
+    scene.add(light);
+    scene.add(light.target);
+
+
+
+    function animate() {
+        requestAnimationFrame( animate );
+        renderer.render( scene, camera );
+    }
+    animate();
+
+
+
+    loader.load("assets\\smallestrocket.obj", (root: THREE.Object3D<THREE.Event>) => {    
+        scene.add(root);
+        setInterval(()=>{
+            root.rotateX(0.01);
+        }, 16);
+    });
+}
+
+
+setup_canvas();
 
 // BNO Render stuff
 // let bunny: { setRotationFromQuaternion: (arg0: THREE.Quaternion) => void; };
