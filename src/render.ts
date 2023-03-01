@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { Quaternion } from 'three';
 import { OBJLoader } from './OBJLoader'
-import { ThreeMFLoader } from './3MFLoader';
 
 export class RocketRender {
     private rocket: THREE.Object3D;
