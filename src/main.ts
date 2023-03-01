@@ -239,10 +239,10 @@ function setup_charts() {
         imu_accel: make_chart_multiaxis("G", "imuA", "KX acceleration", [DP_LOWGAX, DP_LOWGAY, DP_LOWGAZ]),
         imu_gyro: make_chart_multiaxis("DPS", "imuG", "IMU gyroscope", [DP_LOWGGX, DP_LOWGGY, DP_LOWGGZ]),
         imu_mag: make_chart_multiaxis("Gauss", "imuM", "IMU magnetometer", [DP_LOWGMX, DP_LOWGMY, DP_LOWGMZ]),
-        gps: make_chart("Meters", "gps", "GPS altitude", DP_GPS_ALT),
-        se: make_chart_multiaxis("Meters", "se", "State Estimation", [DP_STE_ALT, DP_STE_VEL, DP_STE_ACC, DP_STE_APO]),
+        gps: make_chart("Feet", "gps", "GPS altitude", DP_GPS_ALT),
+        se: make_chart_multiaxis("Feet", "se", "State Estimation", [DP_STE_ALT, DP_STE_VEL, DP_STE_ACC, DP_STE_APO]),
         bno: make_chart_multiaxis("Radians", "BNO", "Orientation", [DP_BNOY, DP_BNOP, DP_BNOR]),
-        baro_altitude: make_chart("Meters", "barometer", "Barometer altitude", DP_BAROMETER),
+        baro_altitude: make_chart("Feet", "barometer", "Barometer altitude", DP_BAROMETER),
         signal: make_chart("dBmW", "signal_data", "Signal Strength (RSSI)", DP_SIGNAL)
     };
 }

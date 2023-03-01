@@ -33,9 +33,9 @@ export class RocketRender {
         light.target.position.set(0,0,0);
         this.scene.add(light);
         this.scene.add(light.target);
-        this.scene.add(new THREE.AmbientLight(0xFFFFFF, 0.1));
+        this.scene.add(new THREE.AmbientLight(0xFFFFFF, 0.3));
 
-        new OBJLoader().load("assets\\rocket.obj", (root: THREE.Object3D<THREE.Event>) => {  
+        new OBJLoader().load("assets\\model.obj", (root: THREE.Object3D<THREE.Event>) => {  
             this.rocket = root
             this.rocket.traverse((obj)=>{
                 if(obj instanceof THREE.Mesh){
@@ -44,12 +44,16 @@ export class RocketRender {
                 }
             });
             this.scene.add(root);
-            this.render(new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI/2,0,0)));
+            this.render(new THREE.Quaternion().setFromEuler(new THREE.Euler(0,0,0, 'YZX')));
         }, null, alert);
     }
 
     updateOrientation(roll: number, pitch: number, yaw: number){
-        this.render(new THREE.Quaternion().setFromEuler(new THREE.Euler(roll,pitch,yaw)));
+        // this.rocket.setRotationFromEuler(new THREE.Euler(roll,pitch,yaw, 'XYZ'));
+        // this.render(new THREE.Quaternion().setFromEuler(new THREE.Euler(0,0,0, 'YXZ')));
+        this.render(new THREE.Quaternion().setFromEuler(new THREE.Euler(pitch,roll,yaw, 'XYZ')));
+        // this.rocket.set(roll);
+        this.renderer.render(this.scene, this.camera);
     }
     
     private render(quaternion: THREE.Quaternion) {
