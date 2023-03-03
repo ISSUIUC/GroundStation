@@ -456,8 +456,10 @@ export function demo() {
                 LSM_IMU_az: val * rand,
                 // gps_lat: 40.1119 + val / 1000, //Talbot Lat
                 // gps_long: -88.2282 + rand / 1000, //Talbot Long
-                gps_lat: 41.488167 + val / 1000, //QCRC
-                gps_long: -89.500778 + rand / 1000, //QCRC
+                // gps_lat: 41.488167 + val / 1000, //QCRC
+                // gps_long: -89.500778 + rand / 1000, //QCRC
+                gps_lat: 41.774273 + val / 1000, // Michiana
+                gps_long: -86.572435 + rand / 1000, // Michiana
                 // gps_lat: 32.990 + val / 1000, //IREC
                 // gps_long: -106.9754 + rand / 1000, //IREC
                 // gps_lat: 0,
