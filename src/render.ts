@@ -35,7 +35,7 @@ export class RocketRender {
         this.scene.add(light.target);
         this.scene.add(new THREE.AmbientLight(0xFFFFFF, 0.3));
 
-        new OBJLoader().load("assets\\model.obj", (root: THREE.Object3D<THREE.Event>) => {  
+        new OBJLoader().load("assets\\up.obj", (root: THREE.Object3D<THREE.Event>) => {  
             this.rocket = root
             this.rocket.traverse((obj)=>{
                 if(obj instanceof THREE.Mesh){
@@ -45,6 +45,7 @@ export class RocketRender {
             });
             this.scene.add(root);
             this.render(new THREE.Quaternion().setFromEuler(new THREE.Euler(0,0,0, 'YZX')));
+            this.renderer.render(this.scene, this.camera);
         }, null, alert);
     }
 
