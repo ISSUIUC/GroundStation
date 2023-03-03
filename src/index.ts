@@ -361,12 +361,15 @@ function on_serial_data(data: string) {
 }
 
 function send_frontends_data(tag: string, data: string) {
-    mainWindow?.webContents?.send(tag, data);
-    for (const ws of web_sockets) {
-        ws.send(JSON.stringify({ event: tag, message: data }));
+    try {
+        mainWindow?.webContents?.send(tag, data);
+        for (const ws of web_sockets) {
+            ws.send(JSON.stringify({ event: tag, message: data }));
+        }
+        rawjsonwindow?.webContents?.send(tag, data);
+    } catch (e) {
+        console.log(e)
     }
-    rawjsonwindow?.webContents?.send(tag, data);
-
 }
 
 ipcMain.on('load_coords', (evt) => {
