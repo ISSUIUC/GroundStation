@@ -115,6 +115,10 @@ input {
     margin: 10px;
 }
 
+canvas.bnoc {
+    cursor: default;
+}
+
 canvas {
     width: auto;
     height: auto;
@@ -238,7 +242,7 @@ canvas.over {
     min-height: 0;
     overflow: hidden;
     height: 25vh;
-    cursor: grab;
+    /* cursor: grab; */
 }
 
 .grid-item.over {
@@ -377,4 +381,11 @@ canvas.over {
 
 .circle.active {
     border-color: var(--line-border-fill);
+}
+
+.animation-container {
+    position: relative;
+    height: 80vh;
+    width: 100%;
+    margin: 10px auto;
 }

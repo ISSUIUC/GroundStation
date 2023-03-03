@@ -63,37 +63,41 @@ ipcRenderer.on('data', (evt, message) => {
   const masterJSON = JSON.parse(message)
 
   let loopList = [
-    'LSM_IMU_mx',
-    'LSM_IMU_my',
-    'LSM_IMU_mz',
-    'LSM_IMU_gx',
-    'LSM_IMU_gy',
-    'LSM_IMU_gz',
-    'LSM_IMU_ax',
-    'LSM_IMU_ay',
-    'LSM_IMU_az',
-    'gps_lat',
-    'gps_long',
-    'gps_alt',
-    'STE_ALT',
-    'STE_VEL',
-    'STE_ACC',
-    'STE_APO',
-    'KX_IMU_ax',
-    'KX_IMU_ay',
-    'KX_IMU_az',
-    'barometer_alt',
-    'RSSI',
-    'FSM_state',
-    'Voltage',
-    'TEMP',
-    'frequency',
-    'flap_extension',
-    'pressure'
-  ]
+    "gps_lat",
+    "gps_long",
+    "gps_alt",
+    "TEMP",
+    "KX_IMU_ax",
+    "KX_IMU_ay",
+    "KX_IMU_az",
+    "STE_ALT",
+    "STE_VEL",
+    "STE_ACC",
+    "STE_APO",
+    "BNO_YAW",
+    "BNO_PITCH",
+    "BNO_ROLL",
+    "IMU_gx",
+    "IMU_gy",
+    "IMU_gz",
+    "IMU_mx",
+    "IMU_my",
+    "IMU_mz",
+    "FSM_state",
+    "sign",
+    "RSSI",
+    "Voltage",
+    "frequency",
+    "flap_extension",
+    "pressure"]
 
   loopList.forEach((e) => {
-    masterJSON.value[e] = (masterJSON.value[e] as any).toFixed(5)
+    if (typeof(masterJSON.value[e]) !== "number") {
+      masterJSON.value[e] = (masterJSON.value[e] as any)
+    } else {
+      masterJSON.value[e] = (masterJSON.value[e] as any).toFixed(5)
+    }
+    
   })
   let newMessage = JSON.stringify(masterJSON)
 

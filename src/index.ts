@@ -5,9 +5,8 @@ import { makeMainMenu, makeSerialMenu } from './menuTemplate';
 import { WebSocket, WebSocketServer } from 'ws';
 import * as fs from 'fs';
 import { write } from 'original-fs';
-import CSVWriter, { readDemo } from './csv';
+import CSVWriter, { readDemo, CSV_HEADERS } from './csv';
 import { SerialResponse } from './serialResponse';
-
 
 // Initializes windows as main windows.
 let mainWindow: BrowserWindow;
@@ -19,6 +18,7 @@ let localfreqwindow: BrowserWindow;
 let callsignwindow: BrowserWindow;
 let homepointswindow: BrowserWindow;
 let rawjsonwindow: BrowserWindow;
+let orientationWindow: BrowserWindow;
 let serial_port: SerialPort;
 let server: WebSocketServer;
 let web_sockets: WebSocket[] = [];
@@ -230,6 +230,24 @@ export function openRawJSONWindow() {
     }
 }
 
+export function showOrientationData() {
+    orientationWindow = new BrowserWindow({
+        width: 800,
+        height: 800,
+        title: 'Orientation Data',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+            
+        }
+    });
+    orientationWindow.loadURL(`file://${__dirname}/bno.html`);
+    if (isMac) {
+        Menu.setApplicationMenu(makeSerialMenu(orientationWindow));
+    }
+}
+
 export function callAbort() {
 
     let response = dialog.showMessageBoxSync(this, {
@@ -337,17 +355,21 @@ function on_serial_data(data: string) {
             console.error(`couldn't parse ${data}`)
         }
     } catch (e) {
+        console.log(data);
         console.log(e);
     }
 }
 
 function send_frontends_data(tag: string, data: string) {
-    mainWindow?.webContents?.send(tag, data);
-    for (const ws of web_sockets) {
-        ws.send(JSON.stringify({ event: tag, message: data }));
+    try {
+        mainWindow?.webContents?.send(tag, data);
+        for (const ws of web_sockets) {
+            ws.send(JSON.stringify({ event: tag, message: data }));
+        }
+        rawjsonwindow?.webContents?.send(tag, data);
+    } catch (e) {
+        console.log(e)
     }
-    rawjsonwindow?.webContents?.send(tag, data);
-
 }
 
 ipcMain.on('load_coords', (evt) => {
@@ -380,34 +402,33 @@ export function playback() {
         const temp: SerialResponse = {
             type: 'data',
             value: {
-                LSM_IMU_mx: parseFloat(data[1]),
-                LSM_IMU_my: parseFloat(data[2]),
-                LSM_IMU_mz: parseFloat(data[3]),
-                LSM_IMU_gx: parseFloat(data[4]),
-                LSM_IMU_gy: parseFloat(data[5]),
-                LSM_IMU_gz: parseFloat(data[6]),
-                LSM_IMU_ax: parseFloat(data[7]),
-                LSM_IMU_ay: parseFloat(data[8]),
-                LSM_IMU_az: parseFloat(data[9]),
-                gps_lat: parseFloat(data[10]),
-                gps_long: parseFloat(data[11]),
-                gps_alt: parseFloat(data[12]),
-                STE_ALT: parseFloat(data[13]),
-                STE_VEL: parseFloat(data[14]),
-                STE_ACC: parseFloat(data[15]),
-                STE_APO: parseFloat(data[16]),
-                KX_IMU_ax: parseFloat(data[17]),
-                KX_IMU_ay: parseFloat(data[18]),
-                KX_IMU_az: parseFloat(data[19]),
-                TEMP: parseFloat(data[20]),
-                barometer_alt: parseFloat(data[21]),
+                gps_lat: parseFloat(data[1]),
+                gps_long: parseFloat(data[2]),
+                gps_alt: parseFloat(data[3]),
+                TEMP: parseFloat(data[4]),
+                KX_IMU_ax: parseFloat(data[5]),
+                KX_IMU_ay: parseFloat(data[6]),
+                KX_IMU_az: parseFloat(data[7]),
+                STE_ALT: parseFloat(data[8]),
+                STE_VEL: parseFloat(data[9]),
+                STE_ACC: parseFloat(data[10]),
+                STE_APO: parseFloat(data[11]),
+                BNO_YAW: parseFloat(data[12]),
+                BNO_PITCH: parseFloat(data[13]),
+                BNO_ROLL: parseFloat(data[14]),
+                IMU_gx: parseFloat(data[15]),
+                IMU_gy: parseFloat(data[16]),
+                IMU_gz: parseFloat(data[17]),
+                IMU_mx: parseFloat(data[18]),
+                IMU_my: parseFloat(data[19]),
+                IMU_mz: parseFloat(data[20]),
+                FSM_state: parseFloat(data[21]),
                 sign: data[22],
-                FSM_state: parseFloat(data[23]),
-                RSSI: parseFloat(data[24]),
-                Voltage: parseFloat(data[25]),
-                frequency: parseFloat(data[26]),
-                flap_extension: parseFloat(data[27]),
-                pressure: parseFloat(data[28])
+                RSSI: parseFloat(data[23]),
+                Voltage: parseFloat(data[24]),
+                frequency: parseFloat(data[25]),
+                flap_extension: parseFloat(data[26]),
+                pressure: parseFloat(data[27])
             }
         }
         packets.push(temp);
@@ -445,15 +466,15 @@ export function demo() {
         const data: SerialResponse = {
             type: 'data',
             value: {
-                LSM_IMU_mx: val,
-                LSM_IMU_my: rand,
-                LSM_IMU_mz: val * rand,
-                LSM_IMU_gx: val,
-                LSM_IMU_gy: rand,
-                LSM_IMU_gz: val * rand,
-                LSM_IMU_ax: val,
-                LSM_IMU_ay: rand,
-                LSM_IMU_az: val * rand,
+                IMU_mx: val,
+                IMU_my: rand,
+                IMU_mz: val * rand,
+                IMU_gx: val,
+                IMU_gy: rand,
+                IMU_gz: val * rand,
+                KX_IMU_ax: val,
+                KX_IMU_ay: rand,
+                KX_IMU_az: val * rand,
                 // gps_lat: 40.1119 + val / 1000, //Talbot Lat
                 // gps_long: -88.2282 + rand / 1000, //Talbot Long
                 // gps_lat: 41.488167 + val / 1000, //QCRC
@@ -469,10 +490,9 @@ export function demo() {
                 STE_VEL: rand,
                 STE_ACC: val * rand,
                 STE_APO: rand*val*2,
-                KX_IMU_ax: val,
-                KX_IMU_ay: rand,
-                KX_IMU_az: val + rand,
-                barometer_alt: val,
+                BNO_YAW: val,
+                BNO_PITCH: rand,
+                BNO_ROLL: val + rand,
                 RSSI: val,
                 sign: "qxqxlol",
                 FSM_state: num * (15/150),
