@@ -11,4 +11,5 @@
       "allowJs": true
   },
   "exclude": ["webpack*", "dist", "build"],
+  "include": ["src/**/*"],
 }

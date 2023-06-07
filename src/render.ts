@@ -35,7 +35,7 @@ export class RocketRender {
         this.scene.add(light.target);
         this.scene.add(new THREE.AmbientLight(0xFFFFFF, 0.3));
 
-        new OBJLoader().load("assets\\up.obj", (root: THREE.Object3D<THREE.Event>) => {  
+        new OBJLoader().load(__dirname + "/assets/up.obj", (root: THREE.Object3D<THREE.Event>) => {  
             this.rocket = root
             this.rocket.traverse((obj)=>{
                 if(obj instanceof THREE.Mesh){
