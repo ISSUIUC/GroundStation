@@ -45,11 +45,12 @@
         "electron-rebuild": "^3.2.6",
         "leaflet": "^1.7.1",
         "loaders.gl": "^0.3.5",
+        "mqtt": "^5.0.5",
         "node-gyp": "^8.4.1",
         "serialport": "^9.2.8",
+        "three": "^0.150.1",
         "three-obj-mtl-loader": "^1.0.3",
         "webpack": "^5.69.1",
-        "ws": "^8.5.0",
-        "three": "^0.150.1"
+        "ws": "^8.5.0"
     }
 }

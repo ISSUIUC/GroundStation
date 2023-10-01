@@ -7,6 +7,8 @@ import * as fs from 'fs';
 import { write } from 'original-fs';
 import CSVWriter, { readDemo, CSV_HEADERS } from './csv';
 import { SerialResponse } from './serialResponse';
+import * as mqtt from 'mqtt';
+
 
 // Initializes windows as main windows.
 let mainWindow: BrowserWindow;
@@ -27,6 +29,7 @@ let latitude = 0;
 let longitude = 0;
 let altitude = 0;
 const isMac = process.platform === 'darwin';
+const client = mqtt.connect('mqtt://localhost:1883');
 
 const date = new Date();
 const year = date.getFullYear();
@@ -367,6 +370,12 @@ function send_frontends_data(tag: string, data: string) {
             ws.send(JSON.stringify({ event: tag, message: data }));
         }
         rawjsonwindow?.webContents?.send(tag, data);
+
+        // Aaditya add stuff here
+        
+        client.publish('Flightdata', data); // Publish data to the 'Flightdata' topic
+
+        
     } catch (e) {
         console.log(e)
     }
