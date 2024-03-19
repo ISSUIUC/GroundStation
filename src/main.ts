@@ -83,6 +83,9 @@ function updateData(IMUGX: number, IMUGY: number, IMUGZ: number,
         { chart: charts.imu_mag, val: [IMUMX, IMUMY, IMUMZ] },
         { chart: charts.signal, val: [SIGNAL] }
     ]
+    console.log(BNO_PITCH);
+    console.log(BNO_ROLL);
+    console.log(BNO_YAW);
 
     chart_arr.forEach(
         c => {
@@ -281,7 +284,9 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
             /* Finds the Raw Telemetry Table 
             finds the field by ID and assigns 
             the value to the div */
+            console.log(m);
             for (var key in m) {
+
                 if (key == "response_ID") {
                     continue;
                 }
@@ -299,7 +304,10 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                     temp *= meter_to_feet;
                     document.getElementById(key).innerText = temp.toFixed(3);
                 } else if (typeof (((m as any)[key])) === "number") {
-                    document.getElementById(key).innerText = ((m as any)[key]).toFixed(3);
+                    let elem = document.getElementById(key);
+                    if (elem) {
+                        elem.innerText = ((m as any)[key]).toFixed(3);
+                    }
                 } else {
                     document.getElementById(key).innerText = (m as any)[key];
                 }

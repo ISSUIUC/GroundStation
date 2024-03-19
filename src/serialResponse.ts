@@ -5,7 +5,7 @@ export type SerialResponse =
         gps_lat:number,
         gps_long:number,
         gps_alt:number,
-        TEMP:number,
+        
         KX_IMU_ax:number,
         KX_IMU_ay:number,
         KX_IMU_az:number,
@@ -28,7 +28,8 @@ export type SerialResponse =
         Voltage:number,
         frequency:number,
         flap_extension:number,
-        pressure: number
+        pressure: number,
+        TEMP:number,
     }
 } | {
     type: "command_success"
