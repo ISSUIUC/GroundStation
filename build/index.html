@@ -172,34 +172,65 @@
         </tr>
         <tr>
             <td>
-                <div>State Estimation (Predicted): </div>
+                <div>Pyros</div>
                 <table>
                     <tr>
                         <td>
-                            <div class="legendx">Altitude (ft)</div>
+                            <div class="legendx">Pyro 1</div>
                         </td>
                         <td>
-                            <div class="legendy">Veloctiy (m/s)</div>
+                            <div class="legendy">Pyro 2</div>
                         </td>
                         <td>
-                            <div class="legendz">Acceleration</div>
+                            <div class="legendz">Pyro 3</div>
                         </td>
                         <td>
-                            <div class="legendplus">Apogee (ft)</div>
+                            <div class="legendplus">Pyro 4</div>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <div id="STE_ALT">0</div>
+                            <div id="Pyro1">0</div>
                         </td>
                         <td>
-                            <div id="STE_VEL">0</div>
+                            <div id="Pyro2">0</div>
                         </td>
                         <td>
-                            <div id="STE_ACC">0</div>
+                            <div id="Pyro3">0</div>
                         </td>
                         <td>
-                            <div id="STE_APO">0</div>
+                            <div id="Pyro4">0</div>
+                        </td>
+                    </tr>
+                </table>
+                <div>Pyros Fired</div>
+                <table>
+                    <tr>
+                        <td>
+                            <div class="legendx">Pyro 1</div>
+                        </td>
+                        <td>
+                            <div class="legendy">Pyro 2</div>
+                        </td>
+                        <td>
+                            <div class="legendz">Pyro 3</div>
+                        </td>
+                        <td>
+                            <div class="legendplus">Pyro 4</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div id="Pyro1Firing">0</div>
+                        </td>
+                        <td>
+                            <div id="Pyro2Firing">0</div>
+                        </td>
+                        <td>
+                            <div id="Pyro3Firing">0</div>
+                        </td>
+                        <td>
+                            <div id="Pyro4Firing">0</div>
                         </td>
                     </tr>
                 </table>
@@ -295,28 +326,44 @@
                 <div class="circle">2</div>
             </div>
             <div class="step">
-                <p class="text">Burnout</p>
+                <p class="text">First Burnout</p>
                 <div class="circle">3</div>
             </div>
             <div class="step">
-                <p class="text">Coast</p>
+                <p class="text">Sustainer Ignited</p>
                 <div class="circle">4</div>
             </div>
             <div class="step">
-                <p class="text">Apogee</p>
+                <p class="text">Second Boost</p>
                 <div class="circle">5</div>
             </div>
             <div class="step">
-                <p class="text">Drogue</p>
+                <p class="text">Coast</p>
                 <div class="circle">6</div>
             </div>
             <div class="step">
-                <p class="text">Main Chute</p>
+                <p class="text">Apogee</p>
                 <div class="circle">7</div>
             </div>
             <div class="step">
-                <p class="text">Landed</p>
+                <p class="text">Drogue Deploy</p>
                 <div class="circle">8</div>
+            </div>
+            <div class="step">
+                <p class="text">Drogue</p>
+                <div class="circle">9</div>
+            </div>
+            <div class="step">
+                <p class="text">Main Deploy</p>
+                <div class="circle">10</div>
+            </div>
+            <div class="step">
+                <p class="text">Main</p>
+                <div class="circle">11</div>
+            </div>
+            <div class="step">
+                <p class="text">Landed</p>
+                <div class="circle">12</div>
             </div>
         </div>
     </div>

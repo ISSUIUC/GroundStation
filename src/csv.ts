@@ -33,7 +33,16 @@ export const CSV_HEADERS = [
         "Continuity1",
         "Continuity2",
         "Continuity3",
-        "Continuity4"
+        "Continuity4",
+        "TelemLatency",
+        "Pyro1",
+        "Pyro2",
+        "Pyro3",
+        "Pyro4",
+        "Pyro1Firing",
+        "Pyro2Firing",
+        "Pyro3Firing",
+        "Pyro4Firing",
     ]
 
 

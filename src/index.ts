@@ -442,7 +442,15 @@ export function playback() {
                 Continuity2: parseFloat(data[29]),
                 Continuity3: parseFloat(data[30]),
                 Continuity4: parseFloat(data[31]),
-                TelemLatency: parseFloat(data[32])
+                TelemLatency: parseFloat(data[32]),
+                Pyro1: parseFloat(data[33]),
+                Pyro2: parseFloat(data[34]),
+                Pyro3: parseFloat(data[35]),
+                Pyro4: parseFloat(data[36]),
+                Pyro1Firing: parseFloat(data[37]),
+                Pyro2Firing: parseFloat(data[38]),
+                Pyro3Firing: parseFloat(data[39]),
+                Pyro4Firing: parseFloat(data[40]),
 
             }
         }
@@ -520,7 +528,16 @@ export function demo() {
                 Continuity2: rand,
                 Continuity3: val,
                 Continuity4: rand,
-                TelemLatency: val
+                TelemLatency: val,
+                Pyro1: val,
+                Pyro2: rand,
+                Pyro3: val,
+                Pyro4: rand,
+                Pyro1Firing: val,
+                Pyro2Firing: rand,
+                Pyro3Firing: val,
+                Pyro4Firing: rand,
+
             }
         }
 

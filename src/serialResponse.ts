@@ -35,6 +35,15 @@ export type SerialResponse =
         Continuity3: number,
         Continuity4: number,
         TelemLatency: number,
+        Pyro1: number,
+        Pyro2: number,
+        Pyro3: number,
+        Pyro4: number,
+        Pyro1Firing: number,
+        Pyro2Firing: number,
+        Pyro3Firing: number,
+        Pyro4Firing: number,
+        
     }
 } | {
     type: "command_success"
