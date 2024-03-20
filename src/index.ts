@@ -437,7 +437,13 @@ export function playback() {
                 Voltage: parseFloat(data[24]),
                 frequency: parseFloat(data[25]),
                 flap_extension: parseFloat(data[26]),
-                pressure: parseFloat(data[27])
+                pressure: parseFloat(data[27]),
+                Continuity1: parseFloat(data[28]),
+                Continuity2: parseFloat(data[29]),
+                Continuity3: parseFloat(data[30]),
+                Continuity4: parseFloat(data[31]),
+                TelemLatency: parseFloat(data[32])
+
             }
         }
         packets.push(temp);
@@ -509,7 +515,12 @@ export function demo() {
                 TEMP: val,
                 frequency: val,
                 flap_extension: rand/val,
-                pressure: 918
+                pressure: 918,
+                Continuity1: val,
+                Continuity2: rand,
+                Continuity3: val,
+                Continuity4: rand,
+                TelemLatency: val
             }
         }
 

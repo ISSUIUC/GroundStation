@@ -29,7 +29,12 @@ export const CSV_HEADERS = [
         "Voltage",
         "frequency",
         "flap_extension",
-        "pressure"]
+        "pressure",
+        "Continuity1",
+        "Continuity2",
+        "Continuity3",
+        "Continuity4"
+    ]
 
 
 

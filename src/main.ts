@@ -64,7 +64,7 @@ function updateData(IMUGX: number, IMUGY: number, IMUGZ: number,
     TEMP: number, 
     STE_ALT: number, STE_VEL: number, STE_ACC: number, STE_APO:number,
     BNO_YAW: number, BNO_PITCH: number, BNO_ROLL: number,
-    PRESSURE: number, SIGNAL: number) {
+    PRESSURE: number, SIGNAL: number, Continuity_1: number, Continuity_2: number, Continuity_3: number, Continuity_4: number, TelemLatency: number) {
    
     labels.splice(0, 1);
     time++;
@@ -319,9 +319,9 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 m["TEMP"], 
                 m["STE_ALT"], m["STE_VEL"], m["STE_ACC"], m["STE_APO"],
                 m["BNO_YAW"], m["BNO_PITCH"], m["BNO_ROLL"],
-                m["pressure"], m["RSSI"]);
+                m["pressure"], m["RSSI"], m["Continuity1"], m["Continuity2"], m["Continuity3"], m["Continuity4"], m["TelemLatency"]);
                 //Change KX_IMU_a$ to State Estimation Variables
-            
+            console.log(m["TelemLatency"]);
             const fsm_index_map = [1,2,2,3,3,4,4,4,5,5,6,6,7,7,8,9];
             if(m["FSM_state"] >= 0 && m["FSM_state"] < fsm_index_map.length){
                 m["FSM_state"] = fsm_index_map[m["FSM_state"]];

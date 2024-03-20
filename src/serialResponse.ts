@@ -30,6 +30,11 @@ export type SerialResponse =
         flap_extension:number,
         pressure: number,
         TEMP:number,
+        Continuity1: number,
+        Continuity2: number,
+        Continuity3: number,
+        Continuity4: number,
+        TelemLatency: number,
     }
 } | {
     type: "command_success"
