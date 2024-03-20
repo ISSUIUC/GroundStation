@@ -65,7 +65,8 @@ function updateData(IMUGX: number, IMUGY: number, IMUGZ: number,
     STE_ALT: number, STE_VEL: number, STE_ACC: number, STE_APO:number,
     BNO_YAW: number, BNO_PITCH: number, BNO_ROLL: number,
     PRESSURE: number, SIGNAL: number, Continuity_1: number, Continuity_2: number, Continuity_3: number, Continuity_4: number, TelemLatency: number
-    ,Pyro1: number, Pyro2: number, Pyro3: number, Pyro4: number, Pyro1Firing: number, Pyro2Firing: number, Pyro3Firing: number, Pyro4Firing: number) {
+    ,Pyro1: number, Pyro2: number, Pyro3: number, Pyro4: number, Pyro1Firing: number, Pyro2Firing: number, Pyro3Firing: number, Pyro4Firing: number,
+    is_booster: boolean) {
    
     labels.splice(0, 1);
     time++;
@@ -321,10 +322,11 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 m["STE_ALT"], m["STE_VEL"], m["STE_ACC"], m["STE_APO"],
                 m["BNO_YAW"], m["BNO_PITCH"], m["BNO_ROLL"],
                 m["pressure"], m["RSSI"], m["Continuity1"], m["Continuity2"], m["Continuity3"], m["Continuity4"], m["TelemLatency"]
-                ,m["Pyro1"], m["Pyro2"], m["Pyro3"], m["Pyro4"], m["Pyro1Firing"], m["Pyro2Firing"], m["Pyro3Firing"], m["Pyro4Firing"]);
+                ,m["Pyro1"], m["Pyro2"], m["Pyro3"], m["Pyro4"], m["Pyro1Firing"], m["Pyro2Firing"], m["Pyro3Firing"], m["Pyro4Firing"]
+                ,m["is_booster"]);
                 //Change KX_IMU_a$ to State Estimation Variables
             console.log(m["TelemLatency"]);
-            const fsm_index_map = [1,2,2,3,3,4,4,4,5,5,6,6,7,7,8,9];
+            const fsm_index_map = [1,2,2,3,3,4,4,4,5,5,6,6,7,7,8,9,10,11,12];
             if(m["FSM_state"] >= 0 && m["FSM_state"] < fsm_index_map.length){
                 m["FSM_state"] = fsm_index_map[m["FSM_state"]];
             }
