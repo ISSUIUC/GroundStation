@@ -336,7 +336,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 ,m["is_booster"]);
                 //Change KX_IMU_a$ to State Estimation Variables
             console.log(m["TelemLatency"]);
-            const fsm_index_map = [1,2,2,3,3,4,4,4,5,5,6,6,7,7,8,9,10,11,12];
+            const fsm_index_map = [1,2,3,4,5,6,7,8,9,10,11,12];
             if(m["FSM_state"] >= 0 && m["FSM_state"] < fsm_index_map.length){
                 m["FSM_state"] = fsm_index_map[m["FSM_state"]];
             }
@@ -540,7 +540,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         charts.bno.resize();
         charts.baro_altitude.resize();
         charts.signal.resize();
-        charts.continuity.resize();
         return false;
     }
 
