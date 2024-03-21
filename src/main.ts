@@ -37,11 +37,19 @@ const DP_BNOY = Array(starting_length).fill(0);
 const DP_BNOP = Array(starting_length).fill(0);
 const DP_BNOR = Array(starting_length).fill(0);
 
+
+
 //STATE ESTIMATION ARRAY PLACEHOLDERS
 const DP_STE_ALT = Array(starting_length).fill(0);
 const DP_STE_VEL = Array(starting_length).fill(0);
 const DP_STE_ACC = Array(starting_length).fill(0);
 const DP_STE_APO = Array(starting_length).fill(0);
+
+//CONTINUITY ARRAY PLACEHOLDERS
+const DP_CONTINUITY1 = Array(starting_length).fill(0);
+const DP_CONTINUITY2 = Array(starting_length).fill(0);
+const DP_CONTINUITY3 = Array(starting_length).fill(0);
+const DP_CONTINUITY4 = Array(starting_length).fill(0);
 
 const DP_TEMP = Array(starting_length).fill(0);
 
@@ -79,11 +87,11 @@ function updateData(IMUGX: number, IMUGY: number, IMUGZ: number,
         { chart: charts.baro_altitude, val: [BAROMETER] },
         { chart: charts.gps, val: [GPS_ALT] },
         { chart: charts.bno, val: [BNO_YAW, BNO_PITCH, BNO_ROLL] },
-        { chart: charts.se, val: [STE_ALT, STE_VEL, STE_ACC, STE_APO] },
+        { chart: charts.se, val: [Continuity_1,Continuity_2,Continuity_3, Continuity_4] },
         { chart: charts.imu_accel, val: [IMUAX, IMUAY, IMUAZ] },
         { chart: charts.imu_gyro, val: [IMUGX, IMUGY, IMUGZ] },
         { chart: charts.imu_mag, val: [IMUMX, IMUMY, IMUMZ] },
-        { chart: charts.signal, val: [SIGNAL] }
+        { chart: charts.signal, val: [SIGNAL]}
     ]
     console.log(BNO_PITCH);
     console.log(BNO_ROLL);
@@ -129,7 +137,8 @@ let charts: {
     se?: Chart,
     bno?: Chart,
     baro_altitude?: Chart,
-    signal: Chart
+    signal: Chart,
+    continuity?: Chart,
 }
 
 let data = {
@@ -245,10 +254,11 @@ function setup_charts() {
         imu_gyro: make_chart_multiaxis("DPS", "imuG", "IMU gyroscope", [DP_LOWGGX, DP_LOWGGY, DP_LOWGGZ]),
         imu_mag: make_chart_multiaxis("Gauss", "imuM", "IMU magnetometer", [DP_LOWGMX, DP_LOWGMY, DP_LOWGMZ]),
         gps: make_chart("Feet", "gps", "GPS altitude", DP_GPS_ALT),
-        se: make_chart_multiaxis("Feet", "se", "State Estimation", [DP_STE_ALT, DP_STE_VEL, DP_STE_ACC, DP_STE_APO]),
+        se: make_chart_multiaxis("Feet", "se", "State Estimation", [DP_CONTINUITY1, DP_CONTINUITY2, DP_CONTINUITY3, DP_CONTINUITY4]),
         bno: make_chart_multiaxis("Radians", "BNO", "Orientation", [DP_BNOY, DP_BNOP, DP_BNOR]),
         baro_altitude: make_chart("Feet", "barometer", "Barometer altitude", DP_BAROMETER),
-        signal: make_chart("dBmW", "signal_data", "Signal Strength (RSSI)", DP_SIGNAL)
+        signal: make_chart("dBmW", "signal_data", "Signal Strength (RSSI)", DP_SIGNAL),
+        //continuity: make_chart_multiaxis("Voltage", "value", "Continuity", [DP_CONTINUITY1, DP_CONTINUITY2, DP_CONTINUITY3, DP_CONTINUITY4]),
     };
 }
 
@@ -364,6 +374,7 @@ function resize_charts() {
     charts.bno.resize();
     charts.baro_altitude.resize();
     charts.signal.resize();
+    charts.continuity.resize();
 }
 
 function update_charts() {
@@ -375,6 +386,7 @@ function update_charts() {
     charts.bno.update();
     charts.baro_altitude.update();
     charts.signal.update();
+    charts.continuity.update();
 }
 
 function get_current_time_full() {
@@ -528,6 +540,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         charts.bno.resize();
         charts.baro_altitude.resize();
         charts.signal.resize();
+        charts.continuity.resize();
         return false;
     }
 
