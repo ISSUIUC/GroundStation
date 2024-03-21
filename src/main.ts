@@ -374,7 +374,6 @@ function resize_charts() {
     charts.bno.resize();
     charts.baro_altitude.resize();
     charts.signal.resize();
-    charts.continuity.resize();
 }
 
 function update_charts() {
