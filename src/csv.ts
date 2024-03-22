@@ -43,6 +43,9 @@ export const CSV_HEADERS = [
         "Pyro2Firing",
         "Pyro3Firing",
         "Pyro4Firing",
+        "is_booster",
+        "sense_pyro",
+        
     ]
 
 
