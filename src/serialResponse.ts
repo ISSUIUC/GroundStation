@@ -44,6 +44,7 @@ export type SerialResponse =
         Pyro3Firing: number,
         Pyro4Firing: number,
         is_booster: boolean,
+        sense_pyro: number,
 
     }
 } | {

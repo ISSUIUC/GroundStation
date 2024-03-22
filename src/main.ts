@@ -74,7 +74,7 @@ function updateData(IMUGX: number, IMUGY: number, IMUGZ: number,
     BNO_YAW: number, BNO_PITCH: number, BNO_ROLL: number,
     PRESSURE: number, SIGNAL: number, Continuity_1: number, Continuity_2: number, Continuity_3: number, Continuity_4: number, TelemLatency: number
     ,Pyro1: number, Pyro2: number, Pyro3: number, Pyro4: number, Pyro1Firing: number, Pyro2Firing: number, Pyro3Firing: number, Pyro4Firing: number,
-    is_booster: boolean) {
+    is_booster: boolean, FSM_state: number, sense_pyro: number) {
    
     labels.splice(0, 1);
     time++;
@@ -328,19 +328,19 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 m["IMU_mx"], m["IMU_my"], m["IMU_mz"],
                 m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],
                 m["gps_lat"], m["gps_long"], m["gps_alt"] / 1000,
-                m["TEMP"], 
+                m["TEMP"],
                 m["STE_ALT"], m["STE_VEL"], m["STE_ACC"], m["STE_APO"],
                 m["BNO_YAW"], m["BNO_PITCH"], m["BNO_ROLL"],
                 m["pressure"], m["RSSI"], m["Continuity1"], m["Continuity2"], m["Continuity3"], m["Continuity4"], m["TelemLatency"]
                 ,m["Pyro1"], m["Pyro2"], m["Pyro3"], m["Pyro4"], m["Pyro1Firing"], m["Pyro2Firing"], m["Pyro3Firing"], m["Pyro4Firing"]
-                ,m["is_booster"]);
+                ,m["is_booster"], m["FSM_state"], m["sense_pyro"]);
                 //Change KX_IMU_a$ to State Estimation Variables
             console.log(m["TelemLatency"]);
             const fsm_index_map = [1,2,3,4,5,6,7,8,9,10,11,12];
             if(m["FSM_state"] >= 0 && m["FSM_state"] < fsm_index_map.length){
                 m["FSM_state"] = fsm_index_map[m["FSM_state"]];
             }
-            if (m["FSM_state"] >= 0 && m["FSM_state"] <= 9) {
+            if (m["FSM_state"] >= 0 && m["FSM_state"] <= 13) {
                 if (m["FSM_state"] > currentActive) {
                     for (let i = currentActive; i < m["FSM_state"]; i++) {
                         nextState();

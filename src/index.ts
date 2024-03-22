@@ -452,6 +452,7 @@ export function playback() {
                 Pyro3Firing: parseFloat(data[39]),
                 Pyro4Firing: parseFloat(data[40]),
                 is_booster: false,
+                sense_pyro: parseFloat(data[41]),
 
             }
         }
@@ -539,6 +540,7 @@ export function demo() {
                 Pyro3Firing: val,
                 Pyro4Firing: rand,
                 is_booster: false,
+                sense_pyro: val,
 
             }
         }
