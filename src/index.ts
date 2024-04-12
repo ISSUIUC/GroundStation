@@ -1,7 +1,7 @@
 import { app, BrowserWindow, dialog, ipcMain, Menu } from 'electron';
 import * as SerialPort from "serialport"
 import * as path from 'path';
-import { makeMainMenu, makeSerialMenu } from './menuTemplate';
+import { makeMainMenu, makeMQTTMenu, makeSerialMenu } from './menuTemplate';
 import { WebSocket, WebSocketServer } from 'ws';
 import * as fs from 'fs';
 import { write } from 'original-fs';
@@ -14,6 +14,7 @@ import * as mqtt from 'mqtt';
 let mainWindow: BrowserWindow;
 let aboutWindow: BrowserWindow;
 let serialWindow: BrowserWindow;
+let mqttWindow: BrowserWindow;
 let gpswindow: BrowserWindow;
 let freqwindow: BrowserWindow;
 let localfreqwindow: BrowserWindow;
@@ -22,6 +23,7 @@ let homepointswindow: BrowserWindow;
 let rawjsonwindow: BrowserWindow;
 let orientationWindow: BrowserWindow;
 let serial_port: SerialPort;
+let cur_mqtt_topic: string = null
 let server: WebSocketServer;
 let web_sockets: WebSocket[] = [];
 let csv: CSVWriter;
@@ -30,6 +32,7 @@ let longitude = 0;
 let altitude = 0;
 const isMac = process.platform === 'darwin';
 const client = mqtt.connect('mqtt://localhost:1883');
+
 
 const date = new Date();
 const year = date.getFullYear();
@@ -54,7 +57,7 @@ if (isMac) {
 }
 
 app.on('ready', () => {
-    console.log('App is ready');
+
     mainWindow = new BrowserWindow({
         width: 1920,
         height: 1080,
@@ -85,6 +88,14 @@ app.on('ready', () => {
             ws.onclose = () => { web_sockets = web_sockets.filter(w => w != ws) };
         }
     )
+
+    client.on("message", (topic, message) => {
+        // Recieved message from a control mqtt stream
+        if(topic.toString() === cur_mqtt_topic) {
+            // Is current stream
+            on_serial_data(message.toString());
+        }
+    });
 });
 
 
@@ -121,6 +132,22 @@ export function createSerialWindow() {
     serialWindow.loadURL(`file://${__dirname}/serial.html`);
     serialWindow.setMenu(makeSerialMenu(serialWindow));
     serial_communicate(serialWindow);
+}
+
+// Creates MQTT conneciton window
+export function createMQTTWindow() {
+    mqttWindow = new BrowserWindow({
+        width: 500,
+        height: 400,
+        title: 'MQTT Reciever connect',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+        }
+    });
+    mqttWindow.loadURL(`file://${__dirname}/MQTT.html`);
+    mqttWindow.setMenu(makeMQTTMenu(serialWindow));
 }
 
 export function createGPSWindow() {
@@ -332,6 +359,46 @@ ipcMain.on('connect', (evt, message, baud) => {
     parser.on('data', on_serial_data);
 });
 
+ipcMain.on('connect_mqtt', (evt, topic) => {
+    mqttWindow.close();
+    console.log(`Connecting to MQTT datastream FlightData-${topic}`);
+    try {
+
+        // disconnect from serial, we do not want to have 2 input data streams
+        if (serial_port && serial_port.isOpen) {
+            serial_port.close();
+        }
+
+        // disconnect from current mqtt
+        if (cur_mqtt_topic != null) {
+            client.unsubscribe(cur_mqtt_topic)
+        }
+       
+        // Subscribe to `FlightData-topic` to subscribe to the datastream specifically
+        const t = "FlightData-" + topic
+        console.log("Subscribing..")
+        client.subscribe(t);
+        console.log("Subscribed")
+        cur_mqtt_topic = t
+    } catch (e) {
+        console.log(e);
+    }
+    
+
+});
+
+ipcMain.on('disconnect_mqtt', (evt, topic) => {
+    mqttWindow.close();
+    try {
+        // disconnect from current mqtt
+        cur_mqtt_topic = null
+    } catch (e) {
+        
+    }
+    console.log(`Disconnecting from MQTT datastream ${topic}`);
+
+});
+
 ipcMain.on('disconnect', (evt, message, baud) => {
     serialWindow.close();
     console.log(`Disconnecting from serial port ${message}`);
@@ -340,6 +407,7 @@ ipcMain.on('disconnect', (evt, message, baud) => {
     });
     serial_port = undefined;
 });
+
 
 function on_serial_data(data: string) {
     try {
