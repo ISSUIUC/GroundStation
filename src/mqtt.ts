@@ -2,6 +2,7 @@ import { ipcRenderer } from "electron";
 import * as SerialPort from "serialport"
 
 const scan_drop = <HTMLSelectElement>document.getElementById('ScanDrop');
+const url = <HTMLInputElement>document.getElementById('mqtturl');
 const led_status = document.getElementById('led_status');
 const connect = <HTMLButtonElement>document.getElementById('Connect');
 const disconnect = <HTMLButtonElement>document.getElementById('Disconnect');

@@ -31,7 +31,8 @@ let latitude = 0;
 let longitude = 0;
 let altitude = 0;
 const isMac = process.platform === 'darwin';
-const client = mqtt.connect('mqtt://localhost:1883');
+let client = mqtt.connect('mqtt://192.168.0.69:1883');
+
 
 
 const date = new Date();
@@ -359,7 +360,7 @@ ipcMain.on('connect', (evt, message, baud) => {
     parser.on('data', on_serial_data);
 });
 
-ipcMain.on('connect_mqtt', (evt, topic) => {
+ipcMain.on('connect_mqtt', (evt, topic, url) => {
     mqttWindow.close();
     console.log(`Connecting to MQTT datastream FlightData-${topic}`);
     try {
@@ -373,6 +374,8 @@ ipcMain.on('connect_mqtt', (evt, topic) => {
         if (cur_mqtt_topic != null) {
             client.unsubscribe(cur_mqtt_topic)
         }
+        // client.end();
+        // client = mqtt.connect(url);
        
         // Subscribe to `FlightData-topic` to subscribe to the datastream specifically
         const t = "FlightData-" + topic
