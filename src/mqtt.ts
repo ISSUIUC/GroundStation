@@ -13,7 +13,11 @@ let set = false;
 connect.addEventListener('click', ()=> {
     let i = scan_drop.selectedIndex;
     if(i <= 0) return;
-    ipcRenderer.send('connect_mqtt', scan_drop.options[i].value);
+    let uri = url.value
+    if (uri == "") {
+        uri = "localhost"
+    }
+    ipcRenderer.send('connect_mqtt', scan_drop.options[i].value, uri);
 })
 
 disconnect.addEventListener('click', ()=> {
@@ -21,6 +25,7 @@ disconnect.addEventListener('click', ()=> {
     if(i <= 0) return;
     ipcRenderer.send('disconnect_mqtt', scan_drop.options[i].value);
 })
+
 
 
 

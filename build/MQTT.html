@@ -18,8 +18,8 @@
             </td>
     </table>
     <div>
-        <label for="mqtturl">MQTT URL: </label><input id="mqtturl" maxlength="6" style="text-transform:uppercase"></div>
-    <button id="Connect" class="button1">Connect</button>
+        <label style="font-size: 0.5em;" for="mqtturl">MQTT URL: </label> <span style="font-size: 0.3em;">mqtt://</span><input placeholder="localhost" id="mqtturl"><span style="font-size: 0.3em;">:1883</span></div>
+    <button style="margin-top: 5px;" id="Connect" class="button1">Connect</button>
     <button id="Disconnect" class="button3">Disconnect</button>
     <script>
         require("./mqtt.js")

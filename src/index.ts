@@ -31,7 +31,7 @@ let latitude = 0;
 let longitude = 0;
 let altitude = 0;
 const isMac = process.platform === 'darwin';
-let client = mqtt.connect('mqtt://192.168.0.69:1883');
+let client: mqtt.MqttClient = null
 
 
 
@@ -90,13 +90,6 @@ app.on('ready', () => {
         }
     )
 
-    client.on("message", (topic, message) => {
-        // Recieved message from a control mqtt stream
-        if(topic.toString() === cur_mqtt_topic) {
-            // Is current stream
-            on_serial_data(message.toString());
-        }
-    });
 });
 
 
@@ -361,8 +354,8 @@ ipcMain.on('connect', (evt, message, baud) => {
 });
 
 ipcMain.on('connect_mqtt', (evt, topic, url) => {
-    mqttWindow.close();
-    console.log(`Connecting to MQTT datastream FlightData-${topic}`);
+    
+    console.log(`Connecting to MQTT datastream FlightData-${topic} @ mqtt://${url}:1883`);
     try {
 
         // disconnect from serial, we do not want to have 2 input data streams
@@ -374,15 +367,35 @@ ipcMain.on('connect_mqtt', (evt, topic, url) => {
         if (cur_mqtt_topic != null) {
             client.unsubscribe(cur_mqtt_topic)
         }
-        // client.end();
-        // client = mqtt.connect(url);
+
+        if(client && client.connected) {
+            client.end();
+        }
+        
+        client = mqtt.connect("mqtt://" + url + ":1883");
+
+        client.on("message", (topic, message) => {
+            // Recieved message from a control mqtt stream
+            if(topic.toString() === cur_mqtt_topic) {
+                // Is current stream
+                
+                on_serial_data(message.toString());
+            }
+        });
        
         // Subscribe to `FlightData-topic` to subscribe to the datastream specifically
         const t = "FlightData-" + topic
         console.log("Subscribing..")
-        client.subscribe(t);
-        console.log("Subscribed")
-        cur_mqtt_topic = t
+        client.subscribe(t, (err, grant) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            mqttWindow.close();
+            console.log("Subscribed")
+            cur_mqtt_topic = t
+        });
+
     } catch (e) {
         console.log(e);
     }
@@ -393,8 +406,17 @@ ipcMain.on('connect_mqtt', (evt, topic, url) => {
 ipcMain.on('disconnect_mqtt', (evt, topic) => {
     mqttWindow.close();
     try {
+        if(!client) {
+            return;
+        }
+
+        if(client.connected) {
+            client.end();
+        }
+
         // disconnect from current mqtt
         cur_mqtt_topic = null
+        client.end()
     } catch (e) {
         
     }
