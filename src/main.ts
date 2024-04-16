@@ -5,6 +5,7 @@ import { ServerConnection } from './serverConnection';
 
 import { ipcRenderer } from 'electron';
 import { RocketRender } from './render';
+import { Differentiator } from './differentiator';
 
 const stylesheetopt = <HTMLLinkElement>document.getElementById("style");
 let contrast = false;
@@ -12,6 +13,8 @@ let time = 0;
 let current_time = new Date();
 let dragSrcEl: any;
 let dragID: string;
+
+let altitude_differentiator = new Differentiator(30)
 
 const meter_to_feet = 3.28084;
 
@@ -51,6 +54,9 @@ const DP_CONTINUITY2 = Array(starting_length).fill(0);
 const DP_CONTINUITY3 = Array(starting_length).fill(0);
 const DP_CONTINUITY4 = Array(starting_length).fill(0);
 
+//DESCENT RATE PLACEHOLDERS
+const DP_DESCENTRATE = Array(starting_length).fill(0);
+
 const DP_TEMP = Array(starting_length).fill(0);
 
 const DP_H3LAX = Array(starting_length).fill(0);
@@ -83,11 +89,14 @@ function updateData(IMUGX: number, IMUGY: number, IMUGZ: number,
     STE_ALT *= meter_to_feet;
     STE_APO *= meter_to_feet;
     let BAROMETER = calc_altitude(PRESSURE, TEMP);
+    altitude_differentiator.push(BAROMETER);
+    let DESCENTRATE = altitude_differentiator.slope;
+    console.log(DESCENTRATE)
     const chart_arr = [
         { chart: charts.baro_altitude, val: [BAROMETER] },
         { chart: charts.gps, val: [GPS_ALT] },
         { chart: charts.bno, val: [BNO_YAW, BNO_PITCH, BNO_ROLL] },
-        { chart: charts.se, val: [Continuity_1,Continuity_2,Continuity_3, Continuity_4] },
+        { chart: charts.se, val: [DESCENTRATE] },
         { chart: charts.imu_accel, val: [IMUAX, IMUAY, IMUAZ] },
         { chart: charts.imu_gyro, val: [IMUGX, IMUGY, IMUGZ] },
         { chart: charts.imu_mag, val: [IMUMX, IMUMY, IMUMZ] },
@@ -254,7 +263,7 @@ function setup_charts() {
         imu_gyro: make_chart_multiaxis("DPS", "imuG", "IMU gyroscope", [DP_LOWGGX, DP_LOWGGY, DP_LOWGGZ]),
         imu_mag: make_chart_multiaxis("Gauss", "imuM", "IMU magnetometer", [DP_LOWGMX, DP_LOWGMY, DP_LOWGMZ]),
         gps: make_chart("Feet", "gps", "GPS altitude", DP_GPS_ALT),
-        se: make_chart_multiaxis("Voltage", "se", "Continuity", [DP_CONTINUITY1, DP_CONTINUITY2, DP_CONTINUITY3, DP_CONTINUITY4]),
+        se: make_chart_multiaxis("FPS", "se", "Vertical Velocity", [DP_DESCENTRATE]),
         bno: make_chart_multiaxis("Radians", "BNO", "Orientation", [DP_BNOY, DP_BNOP, DP_BNOR]),
         baro_altitude: make_chart("Feet", "barometer", "Barometer altitude", DP_BAROMETER),
         signal: make_chart("dBmW", "signal_data", "Signal Strength (RSSI)", DP_SIGNAL),
