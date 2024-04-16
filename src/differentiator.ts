@@ -1,6 +1,4 @@
-// PREREQ: MUST BE NUMBER !
-const cbuf_size = 30
-
+// Class to allow for taking a differential of any quantity over time
 export class Differentiator {
     cbuf_size: number = 30;
     cbuf: number[] = [];
@@ -11,6 +9,7 @@ export class Differentiator {
         this.cbuf_size = size;
     }
 
+    // Get new slope after push
     calculateSlope() {
         let xValues: number[] = this.cbuf_t.map(t => ((Date.now() - t)/1000));
         let yValues: number[] = this.cbuf
@@ -36,6 +35,7 @@ export class Differentiator {
         return slope;
     }
 
+    // Add a new datapoint to differentiator and update this.slope
     push(data: any) {
         this.cbuf.push(data);
         this.cbuf_t.push(Date.now());
