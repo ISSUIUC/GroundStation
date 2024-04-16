@@ -366,6 +366,7 @@ ipcMain.on('connect_mqtt', (evt, topic, url) => {
         // disconnect from current mqtt
         if (cur_mqtt_topic != null) {
             client.unsubscribe(cur_mqtt_topic)
+            cur_mqtt_topic = null
         }
 
         if(client && client.connected) {
@@ -466,7 +467,10 @@ function send_frontends_data(tag: string, data: string) {
 
         // Aaditya add stuff here
         
-        client.publish('Flightdata', data); // Publish data to the 'Flightdata' topic
+        if(!cur_mqtt_topic) {
+            client.publish('Flightdata', data); // Publish data to the 'Flightdata' topic
+        }
+        
 
         
     } catch (e) {
