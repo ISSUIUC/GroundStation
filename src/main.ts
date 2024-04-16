@@ -327,7 +327,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
             updateData(m["IMU_gx"], m["IMU_gy"], m["IMU_gz"],
                 m["IMU_mx"], m["IMU_my"], m["IMU_mz"],
                 m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],
-                m["gps_lat"], m["gps_long"], m["gps_alt"] / 1000,
+                m["gps_lat"]/100000, m["gps_long"]/100000, m["gps_alt"] / 1000,
                 m["TEMP"],
                 m["STE_ALT"], m["STE_VEL"], m["STE_ACC"], m["STE_APO"],
                 m["BNO_YAW"], m["BNO_PITCH"], m["BNO_ROLL"],
