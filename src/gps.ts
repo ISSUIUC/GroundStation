@@ -113,9 +113,9 @@ ipcRenderer.on("data", (something, message) => {
     if (masterJSON.type == "data") {
         const m = masterJSON["value"];
         marker_options.title = "Now";
-        updateTrail(m["gps_lat"], m["gps_long"], m["gps_alt"]);
-        if (!has_moved && m["gps_lat"] != 0 && m["gps_long"] != 0) {
-            map.setView(L.latLng(m["gps_lat"], m["gps_long"]));
+        updateTrail(m["latitude"], m["longitude"], m["altitude"]);
+        if (!has_moved && m["latitude"] != 0 && m["longitude"] != 0) {
+            map.setView(L.latLng(m["latitude"], m["longitude"]));
         }
     }
     

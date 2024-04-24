@@ -6,8 +6,8 @@
 </head>
 <div class="grid-container" id="parent-container">
     <div class="grid-item" draggable="true"><canvas id="imuA"></canvas></div>
-    <div class="grid-item" draggable="true"><canvas id="imuG"></canvas></div>
-    <div class="grid-item" draggable="true"><canvas id="imuM"></canvas></div>
+    <div class="grid-item" draggable="true"><canvas id="vbatt"></canvas></div>
+    <div class="grid-item" draggable="true"><canvas id="satcount"></canvas></div>
     <div class="grid-item" draggable="true">
         <canvas id="signal_data"></canvas>
     </div>
@@ -25,7 +25,7 @@
         <table>
             <tr>
                 <td>
-                    <div>Sensor: </div>
+                    <div></div>
                 </td>
                 <td>
                     <div class="legendx">x</div>
@@ -39,109 +39,66 @@
             </tr>
             <tr>
                 <td>
-                    <div>Acceleration (g):</div>
+                    <div>Acceleration (g): </div>
                 </td>
                 <td>
-                    <div id="KX_IMU_ax">0</div>
+                    <div id="highG_ax">0</div>
                 </td>
                 <td>
-                    <div id="KX_IMU_ay">0</div>
+                    <div id="highG_ay">0</div>
                 </td>
                 <td>
-                    <div id="KX_IMU_az">0</div>
+                    <div id="highG_az">0</div>
                 </td>
             </tr>
+
             <tr>
                 <td>
-                    <div>Gyroscope (DPS):</div>
+                    <div>Tilt Angle (deg): </div>
                 </td>
-                <td>
-                    <div id="IMU_gx">0</div>
-                </td>
-                <td>
-                    <div id="IMU_gy">0</div>
-                </td>
-                <td>
-                    <div id="IMU_gz">0</div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div>Magnetometer (Gauss):</div>
-                </td>
-                <td>
-                    <div id="IMU_mx">0</div>
-                </td>
-                <td>
-                    <div id="IMU_my">0</div>
-                </td>
-                <td>
-                    <div id="IMU_mz">0</div>
-                </td>
-            </tr>
-            <tr>
                 <td>
                     <div></div>
                 </td>
                 <td>
-                    <div class="legendx">Yaw</div>
+                    <div id="tilt_angle">0</div>
                 </td>
                 <td>
-                    <div class="legendy">Pitch</div>
-                </td>
-                <td>
-                    <div class="legendz">Roll</div>
+                    <div></div>
                 </td>
             </tr>
+
             <tr>
                 <td>
-                    <div>Orientation (rad):</div>
+                    <div>Altitude (Barometer / Ft.): </div>
                 </td>
-                <td>
-                    <div id="BNO_YAW">0</div>
-                </td>
-                <td>
-                    <div id="BNO_PITCH">0</div>
-                </td>
-                <td>
-                    <div id="BNO_ROLL">0</div>
-                </td>
-            </tr>
-            <tr>
                 <td>
                     <div></div>
                 </td>
                 <td>
-                    <div class="legendx">C1</div>
+                    <div id="barometer_altitude">0</div>
                 </td>
                 <td>
-                    <div class="legendy">C2</div>
-                </td>
-                <td>
-                    <div class="legendz">C3</div>
-                </td>
-                <td>
-                    <div class="legendplus">C4</div>
+                    <div></div>
                 </td>
             </tr>
+
             <tr>
                 <td>
-                    <div>Continuity:</div>
+                    <div>Vertical Velocity (Barometer / Ft/s): </div>
                 </td>
                 <td>
-                    <div id="Continuity1">0</div>
+                    <div></div>
                 </td>
                 <td>
-                    <div id="Continuity2">0</div>
+                    <div id="desc_rt">0</div>
                 </td>
                 <td>
-                    <div id="Continuity3">0</div>
-                </td>
-                <td>
-                    <div id="Continuity4">0</div>
+                    <div></div>
                 </td>
             </tr>
+
         </table>
+
 
         <div>GPS: </div>
         <table>
@@ -155,6 +112,9 @@
                 <td>
                     <div class="legendx">Altitude (ft)</div>
                 </td>
+                <td>
+                    <div>Sats</div>
+                </td>
             </tr>
             <tr>
                 <td>
@@ -166,113 +126,34 @@
                 <td>
                     <div id="gps_alt">0</div>
                 </td>
+                <td>
+                    <div id="sat_count">0</div>
+                </td>
             </tr>
         </table>
+
         </td>
         </tr>
         <tr>
             <td>
-                <div>Pyros</div>
-                <table>
-                    <tr>
-                        <td>
-                            <div class="legendx">Pyro 1</div>
-                        </td>
-                        <td>
-                            <div class="legendy">Pyro 2</div>
-                        </td>
-                        <td>
-                            <div class="legendz">Pyro 3</div>
-                        </td>
-                        <td>
-                            <div class="legendplus">Pyro 4</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div id="Pyro1">0</div>
-                        </td>
-                        <td>
-                            <div id="Pyro2">0</div>
-                        </td>
-                        <td>
-                            <div id="Pyro3">0</div>
-                        </td>
-                        <td>
-                            <div id="Pyro4">0</div>
-                        </td>
-                    </tr>
-                </table>
-                <div>Pyros Fired</div>
-                <table>
-                    <tr>
-                        <td>
-                            <div class="legendx">Pyro 1</div>
-                        </td>
-                        <td>
-                            <div class="legendy">Pyro 2</div>
-                        </td>
-                        <td>
-                            <div class="legendz">Pyro 3</div>
-                        </td>
-                        <td>
-                            <div class="legendplus">Pyro 4</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div id="Pyro1Firing">0</div>
-                        </td>
-                        <td>
-                            <div id="Pyro2Firing">0</div>
-                        </td>
-                        <td>
-                            <div id="Pyro3Firing">0</div>
-                        </td>
-                        <td>
-                            <div id="Pyro4Firing">0</div>
-                        </td>
-                    </tr>
-                </table>
                 <div>Others: </div>
                 <table>
                     <tr>
-                        <td>
-                            <div>Temperature: </div>
-                        </td>
-                        <td>
-                            <div>Barometer:</div>
-                        </td>
-                        <td>
-                            <div>Sense Pyro</div>
-                        </td>
                         <td>
                             <div>Booster:</div>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <div id="TEMP">0</div>
-                        </td>
-                        <td>
-                            <div id="pressure">0</div>
-                        </td>
-                        <td>
-                            <div id="sense_pyro">0</div>
-                        </td>
-                        <td>
                             <div id="is_booster">0</div>
                         </td>
                     </tr>
                     <tr>
                         <td>
-                            <div>CallSign:</div>
-                        </td>
-                        <td>
                             <div class="legendx">RSSI:</div>
                         </td>
                         <td>
-                            <div>Volt:</div>
+                            <div>Voltage:</div>
                         </td>
                         <td>
                             <div>Freq:</div>
@@ -280,13 +161,10 @@
                     </tr>
                     <tr>
                         <td>
-                            <div id="sign">0</div>
-                        </td>
-                        <td>
                             <div id="RSSI">-1</div>
                         </td>
                         <td>
-                            <div id="Voltage">0</div>
+                            <div id="battery_voltage">0</div>
                         </td>
                         <td>
                             <div id="frequency">0</div>
