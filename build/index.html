@@ -51,6 +51,9 @@
                     <div id="highG_az">0</div>
                 </td>
             </tr>
+        </table>
+
+        <table>
 
             <tr>
                 <td>
@@ -69,7 +72,7 @@
 
             <tr>
                 <td>
-                    <div>Altitude (Barometer / Ft.): </div>
+                    <div>Barometer Altitude (Ft): </div>
                 </td>
                 <td>
                     <div></div>
@@ -84,7 +87,7 @@
 
             <tr>
                 <td>
-                    <div>Vertical Velocity (Barometer / Ft/s): </div>
+                    <div>Barometer Vertical Velocity (Ft/s): </div>
                 </td>
                 <td>
                     <div></div>
@@ -97,6 +100,38 @@
                 </td>
             </tr>
 
+
+        </table>
+
+        <table>
+            <tr>
+                <td>
+                    <div class="legendx">RSSI:</div>
+                </td>
+                <td>
+                    <div>Voltage:</div>
+                </td>
+                <td>
+                    <div>Freq:</div>
+                </td>
+                <td>
+                    <div>Booster:</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="RSSI">-1</div>
+                </td>
+                <td>
+                    <div id="battery_voltage">0</div>
+                </td>
+                <td>
+                    <div id="frequency">0</div>
+                </td>
+                <td>
+                    <div id="is_booster">0</div>
+                </td>
+            </tr>
         </table>
 
 
@@ -118,13 +153,13 @@
             </tr>
             <tr>
                 <td>
-                    <div id="gps_lat">0</div>
+                    <div id="latitude">0</div>
                 </td>
                 <td>
-                    <div id="gps_long">0</div>
+                    <div id="longitude">0</div>
                 </td>
                 <td>
-                    <div id="gps_alt">0</div>
+                    <div id="altitude">0</div>
                 </td>
                 <td>
                     <div id="sat_count">0</div>
@@ -132,55 +167,78 @@
             </tr>
         </table>
 
+
+        <div>Telemetry System Health</div>
+        <table>
+            <tr>
+                <td>
+                    <div class="legendx">Sustainer</div>
+                </td>
+                <td>
+                    <div>COM A</div>
+                </td>
+                <td>
+                    <div>COM B</div>
+                </td>
+                <td>
+                    <div>CMB</div>
+                </td>
+                <td>
+                    <div class="legendx">MQTT</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="health_sustainer">NOMINAL</div>
+                </td>
+                <td>
+                    <div id="health_sustainer_coma">0%</div>
+                </td>
+                <td>
+                    <div id="health_sustainer_comb">0%</div>
+                </td>
+                <td>
+                    <div id="health_sustainer_combiner">0%</div>
+                </td>
+                <td>
+                    <div id="health_sustainer_combiner">0%</div>
+                </td>
+            </tr>
+        </table>
+        <br/>
+        <table>
+            <tr>
+                <td>
+                    <div class="legendx">Booster</div>
+                </td>
+                <td>
+                    <div>COM A</div>
+                </td>
+                <td>
+                    <div>CMB</div>
+                </td>
+                <td>
+                    <div class="legendx">Relay</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="health_booster">NOMINAL</div>
+                </td>
+                <td>
+                    <div id="health_booster_coma">0%</div>
+                </td>
+                <td>
+                    <div id="health_booster_combiner">0%</div>
+                </td>
+                <td>
+                    <div id="health_relay">0%</div>
+                </td>
+            </tr>
+        </table>
+
         </td>
         </tr>
-        <tr>
-            <td>
-                <div>Others: </div>
-                <table>
-                    <tr>
-                        <td>
-                            <div>Booster:</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div id="is_booster">0</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div class="legendx">RSSI:</div>
-                        </td>
-                        <td>
-                            <div>Voltage:</div>
-                        </td>
-                        <td>
-                            <div>Freq:</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div id="RSSI">-1</div>
-                        </td>
-                        <td>
-                            <div id="battery_voltage">0</div>
-                        </td>
-                        <td>
-                            <div id="frequency">0</div>
-                        </td>
-                    </tr>
-                    <!-- <tr>
-                        <td>
-                            <div>Pressure:</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div id="pressure">0</div>
-                        </td>
-                    </tr> -->
-                </table>
 
 
     </div>

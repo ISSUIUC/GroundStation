@@ -313,6 +313,9 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                     document.getElementById(key).innerText = ((m as any)[key]).toFixed(5);
                 } else if (key == "altitude") {
                     document.getElementById(key).innerText = ((((m as any)[key]) / 1000) * meter_to_feet).toFixed(3);
+                } else if (key == "sat_count") {
+                    document.getElementById(key).innerText = ((m as any)[key]).toFixed(0);
+                
                 } else if (key == "barometer_altitude") {
                     let temp: number = parseFloat((m as any)[key]);
                     temp *= meter_to_feet;
