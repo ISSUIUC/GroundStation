@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, Menu } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, ipcRenderer, Menu } from 'electron';
 import * as SerialPort from "serialport"
 import * as path from 'path';
 import { makeMainMenu, makeMQTTMenu, makeSerialMenu } from './menuTemplate';
@@ -376,17 +376,43 @@ ipcMain.on('connect_mqtt', (evt, topic, url) => {
         client = mqtt.connect("mqtt://" + url + ":1883");
 
         client.on("message", (topic, message) => {
-            // Recieved message from a control mqtt stream
+            // Recieved message from an mqtt stream
+
             if(topic.toString() === cur_mqtt_topic) {
                 // Is current stream
-                
                 on_serial_data(message.toString());
             }
+
+            // Common stream
+            if(topic.toString() === "Common") {
+                try {
+                    let packet_data = JSON.parse(message.toString())
+                    if(packet_data['source'] === "gss_combiner" && packet_data['action'] == "none") {
+                        // visual update
+                        mainWindow.webContents.send("common", packet_data);
+                        // update_telem_health(packet_data['data']);
+                    }
+                } catch (e) {
+                    console.log(e)
+                    console.log("Packet decode err")
+                }
+            }
+
         });
        
         // Subscribe to `FlightData-topic` to subscribe to the datastream specifically
         const t = "FlightData-" + topic
         console.log("Subscribing..")
+
+        client.subscribe("Common", (err, grant) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            console.log("Subscribed to Common")
+        });
+
+
         client.subscribe(t, (err, grant) => {
             if (err) {
                 console.log(err);
@@ -396,6 +422,9 @@ ipcMain.on('connect_mqtt', (evt, topic, url) => {
             console.log("Subscribed")
             cur_mqtt_topic = t
         });
+
+
+        
 
     } catch (e) {
         console.log(e);

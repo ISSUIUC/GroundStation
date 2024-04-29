@@ -3,7 +3,7 @@ import { SerialResponse } from './serialResponse';
 import { ServerConnection } from './serverConnection';
 
 
-import { ipcRenderer } from 'electron';
+import { ipcMain, ipcRenderer } from 'electron';
 import { RocketRender } from './render';
 import { Differentiator } from './differentiator';
 
@@ -264,6 +264,189 @@ function setup_charts() {
     };
 }
 
+function update_telem_health(health_packet: any) {
+
+    const set_formatted_text = (element: HTMLElement, text: string) => {
+        // sets text and colors it depending on text content
+        element.innerText = text
+
+        if(text === "OFF" || text === "INACTIVE") {
+            element.style.color = "#888888";
+            return;
+        }
+
+        if(text === "LOS" || text === "NO SIGNAL") {
+            element.style.color = "#ff6666";
+            return;
+        }
+
+        if(text === "NOMINAL") {
+            element.style.color = "#66ff66";
+            return;
+        }
+
+        if(text === "DELAYED" || text === "PKT LOSS") {
+            element.style.color = "#ffff66";
+            return;
+        }
+
+
+
+        element.style.color = "#ffffff";
+    }
+
+    const set_color_for_pct = (element: HTMLElement, percentage: number) => {
+        if(percentage > 80) {
+            element.style.color = "#66ff66";
+            return;
+        }
+
+        if(percentage > 60) {
+            element.style.color = "#ffff66";
+            return;
+        }
+
+        if(percentage == -2) {
+            element.style.color = "#888888";
+            return;
+        }
+
+
+
+        element.style.color = "#ff6666";
+    }
+
+    const get_pct_for_key = (p_key: any) => {
+
+        if(!p_key) {
+            return -2;
+        }
+
+        let min_latency = 99999;
+
+
+        let success = 0;
+        let fail = 0;
+        for(let i = 0; i < Object.values(p_key).length; i++) {
+            let pk: any = Object.values(p_key)[i]
+            success += pk['success'];
+            fail += pk['fail'];
+
+            let latency = (Date.now()/1000) - Number(pk['last'])
+            if (latency < min_latency) {
+                min_latency = latency
+            }
+
+        }
+
+        if(success + fail == 0) {
+            return -2;
+        }
+
+        if(min_latency > 3) {
+            return -1
+        }
+
+        return parseInt(((100*success)/(success+fail)).toFixed(0))
+    }
+
+    const get_formatted_string_for_key = (p_key: any) => {
+        let pct = get_pct_for_key(p_key)
+
+        if(pct == -1) {
+            return "LOS"
+        }
+
+        if(pct == -2) {
+            return "OFF"
+        }
+
+        return pct + "%"
+    }
+
+
+    const update_field = (packet_key_name: string, element_id: string) => {
+        set_formatted_text(document.getElementById(element_id), get_formatted_string_for_key(health_packet['data'][packet_key_name]))
+        set_color_for_pct(document.getElementById(element_id), get_pct_for_key(health_packet['data'][packet_key_name]))
+    }
+
+
+    const get_status_booster = () => {
+        let cur_time = Date.now() / 1000
+        let combiner_health = get_pct_for_key(health_packet['data']['booster_comb'])
+        let comm_health = get_pct_for_key(health_packet['data']['booster_telem'])
+        let relay_health = get_pct_for_key(health_packet['data']['relay_telem'])
+
+        let has_relay = (health_packet['data']['relay_telem'] != undefined)
+        
+        let latency_comb = cur_time - Number(health_packet['data']['booster_comb']['COMB Booster']['last'])
+
+
+        if (combiner_health == -2) {
+            return "INACTIVE"
+        }
+
+        if (latency_comb > 4) {
+            return "NO SIGNAL"
+        }
+
+        if (latency_comb > 2) {
+            return "DELAYED"
+        }
+
+        if(combiner_health > 50 && comm_health > 80 && (!has_relay || relay_health > 80)) {
+            return "NOMINAL"
+        }
+
+
+        return "PKT LOSS"
+    }
+
+    const get_status_sustainer = () => {
+        let cur_time = Date.now() / 1000
+        let combiner_health = get_pct_for_key(health_packet['data']['sustainer_comb'])
+        let comm_health = get_pct_for_key(health_packet['data']['sustainer_telem'])
+        let relay_health = get_pct_for_key(health_packet['data']['relay_telem'])
+
+        let latency_comb = cur_time - Number(health_packet['data']['sustainer_comb']['COMB Sustainer']['last'])
+        let has_relay = (health_packet['data']['relay_telem'] != undefined)
+
+        if (combiner_health == -2) {
+            return "INACTIVE"
+        }
+
+        if (latency_comb > 3) {
+            return "NO SIGNAL"
+        }
+
+        if (latency_comb > 1) {
+            return "DELAYED"
+        }
+
+        if(combiner_health > 50 && comm_health > 80 && (!has_relay || relay_health > 80)) {
+            return "NOMINAL"
+        }
+
+        return "PKT LOSS"
+    }
+
+    update_field("booster_telem", "health_booster_comm")
+    update_field("booster_comb", "health_booster_combiner")
+    update_field("sustainer_telem", "health_sustainer_comm")
+    update_field("sustainer_comb", "health_sustainer_combiner")
+    update_field("relay_telem", "health_relay")
+    update_field("mqtt", "health_mqtt")
+
+    // update text on the fields
+    set_formatted_text(document.getElementById("health_sustainer"), get_status_sustainer())
+    set_formatted_text(document.getElementById("health_booster"), get_status_booster())
+
+}
+
+ipcRenderer.on("common", (evt, msg) => {
+    update_telem_health(msg)
+})
+
 
 
 export function run_frontend(serverConnection: ServerConnection, registerables: readonly ChartComponentLike[]) {
@@ -271,7 +454,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
     BUT WILL BE MOVED LATER TO AFTER GSS 
     ESTABLISHES CONNNECTION TO FEATHER */
     Chart.register(...registerables)
-
+ 
     charts = setup_charts();
     // set_current_time();
     // setInterval(set_current_time, 1000);
