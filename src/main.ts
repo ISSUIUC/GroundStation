@@ -14,7 +14,7 @@ let current_time = new Date();
 let dragSrcEl: any;
 let dragID: string;
 
-let altitude_differentiator = new Differentiator(30)
+let altitude_differentiator = new Differentiator(5)
 
 const meter_to_feet = 3.28084;
 
@@ -87,6 +87,8 @@ function updateData(barometer_altitude: number, altitude: number, latitude: numb
     altitude_differentiator.push(BAROMETER);
     let DESCENTRATE = altitude_differentiator.slope;
 
+    // update vertical velocity raw telem
+    document.getElementById("desc_rt").innerText = DESCENTRATE.toFixed(2)
 
     const chart_arr = [
         { chart: charts.baro_altitude, val: [BAROMETER] },
