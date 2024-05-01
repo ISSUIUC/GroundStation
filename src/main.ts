@@ -401,7 +401,7 @@ function update_telem_health(health_packet: any) {
         }
 
 
-        return "PKT LOSS"
+        return "RELAY"
     }
 
     const get_status_sustainer = () => {
@@ -429,7 +429,7 @@ function update_telem_health(health_packet: any) {
             return "NOMINAL"
         }
 
-        return "PKT LOSS"
+        return "RELAY"
     }
 
     update_field("booster_telem", "health_booster_comm")
