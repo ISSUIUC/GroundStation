@@ -497,7 +497,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 if (key == "latitude" || key == "longitude") {
                     document.getElementById(key).innerText = ((m as any)[key]).toFixed(5);
                 } else if (key == "altitude") {
-                    document.getElementById(key).innerText = ((((m as any)[key]) / 1000) * meter_to_feet).toFixed(3);
+                    document.getElementById(key).innerText = ((((m as any)[key])) * meter_to_feet).toFixed(3);
                 } else if (key == "sat_count") {
                     document.getElementById(key).innerText = ((m as any)[key]).toFixed(0);
                 

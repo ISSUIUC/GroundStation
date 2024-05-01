@@ -380,6 +380,7 @@ ipcMain.on('connect_mqtt', (evt, topic, url) => {
 
             if(topic.toString() === cur_mqtt_topic) {
                 // Is current stream
+                console.log(message.toString())
                 on_serial_data(message.toString());
             }
 
