@@ -514,7 +514,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                     document.getElementById(key).innerText = (m as any)[key];
                 }
             }
-            updateData(m["barometer_altitude"], m["altitude"], m["latitude"],
+            updateData(m["barometer_altitude"], m["altitude"] * meter_to_feet, m["latitude"],
                 m["longitude"], m["highG_ax"], m["highG_ay"],
                 m["highG_az"], m["battery_voltage"], m["FSM_state"],
                 m["tilt_angle"], m["frequency"], m["RSSI"], m["sat_count"]);
