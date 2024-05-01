@@ -514,10 +514,12 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                     document.getElementById(key).innerText = (m as any)[key];
                 }
             }
+          
             updateData(m["barometer_altitude"], m["altitude"] * meter_to_feet, m["latitude"],
                 m["longitude"], m["highG_ax"], m["highG_ay"],
                 m["highG_az"], m["battery_voltage"], m["FSM_state"],
                 m["tilt_angle"], m["frequency"], m["RSSI"], m["sat_count"]);
+
                 //Change KX_IMU_a$ to State Estimation Variables
             const fsm_index_map = [1,2,3,4,5,6,7,8,9,10,11,12];
             if(m["FSM_state"] >= 0 && m["FSM_state"] < fsm_index_map.length){

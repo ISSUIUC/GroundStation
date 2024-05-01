@@ -3,6 +3,10 @@
     "version": "1.0.0",
     "contributors": [
         {
+            "name": "Aaditya Voruganti",
+            "url": "https://github.com/Aadityavoru"
+        },
+        {
             "name": "Peter Giannetos",
             "url": "https://github.com/Peter-Giannetos"
         },
@@ -22,7 +26,8 @@
     "main": "build/index.js",
     "scripts": {
         "start": "electron .",
-        "build": "tsc --watch"
+        "build": "tsc --watch",
+        "serve": "node server.js"
     },
     "devDependencies": {
         "@types/bootstrap": "^5.2.3",
@@ -43,6 +48,7 @@
         "chart.js": "^3.7.1",
         "chroma-js": "^2.4.2",
         "electron-rebuild": "^3.2.6",
+        "http-server": "^14.1.1",
         "leaflet": "^1.7.1",
         "loaders.gl": "^0.3.5",
         "mqtt": "^5.0.5",
