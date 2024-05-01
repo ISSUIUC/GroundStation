@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, Menu } from 'electron';
+import { app, BrowserWindow, dialog, ipcMain, ipcRenderer, Menu } from 'electron';
 import * as SerialPort from "serialport"
 import * as path from 'path';
 import { makeMainMenu, makeMQTTMenu, makeSerialMenu } from './menuTemplate';
@@ -376,17 +376,44 @@ ipcMain.on('connect_mqtt', (evt, topic, url) => {
         client = mqtt.connect("mqtt://" + url + ":1883");
 
         client.on("message", (topic, message) => {
-            // Recieved message from a control mqtt stream
+            // Recieved message from an mqtt stream
+
             if(topic.toString() === cur_mqtt_topic) {
                 // Is current stream
-                
+                console.log(message.toString())
                 on_serial_data(message.toString());
             }
+
+            // Common stream
+            if(topic.toString() === "Common") {
+                try {
+                    let packet_data = JSON.parse(message.toString())
+                    if(packet_data['source'] === "gss_combiner" && packet_data['action'] == "none") {
+                        // visual update
+                        mainWindow.webContents.send("common", packet_data);
+                        // update_telem_health(packet_data['data']);
+                    }
+                } catch (e) {
+                    console.log(e)
+                    console.log("Packet decode err")
+                }
+            }
+
         });
        
         // Subscribe to `FlightData-topic` to subscribe to the datastream specifically
         const t = "FlightData-" + topic
         console.log("Subscribing..")
+
+        client.subscribe("Common", (err, grant) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            console.log("Subscribed to Common")
+        });
+
+
         client.subscribe(t, (err, grant) => {
             if (err) {
                 console.log(err);
@@ -396,6 +423,9 @@ ipcMain.on('connect_mqtt', (evt, topic, url) => {
             console.log("Subscribed")
             cur_mqtt_topic = t
         });
+
+
+        
 
     } catch (e) {
         console.log(e);
@@ -505,55 +535,56 @@ export function playback() {
     let packets: SerialResponse[] = [];
     for (let i = 1; i < filedump.length - 1; i++) {
         let data: string[] = filedump.at(i).split(",");
-        const temp: SerialResponse = {
-            type: 'data',
-            value: {
-                gps_lat: parseFloat(data[1]),
-                gps_long: parseFloat(data[2]),
-                gps_alt: parseFloat(data[3]),
-                TEMP: parseFloat(data[4]),
-                KX_IMU_ax: parseFloat(data[5]),
-                KX_IMU_ay: parseFloat(data[6]),
-                KX_IMU_az: parseFloat(data[7]),
-                STE_ALT: parseFloat(data[8]),
-                STE_VEL: parseFloat(data[9]),
-                STE_ACC: parseFloat(data[10]),
-                STE_APO: parseFloat(data[11]),
-                BNO_YAW: parseFloat(data[12]),
-                BNO_PITCH: parseFloat(data[13]),
-                BNO_ROLL: parseFloat(data[14]),
-                IMU_gx: parseFloat(data[15]),
-                IMU_gy: parseFloat(data[16]),
-                IMU_gz: parseFloat(data[17]),
-                IMU_mx: parseFloat(data[18]),
-                IMU_my: parseFloat(data[19]),
-                IMU_mz: parseFloat(data[20]),
-                FSM_state: parseFloat(data[21]),
-                sign: data[22],
-                RSSI: parseFloat(data[23]),
-                Voltage: parseFloat(data[24]),
-                frequency: parseFloat(data[25]),
-                flap_extension: parseFloat(data[26]),
-                pressure: parseFloat(data[27]),
-                Continuity1: parseFloat(data[28]),
-                Continuity2: parseFloat(data[29]),
-                Continuity3: parseFloat(data[30]),
-                Continuity4: parseFloat(data[31]),
-                TelemLatency: parseFloat(data[32]),
-                Pyro1: parseFloat(data[33]),
-                Pyro2: parseFloat(data[34]),
-                Pyro3: parseFloat(data[35]),
-                Pyro4: parseFloat(data[36]),
-                Pyro1Firing: parseFloat(data[37]),
-                Pyro2Firing: parseFloat(data[38]),
-                Pyro3Firing: parseFloat(data[39]),
-                Pyro4Firing: parseFloat(data[40]),
-                is_booster: false,
-                sense_pyro: parseFloat(data[41]),
+        // TODO: Re-implement playback in a smarter way later
+        // const temp: SerialResponse = {
+        //     type: 'data',
+        //     value: {
+        //         gps_lat: parseFloat(data[1]),
+        //         gps_long: parseFloat(data[2]),
+        //         gps_alt: parseFloat(data[3]),
+        //         TEMP: parseFloat(data[4]),
+        //         KX_IMU_ax: parseFloat(data[5]),
+        //         KX_IMU_ay: parseFloat(data[6]),
+        //         KX_IMU_az: parseFloat(data[7]),
+        //         STE_ALT: parseFloat(data[8]),
+        //         STE_VEL: parseFloat(data[9]),
+        //         STE_ACC: parseFloat(data[10]),
+        //         STE_APO: parseFloat(data[11]),
+        //         BNO_YAW: parseFloat(data[12]),
+        //         BNO_PITCH: parseFloat(data[13]),
+        //         BNO_ROLL: parseFloat(data[14]),
+        //         IMU_gx: parseFloat(data[15]),
+        //         IMU_gy: parseFloat(data[16]),
+        //         IMU_gz: parseFloat(data[17]),
+        //         IMU_mx: parseFloat(data[18]),
+        //         IMU_my: parseFloat(data[19]),
+        //         IMU_mz: parseFloat(data[20]),
+        //         FSM_state: parseFloat(data[21]),
+        //         sign: data[22],
+        //         RSSI: parseFloat(data[23]),
+        //         Voltage: parseFloat(data[24]),
+        //         frequency: parseFloat(data[25]),
+        //         flap_extension: parseFloat(data[26]),
+        //         pressure: parseFloat(data[27]),
+        //         Continuity1: parseFloat(data[28]),
+        //         Continuity2: parseFloat(data[29]),
+        //         Continuity3: parseFloat(data[30]),
+        //         Continuity4: parseFloat(data[31]),
+        //         TelemLatency: parseFloat(data[32]),
+        //         Pyro1: parseFloat(data[33]),
+        //         Pyro2: parseFloat(data[34]),
+        //         Pyro3: parseFloat(data[35]),
+        //         Pyro4: parseFloat(data[36]),
+        //         Pyro1Firing: parseFloat(data[37]),
+        //         Pyro2Firing: parseFloat(data[38]),
+        //         Pyro3Firing: parseFloat(data[39]),
+        //         Pyro4Firing: parseFloat(data[40]),
+        //         is_booster: false,
+        //         sense_pyro: parseFloat(data[41]),
 
-            }
-        }
-        packets.push(temp);
+        //     }
+        // }
+        // packets.push(temp);
 
     }
     let index = 0;
@@ -585,63 +616,64 @@ export function demo() {
         const val = Math.cos(num/10);
         const rand = Math.sin(num/10);
 
-        const data: SerialResponse = {
-            type: 'data',
-            value: {
-                IMU_mx: val,
-                IMU_my: rand,
-                IMU_mz: val * rand,
-                IMU_gx: val,
-                IMU_gy: rand,
-                IMU_gz: val * rand,
-                KX_IMU_ax: val,
-                KX_IMU_ay: rand,
-                KX_IMU_az: val * rand,
-                // gps_lat: 40.1119 + val / 1000, //Talbot Lat
-                // gps_long: -88.2282 + rand / 1000, //Talbot Long
-                // gps_lat: 41.488167 + val / 1000, //QCRC
-                // gps_long: -89.500778 + rand / 1000, //QCRC
-                gps_lat: 41.774273 + val / 1000, // Michiana
-                gps_long: -86.572435 + rand / 1000, // Michiana
-                // gps_lat: 32.990 + val / 1000, //IREC
-                // gps_long: -106.9754 + rand / 1000, //IREC
-                // gps_lat: 0,
-                // gps_long: 0,
-                gps_alt: (num/150) * 45000,
-                STE_ALT: val,
-                STE_VEL: rand,
-                STE_ACC: val * rand,
-                STE_APO: rand*val*2,
-                BNO_YAW: val,
-                BNO_PITCH: rand,
-                BNO_ROLL: val + rand,
-                RSSI: val,
-                sign: "qxqxlol",
-                FSM_state: num * (15/150),
-                Voltage: val,
-                TEMP: val,
-                frequency: val,
-                flap_extension: rand/val,
-                pressure: 918,
-                Continuity1: val,
-                Continuity2: rand,
-                Continuity3: val,
-                Continuity4: rand,
-                TelemLatency: val,
-                Pyro1: val,
-                Pyro2: rand,
-                Pyro3: val,
-                Pyro4: rand,
-                Pyro1Firing: val,
-                Pyro2Firing: rand,
-                Pyro3Firing: val,
-                Pyro4Firing: rand,
-                is_booster: false,
-                sense_pyro: val,
+        // TODO: Re-implement demo later in a smarter way. As of now the gss_combiner test script is a better way to demo anyway.
+        // const data: SerialResponse = {
+        //     type: 'data',
+        //     value: {
+        //         IMU_mx: val,
+        //         IMU_my: rand,
+        //         IMU_mz: val * rand,
+        //         IMU_gx: val,
+        //         IMU_gy: rand,
+        //         IMU_gz: val * rand,
+        //         KX_IMU_ax: val,
+        //         KX_IMU_ay: rand,
+        //         KX_IMU_az: val * rand,
+        //         // gps_lat: 40.1119 + val / 1000, //Talbot Lat
+        //         // gps_long: -88.2282 + rand / 1000, //Talbot Long
+        //         // gps_lat: 41.488167 + val / 1000, //QCRC
+        //         // gps_long: -89.500778 + rand / 1000, //QCRC
+        //         gps_lat: 41.774273 + val / 1000, // Michiana
+        //         gps_long: -86.572435 + rand / 1000, // Michiana
+        //         // gps_lat: 32.990 + val / 1000, //IREC
+        //         // gps_long: -106.9754 + rand / 1000, //IREC
+        //         // gps_lat: 0,
+        //         // gps_long: 0,
+        //         gps_alt: (num/150) * 45000,
+        //         STE_ALT: val,
+        //         STE_VEL: rand,
+        //         STE_ACC: val * rand,
+        //         STE_APO: rand*val*2,
+        //         BNO_YAW: val,
+        //         BNO_PITCH: rand,
+        //         BNO_ROLL: val + rand,
+        //         RSSI: val,
+        //         sign: "qxqxlol",
+        //         FSM_state: num * (15/150),
+        //         Voltage: val,
+        //         TEMP: val,
+        //         frequency: val,
+        //         flap_extension: rand/val,
+        //         pressure: 918,
+        //         Continuity1: val,
+        //         Continuity2: rand,
+        //         Continuity3: val,
+        //         Continuity4: rand,
+        //         TelemLatency: val,
+        //         Pyro1: val,
+        //         Pyro2: rand,
+        //         Pyro3: val,
+        //         Pyro4: rand,
+        //         Pyro1Firing: val,
+        //         Pyro2Firing: rand,
+        //         Pyro3Firing: val,
+        //         Pyro4Firing: rand,
+        //         is_booster: false,
+        //         sense_pyro: val,
 
-            }
-        }
+        //     }
+        // }
 
-        on_serial_data(JSON.stringify(data));
+        // on_serial_data(JSON.stringify(data));
     }, 66);
 }

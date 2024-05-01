@@ -3,7 +3,7 @@ import { SerialResponse } from './serialResponse';
 import { ServerConnection } from './serverConnection';
 
 
-import { ipcRenderer } from 'electron';
+import { ipcMain, ipcRenderer } from 'electron';
 import { RocketRender } from './render';
 import { Differentiator } from './differentiator';
 
@@ -14,7 +14,7 @@ let current_time = new Date();
 let dragSrcEl: any;
 let dragID: string;
 
-let altitude_differentiator = new Differentiator(30)
+let altitude_differentiator = new Differentiator(5)
 
 const meter_to_feet = 3.28084;
 
@@ -36,9 +36,7 @@ const DP_GPS_LAT = Array(starting_length).fill(0);
 const DP_GPS_LONG = Array(starting_length).fill(0);
 const DP_GPS_ALT = Array(starting_length).fill(0);
 
-const DP_BNOY = Array(starting_length).fill(0);
-const DP_BNOP = Array(starting_length).fill(0);
-const DP_BNOR = Array(starting_length).fill(0);
+const DP_TILTANGLE = Array(starting_length).fill(0);
 
 
 
@@ -57,6 +55,12 @@ const DP_CONTINUITY4 = Array(starting_length).fill(0);
 //DESCENT RATE PLACEHOLDERS
 const DP_DESCENTRATE = Array(starting_length).fill(0);
 
+// VOLTAGE
+const DP_VOLTAGE: number[] = Array(starting_length).fill(0);
+
+// SAT COUNT
+const DP_SATCOUNT = Array(starting_length).fill(0);
+
 const DP_TEMP = Array(starting_length).fill(0);
 
 const DP_H3LAX = Array(starting_length).fill(0);
@@ -71,40 +75,31 @@ const rocket_renderer = new RocketRender(canvas);
 
 let labels = Array(starting_length).fill(0);
 
-function updateData(IMUGX: number, IMUGY: number, IMUGZ: number,
-    IMUMX: number, IMUMY: number, IMUMZ: number,
-    IMUAX: number, IMUAY: number, IMUAZ: number,
-    GPS_LAT: number, GPS_LONG: number, GPS_ALT: number,
-    TEMP: number, 
-    STE_ALT: number, STE_VEL: number, STE_ACC: number, STE_APO:number,
-    BNO_YAW: number, BNO_PITCH: number, BNO_ROLL: number,
-    PRESSURE: number, SIGNAL: number, Continuity_1: number, Continuity_2: number, Continuity_3: number, Continuity_4: number, TelemLatency: number
-    ,Pyro1: number, Pyro2: number, Pyro3: number, Pyro4: number, Pyro1Firing: number, Pyro2Firing: number, Pyro3Firing: number, Pyro4Firing: number,
-    is_booster: boolean, FSM_state: number, sense_pyro: number) {
+function updateData(barometer_altitude: number, altitude: number, latitude: number,
+    longitude: number, highG_ax: number, highG_ay: number,
+    highG_az: number, battery_voltage: number, FSM_state: number,
+    tilt_angle: number, frequency: number, RSSI: number, sat_count: number) {
    
     labels.splice(0, 1);
     time++;
     labels.push(time);
-    GPS_ALT *= meter_to_feet;
-    STE_ALT *= meter_to_feet;
-    STE_APO *= meter_to_feet;
-    let BAROMETER = calc_altitude(PRESSURE, TEMP);
+    let BAROMETER = barometer_altitude;
     altitude_differentiator.push(BAROMETER);
     let DESCENTRATE = altitude_differentiator.slope;
-    console.log(DESCENTRATE)
+
+    // update vertical velocity raw telem
+    document.getElementById("desc_rt").innerText = DESCENTRATE.toFixed(2)
+
     const chart_arr = [
         { chart: charts.baro_altitude, val: [BAROMETER] },
-        { chart: charts.gps, val: [GPS_ALT] },
-        { chart: charts.bno, val: [BNO_YAW, BNO_PITCH, BNO_ROLL] },
+        { chart: charts.gps, val: [altitude] },
+        { chart: charts.bno, val: [tilt_angle] },
         { chart: charts.se, val: [DESCENTRATE] },
-        { chart: charts.imu_accel, val: [IMUAX, IMUAY, IMUAZ] },
-        { chart: charts.imu_gyro, val: [IMUGX, IMUGY, IMUGZ] },
-        { chart: charts.imu_mag, val: [IMUMX, IMUMY, IMUMZ] },
-        { chart: charts.signal, val: [SIGNAL]}
+        { chart: charts.imu_accel, val: [highG_ax, highG_ay, highG_az] },
+        { chart: charts.vbatt, val: [battery_voltage] },
+        { chart: charts.satcount, val: [sat_count] },
+        { chart: charts.signal, val: [RSSI]}
     ]
-    console.log(BNO_PITCH);
-    console.log(BNO_ROLL);
-    console.log(BNO_YAW);
 
     chart_arr.forEach(
         c => {
@@ -119,7 +114,7 @@ function updateData(IMUGX: number, IMUGY: number, IMUGZ: number,
             }
         }
     )
-    rocket_renderer.updateOrientation(BNO_ROLL, BNO_PITCH, BNO_YAW);
+    rocket_renderer.updateOrientation(0, 0, tilt_angle * (-Math.PI/180));
     // update_charts();
 
 }
@@ -140,8 +135,8 @@ function make_new_dataset(data: number[], name: string) {
 
 let charts: {
     imu_accel?: Chart,
-    imu_gyro?: Chart,
-    imu_mag?: Chart,
+    vbatt?: Chart,
+    satcount?: Chart,
     gps?: Chart,
     se?: Chart,
     bno?: Chart,
@@ -260,16 +255,199 @@ function make_chart_multiaxis(units: string, element_id: string, name: string, d
 function setup_charts() {
     return {
         imu_accel: make_chart_multiaxis("G", "imuA", "KX acceleration", [DP_LOWGAX, DP_LOWGAY, DP_LOWGAZ]),
-        imu_gyro: make_chart_multiaxis("DPS", "imuG", "IMU gyroscope", [DP_LOWGGX, DP_LOWGGY, DP_LOWGGZ]),
-        imu_mag: make_chart_multiaxis("Gauss", "imuM", "IMU magnetometer", [DP_LOWGMX, DP_LOWGMY, DP_LOWGMZ]),
+        vbatt: make_chart_multiaxis("V", "vbatt", "Battery Voltage", [DP_VOLTAGE]),
+        satcount: make_chart_multiaxis("#", "satcount", "GPS Satellite Count", [DP_SATCOUNT]),
         gps: make_chart("Feet", "gps", "GPS altitude", DP_GPS_ALT),
         se: make_chart_multiaxis("FPS", "se", "Vertical Velocity", [DP_DESCENTRATE]),
-        bno: make_chart_multiaxis("Radians", "BNO", "Orientation", [DP_BNOY, DP_BNOP, DP_BNOR]),
+        bno: make_chart_multiaxis("Degrees", "BNO", "Tilt Angle", [DP_TILTANGLE]),
         baro_altitude: make_chart("Feet", "barometer", "Barometer altitude", DP_BAROMETER),
         signal: make_chart("dBmW", "signal_data", "Signal Strength (RSSI)", DP_SIGNAL),
         //continuity: make_chart_multiaxis("Voltage", "value", "Continuity", [DP_CONTINUITY1, DP_CONTINUITY2, DP_CONTINUITY3, DP_CONTINUITY4]),
     };
 }
+
+function update_telem_health(health_packet: any) {
+
+    const set_formatted_text = (element: HTMLElement, text: string) => {
+        // sets text and colors it depending on text content
+        element.innerText = text
+
+        if(text === "OFF" || text === "INACTIVE") {
+            element.style.color = "#888888";
+            return;
+        }
+
+        if(text === "LOS" || text === "NO SIGNAL") {
+            element.style.color = "#ff6666";
+            return;
+        }
+
+        if(text === "NOMINAL") {
+            element.style.color = "#66ff66";
+            return;
+        }
+
+        if(text === "DELAYED" || text === "PKT LOSS") {
+            element.style.color = "#ffff66";
+            return;
+        }
+
+
+
+        element.style.color = "#ffffff";
+    }
+
+    const set_color_for_pct = (element: HTMLElement, percentage: number) => {
+        if(percentage > 80) {
+            element.style.color = "#66ff66";
+            return;
+        }
+
+        if(percentage > 60) {
+            element.style.color = "#ffff66";
+            return;
+        }
+
+        if(percentage == -2) {
+            element.style.color = "#888888";
+            return;
+        }
+
+
+
+        element.style.color = "#ff6666";
+    }
+
+    const get_pct_for_key = (p_key: any) => {
+
+        if(!p_key) {
+            return -2;
+        }
+
+        let min_latency = 99999;
+
+
+        let success = 0;
+        let fail = 0;
+        for(let i = 0; i < Object.values(p_key).length; i++) {
+            let pk: any = Object.values(p_key)[i]
+            success += pk['success'];
+            fail += pk['fail'];
+
+            let latency = (Date.now()/1000) - Number(pk['last'])
+            if (latency < min_latency) {
+                min_latency = latency
+            }
+
+        }
+
+        if(success + fail == 0) {
+            return -2;
+        }
+
+        if(min_latency > 3) {
+            return -1
+        }
+
+        return parseInt(((100*success)/(success+fail)).toFixed(0))
+    }
+
+    const get_formatted_string_for_key = (p_key: any) => {
+        let pct = get_pct_for_key(p_key)
+
+        if(pct == -1) {
+            return "LOS"
+        }
+
+        if(pct == -2) {
+            return "OFF"
+        }
+
+        return pct + "%"
+    }
+
+
+    const update_field = (packet_key_name: string, element_id: string) => {
+        set_formatted_text(document.getElementById(element_id), get_formatted_string_for_key(health_packet['data'][packet_key_name]))
+        set_color_for_pct(document.getElementById(element_id), get_pct_for_key(health_packet['data'][packet_key_name]))
+    }
+
+
+    const get_status_booster = () => {
+        let cur_time = Date.now() / 1000
+        let combiner_health = get_pct_for_key(health_packet['data']['booster_comb'])
+        let comm_health = get_pct_for_key(health_packet['data']['booster_telem'])
+        let relay_health = get_pct_for_key(health_packet['data']['relay_telem'])
+
+        let has_relay = (health_packet['data']['relay_telem'] != undefined)
+        
+        let latency_comb = cur_time - Number(health_packet['data']['booster_comb']['COMB Booster']['last'])
+
+
+        if (combiner_health == -2) {
+            return "INACTIVE"
+        }
+
+        if (latency_comb > 4) {
+            return "NO SIGNAL"
+        }
+
+        if (latency_comb > 2) {
+            return "DELAYED"
+        }
+
+        if(combiner_health > 50 && comm_health > 80 && (!has_relay || relay_health > 80)) {
+            return "NOMINAL"
+        }
+
+
+        return "RELAY"
+    }
+
+    const get_status_sustainer = () => {
+        let cur_time = Date.now() / 1000
+        let combiner_health = get_pct_for_key(health_packet['data']['sustainer_comb'])
+        let comm_health = get_pct_for_key(health_packet['data']['sustainer_telem'])
+        let relay_health = get_pct_for_key(health_packet['data']['relay_telem'])
+
+        let latency_comb = cur_time - Number(health_packet['data']['sustainer_comb']['COMB Sustainer']['last'])
+        let has_relay = (health_packet['data']['relay_telem'] != undefined)
+
+        if (combiner_health == -2) {
+            return "INACTIVE"
+        }
+
+        if (latency_comb > 3) {
+            return "NO SIGNAL"
+        }
+
+        if (latency_comb > 1) {
+            return "DELAYED"
+        }
+
+        if(combiner_health > 50 && comm_health > 80 && (!has_relay || relay_health > 80)) {
+            return "NOMINAL"
+        }
+
+        return "RELAY"
+    }
+
+    update_field("booster_telem", "health_booster_comm")
+    update_field("booster_comb", "health_booster_combiner")
+    update_field("sustainer_telem", "health_sustainer_comm")
+    update_field("sustainer_comb", "health_sustainer_combiner")
+    update_field("relay_telem", "health_relay")
+    update_field("mqtt", "health_mqtt")
+
+    // update text on the fields
+    set_formatted_text(document.getElementById("health_sustainer"), get_status_sustainer())
+    set_formatted_text(document.getElementById("health_booster"), get_status_booster())
+
+}
+
+ipcRenderer.on("common", (evt, msg) => {
+    update_telem_health(msg)
+})
 
 
 
@@ -278,7 +456,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
     BUT WILL BE MOVED LATER TO AFTER GSS 
     ESTABLISHES CONNNECTION TO FEATHER */
     Chart.register(...registerables)
-
+ 
     charts = setup_charts();
     // set_current_time();
     // setInterval(set_current_time, 1000);
@@ -316,11 +494,14 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 // } else {
                 //     document.getElementById(key).innerText = ((m as any)[key]).toFixed(3);
                 // }
-                if (key == "gps_lat" || key == "gps_long") {
+                if (key == "latitude" || key == "longitude") {
                     document.getElementById(key).innerText = ((m as any)[key]).toFixed(5);
-                } else if (key == "gps_alt") {
-                    document.getElementById(key).innerText = ((((m as any)[key]) / 1000) * meter_to_feet).toFixed(3);
-                } else if (key == "STE_ALT" || key == "STE_APO" || key == "barometer_alt") {
+                } else if (key == "altitude") {
+                    document.getElementById(key).innerText = ((((m as any)[key])) * meter_to_feet).toFixed(3);
+                } else if (key == "sat_count") {
+                    document.getElementById(key).innerText = ((m as any)[key]).toFixed(0);
+                
+                } else if (key == "barometer_altitude") {
                     let temp: number = parseFloat((m as any)[key]);
                     temp *= meter_to_feet;
                     document.getElementById(key).innerText = temp.toFixed(3);
@@ -333,18 +514,11 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                     document.getElementById(key).innerText = (m as any)[key];
                 }
             }
-            updateData(m["IMU_gx"], m["IMU_gy"], m["IMU_gz"],
-                m["IMU_mx"], m["IMU_my"], m["IMU_mz"],
-                m["KX_IMU_ax"], m["KX_IMU_ay"], m["KX_IMU_az"],
-                m["gps_lat"], m["gps_long"], m["gps_alt"] / 1000,
-                m["TEMP"],
-                m["STE_ALT"], m["STE_VEL"], m["STE_ACC"], m["STE_APO"],
-                m["BNO_YAW"], m["BNO_PITCH"], m["BNO_ROLL"],
-                m["pressure"], m["RSSI"], m["Continuity1"], m["Continuity2"], m["Continuity3"], m["Continuity4"], m["TelemLatency"]
-                ,m["Pyro1"], m["Pyro2"], m["Pyro3"], m["Pyro4"], m["Pyro1Firing"], m["Pyro2Firing"], m["Pyro3Firing"], m["Pyro4Firing"]
-                ,m["is_booster"], m["FSM_state"], m["sense_pyro"]);
+            updateData(m["barometer_altitude"], m["altitude"] * meter_to_feet, m["latitude"],
+                m["longitude"], m["highG_ax"], m["highG_ay"],
+                m["highG_az"], m["battery_voltage"], m["FSM_state"],
+                m["tilt_angle"], m["frequency"], m["RSSI"], m["sat_count"]);
                 //Change KX_IMU_a$ to State Estimation Variables
-            console.log(m["TelemLatency"]);
             const fsm_index_map = [1,2,3,4,5,6,7,8,9,10,11,12];
             if(m["FSM_state"] >= 0 && m["FSM_state"] < fsm_index_map.length){
                 m["FSM_state"] = fsm_index_map[m["FSM_state"]];
@@ -376,8 +550,8 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
 
 function resize_charts() {
     charts.imu_accel.resize();
-    charts.imu_gyro.resize();
-    charts.imu_mag.resize();
+    charts.vbatt.resize();
+    charts.satcount.resize();
     charts.gps.resize();
     charts.se.resize();
     charts.bno.resize();
@@ -387,8 +561,8 @@ function resize_charts() {
 
 function update_charts() {
     charts.imu_accel.update();
-    charts.imu_gyro.update();
-    charts.imu_mag.update();
+    charts.vbatt.update();
+    charts.satcount.update();
     charts.gps.update();
     charts.se.update();
     charts.bno.update();
@@ -541,8 +715,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
             this.appendChild(document.getElementById(dragID));
         }
         charts.imu_accel.resize();
-        charts.imu_gyro.resize();
-        charts.imu_mag.resize();
+        charts.vbatt.resize();
+        charts.satcount.resize();
         charts.gps.resize();
         charts.se.resize();
         charts.bno.resize();
