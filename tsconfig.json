@@ -8,7 +8,7 @@
       "sourceMap": true,   
       "declaration": false,
       "moduleResolution": "node",
-      "allowJs": true
+      "allowJs": true,
   },
   "exclude": ["webpack*", "dist", "build"],
   "include": ["src/**/*"],

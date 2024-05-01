@@ -1,8 +1,12 @@
 import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from 'electron';
-import { actuateFlaps, callAbort, changeCallSignWindow, changeFrequencyWindow, changeHomePoints, changeLocalFrequencyWindow, change_contrast, createGPSWindow, createSerialWindow, demo, openAboutWindow, openRawJSONWindow, playback, showOrientationData } from './index';
+import { actuateFlaps, callAbort, changeCallSignWindow, changeFrequencyWindow, changeHomePoints, changeLocalFrequencyWindow, change_contrast, createGPSWindow, createSerialWindow, demo, openAboutWindow, openRawJSONWindow, playback, showOrientationData, createMQTTWindow } from './index';
 const isMac = process.platform === 'darwin';
 
 export function makeSerialMenu(window: BrowserWindow) {
+    return Menu.buildFromTemplate(serialWindowTemplate(window));
+}
+
+export function makeMQTTMenu(window: BrowserWindow) {
     return Menu.buildFromTemplate(serialWindowTemplate(window));
 }
 
@@ -16,6 +20,8 @@ function serialWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions
         fileMenu(window)
     ];
 }
+
+
 
 function fileMenu(window: BrowserWindow): MenuItemConstructorOptions {
     return {
@@ -56,6 +62,11 @@ function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[]
                     label: 'Serial',
                     accelerator: 'ctrl+shift+C',
                     click() { createSerialWindow(); }
+                },
+                {
+                    label: 'MQTT',
+                    accelerator: 'ctrl+shift+M',
+                    click() { createMQTTWindow(); }
                 },
                 {
                     label: 'Ethernet'

@@ -30,6 +30,10 @@ select {
     width: 350px;
 }
 
+.select-wide {
+    width: 100%;
+}
+
 
 /* arrows */
 

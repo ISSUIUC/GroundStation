@@ -11,7 +11,8 @@ let coord_dict: { [key: string]: number[] } = {
     'talbot': [40.1119, -88.2282, 0],
     'qcrc': [41.488167, -89.500778, 0],
     'michiana': [41.774273, -86.572435, 0],
-    'irec': [32.990, -106.9754, 0]
+    'irec': [32.990, -106.9754, 0],
+    'kansas': [37.1007, -97.4439, 0]
 }
 
 submit_button.addEventListener("click", () => {

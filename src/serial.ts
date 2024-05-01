@@ -49,8 +49,6 @@ ipcRenderer.on("serial",(event, message)=>{
         }
         set = true;
     }
-    
-
 
 });
 

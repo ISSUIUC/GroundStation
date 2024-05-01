@@ -52,7 +52,10 @@ export class RocketRender {
     updateOrientation(roll: number, pitch: number, yaw: number){
         // this.rocket.setRotationFromEuler(new THREE.Euler(roll,pitch,yaw, 'XYZ'));
         // this.render(new THREE.Quaternion().setFromEuler(new THREE.Euler(0,0,0, 'YXZ')));
-        this.render(new THREE.Quaternion().setFromEuler(new THREE.Euler(pitch,roll,yaw, 'XYZ')));
+        const adjustedPitch = pitch;
+        const adjustedYaw = yaw;
+        const adjustedRoll = roll;
+        this.render(new THREE.Quaternion().setFromEuler(new THREE.Euler(adjustedPitch,adjustedRoll,adjustedYaw, 'XYZ')));
         // this.rocket.set(roll);
         this.renderer.render(this.scene, this.camera);
     }

@@ -6,8 +6,8 @@
 </head>
 <div class="grid-container" id="parent-container">
     <div class="grid-item" draggable="true"><canvas id="imuA"></canvas></div>
-    <div class="grid-item" draggable="true"><canvas id="imuG"></canvas></div>
-    <div class="grid-item" draggable="true"><canvas id="imuM"></canvas></div>
+    <div class="grid-item" draggable="true"><canvas id="vbatt"></canvas></div>
+    <div class="grid-item" draggable="true"><canvas id="satcount"></canvas></div>
     <div class="grid-item" draggable="true">
         <canvas id="signal_data"></canvas>
     </div>
@@ -25,7 +25,7 @@
         <table>
             <tr>
                 <td>
-                    <div>Sensor: </div>
+                    <div></div>
                 </td>
                 <td>
                     <div class="legendx">x</div>
@@ -39,75 +39,101 @@
             </tr>
             <tr>
                 <td>
-                    <div>Acceleration (g):</div>
+                    <div>Acceleration (g): </div>
                 </td>
                 <td>
-                    <div id="KX_IMU_ax">0</div>
+                    <div id="highG_ax">0</div>
                 </td>
                 <td>
-                    <div id="KX_IMU_ay">0</div>
+                    <div id="highG_ay">0</div>
                 </td>
                 <td>
-                    <div id="KX_IMU_az">0</div>
+                    <div id="highG_az">0</div>
                 </td>
             </tr>
+        </table>
+
+        <table>
+
             <tr>
                 <td>
-                    <div>Gyroscope (DPS):</div>
+                    <div>Tilt Angle (deg): </div>
                 </td>
-                <td>
-                    <div id="IMU_gx">0</div>
-                </td>
-                <td>
-                    <div id="IMU_gy">0</div>
-                </td>
-                <td>
-                    <div id="IMU_gz">0</div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div>Magnetometer (Gauss):</div>
-                </td>
-                <td>
-                    <div id="IMU_mx">0</div>
-                </td>
-                <td>
-                    <div id="IMU_my">0</div>
-                </td>
-                <td>
-                    <div id="IMU_mz">0</div>
-                </td>
-            </tr>
-            <tr>
                 <td>
                     <div></div>
                 </td>
                 <td>
-                    <div class="legendx">Yaw</div>
+                    <div id="tilt_angle">0</div>
                 </td>
                 <td>
-                    <div class="legendy">Pitch</div>
+                    <div></div>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <div>Barometer Altitude (Ft): </div>
                 </td>
                 <td>
-                    <div class="legendz">Roll</div>
+                    <div></div>
+                </td>
+                <td>
+                    <div id="barometer_altitude">0</div>
+                </td>
+                <td>
+                    <div></div>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <div>Barometer Vertical Velocity (Ft/s): </div>
+                </td>
+                <td>
+                    <div></div>
+                </td>
+                <td>
+                    <div id="desc_rt">0</div>
+                </td>
+                <td>
+                    <div></div>
+                </td>
+            </tr>
+
+
+        </table>
+
+        <table>
+            <tr>
+                <td>
+                    <div class="legendx">RSSI:</div>
+                </td>
+                <td>
+                    <div>Voltage:</div>
+                </td>
+                <td>
+                    <div>Freq:</div>
+                </td>
+                <td>
+                    <div>Sustainer?</div>
                 </td>
             </tr>
             <tr>
                 <td>
-                    <div>Orientation (rad):</div>
+                    <div id="RSSI">-1</div>
                 </td>
                 <td>
-                    <div id="BNO_YAW">0</div>
+                    <div id="battery_voltage">0</div>
                 </td>
                 <td>
-                    <div id="BNO_PITCH">0</div>
+                    <div id="frequency">0</div>
                 </td>
                 <td>
-                    <div id="BNO_ROLL">0</div>
+                    <div id="is_sustainer">0</div>
                 </td>
             </tr>
         </table>
+
 
         <div>GPS: </div>
         <table>
@@ -121,123 +147,92 @@
                 <td>
                     <div class="legendx">Altitude (ft)</div>
                 </td>
+                <td>
+                    <div>Sats</div>
+                </td>
             </tr>
             <tr>
                 <td>
-                    <div id="gps_lat">0</div>
+                    <div id="latitude">0</div>
                 </td>
                 <td>
-                    <div id="gps_long">0</div>
+                    <div id="longitude">0</div>
                 </td>
                 <td>
-                    <div id="gps_alt">0</div>
+                    <div id="altitude">0</div>
+                </td>
+                <td>
+                    <div id="sat_count">0</div>
                 </td>
             </tr>
         </table>
+
+
+        <div>Telemetry System Health</div>
+        <table>
+            <tr>
+                <td>
+                    <div class="legendy">Sustainer</div>
+                </td>
+                <td>
+                    <div>TELEM</div>
+                </td>
+                <td>
+                    <div>CMB</div>
+                </td>
+                <td>
+                    <div class="legendy">MQTT</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="health_sustainer">------</div>
+                </td>
+                <td>
+                    <div id="health_sustainer_comm">--</div>
+                </td>
+                <td>
+                    <div id="health_sustainer_combiner">--</div>
+                </td>
+                <td>
+                    <div id="health_mqtt">--</div>
+                </td>
+            </tr>
+        </table>
+        <br/>
+        <table>
+            <tr>
+                <td>
+                    <div class="legendy">Booster</div>
+                </td>
+                <td>
+                    <div>TELEM</div>
+                </td>
+                <td>
+                    <div>CMB</div>
+                </td>
+                <td>
+                    <div class="legendy">Relay</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="health_booster">------</div>
+                </td>
+                <td>
+                    <div id="health_booster_comm">--</div>
+                </td>
+                <td>
+                    <div id="health_booster_combiner">--</div>
+                </td>
+                <td>
+                    <div id="health_relay">--</div>
+                </td>
+            </tr>
+        </table>
+
         </td>
         </tr>
-        <tr>
-            <td>
-                <div>State Estimation (Predicted): </div>
-                <table>
-                    <tr>
-                        <td>
-                            <div class="legendx">Altitude (ft)</div>
-                        </td>
-                        <td>
-                            <div class="legendy">Veloctiy (m/s)</div>
-                        </td>
-                        <td>
-                            <div class="legendz">Acceleration</div>
-                        </td>
-                        <td>
-                            <div class="legendplus">Apogee (ft)</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div id="STE_ALT">0</div>
-                        </td>
-                        <td>
-                            <div id="STE_VEL">0</div>
-                        </td>
-                        <td>
-                            <div id="STE_ACC">0</div>
-                        </td>
-                        <td>
-                            <div id="STE_APO">0</div>
-                        </td>
-                    </tr>
-                </table>
-                <div>Others: </div>
-                <table>
-                    <tr>
-                        <td>
-                            <div>Temperature: </div>
-                        </td>
-                        <td>
-                            <div>Barometer:</div>
-                        </td>
-                        <td>
-                            <div>FSM:</div>
-                        </td>
-                        <td>
-                            <div>Flap:</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div id="TEMP">0</div>
-                        </td>
-                        <td>
-                            <div id="pressure">0</div>
-                        </td>
-                        <td>
-                            <div id="FSM_state">0</div>
-                        </td>
-                        <td>
-                            <div id="flap_extension">0</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div>CallSign:</div>
-                        </td>
-                        <td>
-                            <div class="legendx">RSSI:</div>
-                        </td>
-                        <td>
-                            <div>Volt:</div>
-                        </td>
-                        <td>
-                            <div>Freq:</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div id="sign">0</div>
-                        </td>
-                        <td>
-                            <div id="RSSI">-1</div>
-                        </td>
-                        <td>
-                            <div id="Voltage">0</div>
-                        </td>
-                        <td>
-                            <div id="frequency">0</div>
-                        </td>
-                    </tr>
-                    <!-- <tr>
-                        <td>
-                            <div>Pressure:</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <div id="pressure">0</div>
-                        </td>
-                    </tr> -->
-                </table>
 
 
     </div>
@@ -253,36 +248,52 @@
             <div class="progress" id="progress"></div>
 
             <div class="step">
-                <p class="text">Init</p>
+                <p class="text">Idle</p>
                 <div class="circle active">1</div>
             </div>
             <div class="step">
-                <p class="text">Idle</p>
+                <p class="text">First Boost</p>
                 <div class="circle">2</div>
             </div>
             <div class="step">
-                <p class="text">Boost</p>
+                <p class="text">First Burnout</p>
                 <div class="circle">3</div>
             </div>
             <div class="step">
-                <p class="text">Coast</p>
+                <p class="text">Sustainer Ignited</p>
                 <div class="circle">4</div>
             </div>
             <div class="step">
-                <p class="text">Apogee</p>
+                <p class="text">Second Boost</p>
                 <div class="circle">5</div>
             </div>
             <div class="step">
-                <p class="text">Drogue</p>
+                <p class="text">Coast</p>
                 <div class="circle">6</div>
             </div>
             <div class="step">
-                <p class="text">Main Chute</p>
+                <p class="text">Apogee</p>
                 <div class="circle">7</div>
             </div>
             <div class="step">
-                <p class="text">Landed</p>
+                <p class="text">Drogue Deploy</p>
                 <div class="circle">8</div>
+            </div>
+            <div class="step">
+                <p class="text">Drogue</p>
+                <div class="circle">9</div>
+            </div>
+            <div class="step">
+                <p class="text">Main Deploy</p>
+                <div class="circle">10</div>
+            </div>
+            <div class="step">
+                <p class="text">Main</p>
+                <div class="circle">11</div>
+            </div>
+            <div class="step">
+                <p class="text">Landed</p>
+                <div class="circle">12</div>
             </div>
         </div>
     </div>
