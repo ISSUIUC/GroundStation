@@ -390,7 +390,13 @@ ipcMain.on('connect_mqtt', (evt, topic, url) => {
                     let packet_data = JSON.parse(message.toString())
                     if(packet_data['source'] === "gss_combiner" && packet_data['action'] == "none") {
                         // visual update
-                        mainWindow.webContents.send("common", packet_data);
+                        mainWindow.webContents.send("common_gss", packet_data);
+                        // update_telem_health(packet_data['data']);
+                    }
+
+                    if(packet_data['source'] === "gss_combiner" && packet_data['action'] == "heartbeat") {
+                        // visual update
+                        mainWindow.webContents.send("common_hb", packet_data);
                         // update_telem_health(packet_data['data']);
                     }
                 } catch (e) {

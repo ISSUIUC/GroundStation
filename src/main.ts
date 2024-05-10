@@ -445,8 +445,17 @@ function update_telem_health(health_packet: any) {
 
 }
 
-ipcRenderer.on("common", (evt, msg) => {
+function update_heartbeat(hb_packet: any) {
+    document.getElementById("drone_voltage").innerText = hb_packet['battery_voltage'] + " V"
+    document.getElementById("drone_rssi").innerText = hb_packet['rssi'] + " dBm"
+}
+
+ipcRenderer.on("common_gss", (evt, msg) => {
     update_telem_health(msg)
+})
+
+ipcRenderer.on("common_hb", (evt, msg) => {
+    update_heartbeat(msg['data'])
 })
 
 
