@@ -1,4 +1,4 @@
-# Ground Station
+cd # Ground Station
 Telemetry Ground Station
 
 ## How to start

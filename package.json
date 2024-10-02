@@ -37,7 +37,7 @@
         "@types/serialport": "^8.0.2",
         "@types/three": "^0.149.0",
         "@types/ws": "^8.5.1",
-        "electron": "^15.3.4",
+        "electron": "^15.5.7",
         "electron-packager": "^15.5.1",
         "three": "^0.150.1",
         "ts-loader": "^9.2.6",

@@ -11,6 +11,7 @@ import * as mqtt from 'mqtt';
 
 
 // Initializes windows as main windows.
+// Found at the top left menus when running the program
 let mainWindow: BrowserWindow;
 let aboutWindow: BrowserWindow;
 let serialWindow: BrowserWindow;
@@ -30,11 +31,11 @@ let csv: CSVWriter;
 let latitude = 0;
 let longitude = 0;
 let altitude = 0;
-const isMac = process.platform === 'darwin';
+const isMac = process.platform === 'darwin'; //checking if the current OS is macOS
 let client: mqtt.MqttClient = null
 
 
-
+// Getting times from Computer
 const date = new Date();
 const year = date.getFullYear();
 const month = date.getMonth() + 1;
@@ -67,7 +68,7 @@ app.on('ready', () => {
             nodeIntegrationInWorker: true,
             contextIsolation: false,
         },
-        icon: __dirname + '../build/iss_logo.png',
+        icon: __dirname + '../build/iss_logo.png', // `__dirname` is absolute path to current directory
     });
     mainWindow.maximize();
 
