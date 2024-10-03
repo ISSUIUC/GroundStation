@@ -1,14 +1,17 @@
+<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Counter</title>
+    <title>Graphs</title>
 </head>
 <body>
-    <h1>Counter: {{ counter }}</h1>
-    <form action="{{ url_for('increment') }}" method="post">
-        <button type="submit">Increment</button>
-    </form>
+    <h1>Graphs</h1>
+    <img src="{{ url_for('static', filename='images/graph1.png') }}" alt="Graph 1">
+    <img src="{{ url_for('static', filename='images/graph2.png') }}" alt="Graph 2">
+    <img src="{{ url_for('static', filename='images/graph3.png') }}" alt="Graph 3">
+    <img src="{{ url_for('static', filename='images/graph4.png') }}" alt="Graph 4">
+    <img src="{{ url_for('static', filename='images/graph5.png') }}" alt="Graph 5">
 </body>
 </html>
