@@ -1,17 +1,13 @@
-<!-- templates/index.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Graphs</title>
+    <title>Counter</title>
 </head>
 <body>
-    <h1>Graphs</h1>
-    <img src="{{ url_for('static', filename='images/graph1.png') }}" alt="Graph 1">
-    <img src="{{ url_for('static', filename='images/graph2.png') }}" alt="Graph 2">
-    <img src="{{ url_for('static', filename='images/graph3.png') }}" alt="Graph 3">
-    <img src="{{ url_for('static', filename='images/graph4.png') }}" alt="Graph 4">
-    <img src="{{ url_for('static', filename='images/graph5.png') }}" alt="Graph 5">
+    <h1>Website Counter</h1>
+    <p>This page has been accessed {{ count }} times.</p>
+    <button onclick="window.location.reload();">Refresh</button>
 </body>
 </html>
