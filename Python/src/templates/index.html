@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telemetry Dashboard</title>
+    <meta http-equiv="refresh" content=".1">  <!-- Optional: refresh every second -->
+</head>
+<body>
+    <h1>Telemetry Data</h1>
+    <div id="packetstats">Waiting for packets...</div>
+    <div id="latitude">Latitude: {{ telemetry['latitude'] }}</div>
+    <div id="longitude">Longitude: {{ telemetry['longitude'] }}</div>
+    <div id="altitude">Altitude: {{ telemetry['altitude'] }} ft</div>
+    <div id="sat_count">Satellite Count: {{ telemetry['sat_count'] }}</div>
+    
+    <!-- Add a button to reload the values -->
+    <form action="{{ url_for('reload') }}" method="get">
+        <button type="submit">Reload Data</button>
+    </form>
+</body>
+</html>
