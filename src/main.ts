@@ -16,7 +16,7 @@ let dragID: string;
 
 let altitude_differentiator = new Differentiator(5)
 
-const meter_to_feet = 3.28084;
+
 
 const starting_length = 100;
 // ALL VALUES ARE DEMO FOR NOW BUT THESE ARE THE VARIABLES THAT WILL BE PASSED TO THE CHART
@@ -120,7 +120,7 @@ function updateData(barometer_altitude: number, altitude: number, latitude: numb
 }
 
 function calc_altitude(pressure: number, temp: number) {
-    return (-Math.log(pressure * 0.000987) * (temp + 273.15) * 29.254) * meter_to_feet;
+    return (-Math.log(pressure * 0.000987) * (temp + 273.15) * 29.254);
 }
 
 function make_new_dataset(data: number[], name: string) {
@@ -257,10 +257,10 @@ function setup_charts() {
         imu_accel: make_chart_multiaxis("G", "imuA", "KX acceleration", [DP_LOWGAX, DP_LOWGAY, DP_LOWGAZ]),
         vbatt: make_chart_multiaxis("V", "vbatt", "Battery Voltage", [DP_VOLTAGE]),
         satcount: make_chart_multiaxis("#", "satcount", "GPS Satellite Count", [DP_SATCOUNT]),
-        gps: make_chart("Feet", "gps", "GPS altitude", DP_GPS_ALT),
-        se: make_chart_multiaxis("FPS", "se", "Vertical Velocity", [DP_DESCENTRATE]),
+        gps: make_chart("M", "gps", "GPS altitude", DP_GPS_ALT),
+        se: make_chart_multiaxis("M/S", "se", "Vertical Velocity", [DP_DESCENTRATE]),
         bno: make_chart_multiaxis("Degrees", "BNO", "Tilt Angle", [DP_TILTANGLE]),
-        baro_altitude: make_chart("Feet", "barometer", "Barometer altitude", DP_BAROMETER),
+        baro_altitude: make_chart("M", "barometer", "Barometer altitude", DP_BAROMETER),
         signal: make_chart("dBmW", "signal_data", "Signal Strength (RSSI)", DP_SIGNAL),
         //continuity: make_chart_multiaxis("Voltage", "value", "Continuity", [DP_CONTINUITY1, DP_CONTINUITY2, DP_CONTINUITY3, DP_CONTINUITY4]),
     };
@@ -497,13 +497,13 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 if (key == "latitude" || key == "longitude") {
                     document.getElementById(key).innerText = ((m as any)[key]).toFixed(5);
                 } else if (key == "altitude") {
-                    document.getElementById(key).innerText = ((((m as any)[key])) * meter_to_feet).toFixed(3);
+                    document.getElementById(key).innerText = ((m as any)[key]).toFixed(3);
                 } else if (key == "sat_count") {
                     document.getElementById(key).innerText = ((m as any)[key]).toFixed(0);
                 
                 } else if (key == "barometer_altitude") {
                     let temp: number = parseFloat((m as any)[key]);
-                    temp *= meter_to_feet;
+                    
                     document.getElementById(key).innerText = temp.toFixed(3);
                 } else if (typeof (((m as any)[key])) === "number") {
                     let elem = document.getElementById(key);
@@ -515,7 +515,7 @@ export function run_frontend(serverConnection: ServerConnection, registerables: 
                 }
             }
           
-            updateData(m["barometer_altitude"], m["altitude"] * meter_to_feet, m["latitude"],
+            updateData(m["barometer_altitude"], m["altitude"], m["latitude"],
                 m["longitude"], m["highG_ax"], m["highG_ay"],
                 m["highG_az"], m["battery_voltage"], m["FSM_state"],
                 m["tilt_angle"], m["frequency"], m["RSSI"], m["sat_count"]);
