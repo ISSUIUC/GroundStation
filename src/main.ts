@@ -257,10 +257,10 @@ function setup_charts() {
         imu_accel: make_chart_multiaxis("G", "imuA", "KX acceleration", [DP_LOWGAX, DP_LOWGAY, DP_LOWGAZ]),
         vbatt: make_chart_multiaxis("V", "vbatt", "Battery Voltage", [DP_VOLTAGE]),
         satcount: make_chart_multiaxis("#", "satcount", "GPS Satellite Count", [DP_SATCOUNT]),
-        gps: make_chart("Feet", "gps", "GPS altitude", DP_GPS_ALT),
-        se: make_chart_multiaxis("FPS", "se", "Vertical Velocity", [DP_DESCENTRATE]),
+        gps: make_chart("M", "gps", "GPS altitude", DP_GPS_ALT),
+        se: make_chart_multiaxis("M/S", "se", "Vertical Velocity", [DP_DESCENTRATE]),
         bno: make_chart_multiaxis("Degrees", "BNO", "Tilt Angle", [DP_TILTANGLE]),
-        baro_altitude: make_chart("Feet", "barometer", "Barometer altitude", DP_BAROMETER),
+        baro_altitude: make_chart("M", "barometer", "Barometer altitude", DP_BAROMETER),
         signal: make_chart("dBmW", "signal_data", "Signal Strength (RSSI)", DP_SIGNAL),
         //continuity: make_chart_multiaxis("Voltage", "value", "Continuity", [DP_CONTINUITY1, DP_CONTINUITY2, DP_CONTINUITY3, DP_CONTINUITY4]),
     };
