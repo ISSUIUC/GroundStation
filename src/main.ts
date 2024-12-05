@@ -19,7 +19,6 @@ let altitude_differentiator = new Differentiator(5)
 const meter_to_feet = 3.28084;
 
 const starting_length = 100;
-// ALL VALUES ARE DEMO FOR NOW BUT THESE ARE THE VARIABLES THAT WILL BE PASSED TO THE CHART
 const DP_LOWGMX = Array(starting_length).fill(0);
 const DP_LOWGMY = Array(starting_length).fill(0);
 const DP_LOWGMZ = Array(starting_length).fill(0);
