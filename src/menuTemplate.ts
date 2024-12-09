@@ -77,7 +77,7 @@ function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[]
             label: 'Commands',
             submenu: [
                 {
-                    label: 'Call Sign',
+                    label: 'Raw Command',
                     click() { changeCallSignWindow(); }
                 },
                 {
