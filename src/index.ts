@@ -24,6 +24,7 @@ let rawjsonwindow: BrowserWindow;
 let orientationWindow: BrowserWindow;
 let serial_port: SerialPort;
 let cur_mqtt_topic: string = null
+let cur_control_topic: string = null
 let server: WebSocketServer;
 let web_sockets: WebSocket[] = [];
 let csv: CSVWriter;
@@ -199,7 +200,7 @@ export function changeCallSignWindow() {
     callsignwindow = new BrowserWindow({
         width: 500,
         height: 450,
-        title: 'Change Call Sign',
+        title: 'Raw Command',
         webPreferences: {
             nodeIntegration: true,
             nodeIntegrationInWorker: true,
@@ -311,11 +312,11 @@ ipcMain.on('local_frequency', (evt, frequency) => {
     serial_port.flush();
 });
 
-ipcMain.on('call_sign', (evt, call_sign) => {
+ipcMain.on('raw_command', (evt, cmd) => {
     callsignwindow.close();
-    console.log(`Changing Call Sign to ${call_sign}`);
-    serial_port.write("CALLSIGN " + call_sign + "\n");
-    serial_port.flush();
+    console.log(`Sending raw command '${cmd}' to ${cur_control_topic}`);
+    let payload = {"type": "telemetry_command", "raw": cmd};
+    client.publish(cur_control_topic, JSON.stringify(payload)); // Publish data to the 'Flightdata' topic
 });
 
 ipcMain.on('homecoords', (evt, lat, long, alt) => {
@@ -366,7 +367,9 @@ ipcMain.on('connect_mqtt', (evt, topic, url) => {
         // disconnect from current mqtt
         if (cur_mqtt_topic != null) {
             client.unsubscribe(cur_mqtt_topic)
+            client.unsubscribe(cur_control_topic)
             cur_mqtt_topic = null
+            cur_control_topic = null
         }
 
         if(client && client.connected) {
@@ -382,6 +385,10 @@ ipcMain.on('connect_mqtt', (evt, topic, url) => {
                 // Is current stream
                 console.log(message.toString())
                 on_serial_data(message.toString());
+            }
+
+            if(topic.toString() === cur_control_topic) {
+                // idk do something with the acknowledge
             }
 
             // Common stream
@@ -403,6 +410,7 @@ ipcMain.on('connect_mqtt', (evt, topic, url) => {
        
         // Subscribe to `FlightData-topic` to subscribe to the datastream specifically
         const t = "FlightData-" + topic
+        const c_stream = "Control-" + topic
         console.log("Subscribing..")
 
         client.subscribe("Common", (err, grant) => {
@@ -420,12 +428,18 @@ ipcMain.on('connect_mqtt', (evt, topic, url) => {
                 return;
             }
             mqttWindow.close();
-            console.log("Subscribed")
+            console.log("Subscribed to " + t)
             cur_mqtt_topic = t
         });
 
-
-        
+        client.subscribe(c_stream, (err, grant) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            console.log("Subscribed to " + c_stream)
+            cur_control_topic = c_stream
+        });
 
     } catch (e) {
         console.log(e);
