@@ -112,7 +112,15 @@ function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[]
                 },
             ]
         },
-
+        {
+            label: 'Pyro Test',
+            submenu: [
+                {
+                    label: 'Pyro Menu',
+                    click() { changeCallSignWindow(); }
+                }
+            ]
+        },
         {
             label: 'Maps',
             submenu: [

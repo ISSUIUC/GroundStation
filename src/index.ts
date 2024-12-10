@@ -207,6 +207,20 @@ export function changeCallSignWindow() {
             contextIsolation: false,
         }
     });
+    callsignwindow.loadURL(`file://${__dirname}/pyrotest.html`);
+}
+
+export function createPyroMenu() {
+    callsignwindow = new BrowserWindow({
+        width: 600,
+        height: 525,
+        title: 'Raw Command',
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true,
+            contextIsolation: false,
+        }
+    });
     callsignwindow.loadURL(`file://${__dirname}/callsign.html`);
 }
 
