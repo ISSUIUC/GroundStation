@@ -1,5 +1,5 @@
 import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from 'electron';
-import { actuateFlaps, callAbort, changeCallSignWindow, changeFrequencyWindow, changeHomePoints, changeLocalFrequencyWindow, change_contrast, createGPSWindow, createSerialWindow, demo, openAboutWindow, openRawJSONWindow, playback, showOrientationData, createMQTTWindow } from './index';
+import { actuateFlaps, callAbort, changeCallSignWindow, changeFrequencyWindow, changeHomePoints, changeLocalFrequencyWindow, change_contrast, createGPSWindow, createSerialWindow, demo, openAboutWindow, openRawJSONWindow, playback, showOrientationData, createMQTTWindow, createPyroMenu } from './index';
 const isMac = process.platform === 'darwin';
 
 export function makeSerialMenu(window: BrowserWindow) {
@@ -117,7 +117,7 @@ function mainWindowTemplate(window: BrowserWindow): MenuItemConstructorOptions[]
             submenu: [
                 {
                     label: 'Pyro Menu',
-                    click() { changeCallSignWindow(); }
+                    click() { createPyroMenu(); }
                 }
             ]
         },
