@@ -1,0 +1,43 @@
+/* Base styles */
+
+.timer-t-text {
+    color: #a6a6a6;
+}
+
+.timer-display {
+    font-size: 2rem;
+    text-align: center;
+    width: 100%;
+}
+
+.timer-paused {
+    animation: pulse-pause 3s infinite;
+}
+
+@keyframes pulse-pause {
+    0%, 100% {
+      color: var(--pulse-bright);
+    }
+    50% {
+      color: var(--pulse-dark);
+    }
+  }
+
+
+/* Dark mode */
+:root {
+    --background: #1e1e1e;
+    --foreground: #ffffff;
+    --pulse-bright: #dddd00;
+    --pulse-dark: #888800;
+    --border: #a6a6a6;
+}
+
+/* Light mode */
+:root.light {
+    --background: #f5f5f5;
+    --foreground: #000;
+    --pulse-bright: #0000ff;
+    --pulse-dark: #000077;
+    --border: #444;
+}

@@ -1,0 +1,197 @@
+.card-hide {
+    filter: blur(3px) brightness(0.5) saturate(0.5);
+    pointer-events: none;
+}
+
+.card-overlay {
+    z-index: 50;
+    color: #ff9999;
+    font-weight: bold;
+    font-size: 1.2em;
+    position:absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.value-card {
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-top: 1em;
+    position: relative;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: left;
+    justify-content: left;
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: var(--background);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-family: 'Digital-7 Mono', monospace; /* Recommend a digital font */
+    color: var(--foreground);
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.value-card-name {
+    position: absolute;
+    top: -.75em;
+    background-color: var(--background);
+    padding: 0 5px;
+  }
+
+.shrink-text {
+    font-size: 1rem;
+}
+
+.gss-center-text {
+    text-align: center;
+}
+
+.gss-center-vert {
+    height:100%;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+}
+
+.gss-text-dim {
+    color: #999;
+}
+
+.gss-horizontal-group {
+    display:flex;
+    flex-flow: row nowrap;
+    justify-content: left;
+}
+
+.gss-horizontal-group-sb {
+    display:flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+}
+
+/* For moving horizontal groups to vertical ones on small screens */
+.gss-horizontal-small-restack {
+    display: flex;
+}
+
+.gss-button {
+    cursor: pointer;    
+    background-color: #444;
+    color: white;
+    padding: 10px;
+    margin-top: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.gss-button:hover {
+    background-color: #333;
+}
+
+.gss-button-red {
+    background: repeating-linear-gradient(
+        45deg,
+        #990000,
+        #990000 20px,
+        #660000 20px,
+        #660000 40px
+    );
+}
+
+.gss-button-red:hover {
+    background: repeating-linear-gradient(
+        45deg,
+        #880000,
+        #880000 20px,
+        #550000 20px,
+        #550000 40px
+    );
+}
+
+.gss-button-yellow {
+    background: repeating-linear-gradient(
+        45deg,
+        #a09e00,
+        #a09e00 20px,
+        #948800 20px,
+        #948800 40px
+    );
+}
+
+.gss-button-yellow:hover {
+    background: repeating-linear-gradient(
+        45deg,
+        #898d00,
+        #898d00 20px,
+        #837700 20px,
+        #837700 40px
+    );
+}
+
+.gss-button-blue {
+    background: repeating-linear-gradient(
+        45deg,
+        #606dbc,
+        #606dbc 20px,
+        #465298 20px,
+        #465298 40px
+    );
+}
+
+.gss-button-blue:hover {
+    background: repeating-linear-gradient(
+        45deg,
+        #505dcc,
+        #505dcc 20px,
+        #364288 20px,
+        #364288 40px
+    );
+}
+
+.gss-button-disabled {
+    background: none;
+    background-color: #252525;
+    cursor: not-allowed;
+    color: #888;
+}
+
+.gss-button-disabled:hover {
+    background: none;
+    background-color: #252525;
+}
+
+@media only screen and (max-width: 450px) {
+    .shrink-text {
+        font-size: 0.85rem;
+    }
+
+    .gss-button {
+        padding: 5px;
+        font-size: 0.85rem;
+    }
+
+    .gss-horizontal-small-restack {
+        display: block;
+    }
+}
+
+@media only screen and (max-width: 375px) {
+    .shrink-text {
+        font-size: 0.7rem;
+    }
+}
+
+@media only screen and (max-width: 350px) {
+    .shrink-text {
+        font-size: 0.6rem;
+    }
+}
+
+

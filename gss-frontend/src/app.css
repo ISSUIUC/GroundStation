@@ -1,0 +1,42 @@
+#app {
+  width: 100%;
+  height: 100%;
+  font-family: 'Digital-7 Mono', monospace;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.preact:hover {
+  filter: drop-shadow(0 0 2em #673ab8aa);
+}
+
+.card {
+  padding: 2em;
+}
+
+.telemetry-view {
+  width: 100%;
+  height: 100%;;
+}
+
+.main-content {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+.str-angle-visualaid {
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.str-angle-visualaid-stat {
+  flex-grow: 2;
+}

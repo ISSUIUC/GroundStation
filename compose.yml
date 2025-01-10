@@ -1,0 +1,40 @@
+version: '3'
+services:
+  display:
+    container_name: display
+    build:
+      context: ./gss-frontend
+      dockerfile: ./Dockerfile
+    ports:
+      - "80:3000"
+    networks:
+      - gss_network
+    volumes:
+      - ./config.ini:/app/public/config.ini
+  mqtt:
+    image: eclipse-mosquitto
+    container_name: mqtt
+    ports:
+      - "1884:1884"
+    volumes:
+      - ./mosquitto:/mosquitto/config:rw
+    restart: unless-stopped
+    networks:
+      - gss_network
+  backend: 
+    container_name: backend
+    depends_on:
+      - mqtt
+    build:
+     context: ./gss-backend
+     dockerfile: ./Dockerfile
+    ports: 
+      - '5000:5000'
+    networks:
+      - gss_network
+    volumes:
+      - ./config.ini:/app/config.ini
+
+networks:
+  gss_network:
+    driver: bridge

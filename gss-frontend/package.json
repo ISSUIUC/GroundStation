@@ -1,0 +1,23 @@
+{
+  "name": "gss-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.7",
+    "config-ini-parser": "^1.6.1",
+    "preact": "^10.25.3",
+    "react-chartjs-2": "^5.2.0",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.9.3",
+    "vite": "^6.0.5"
+  },
+  "proxy": "http://backend:5000"
+}

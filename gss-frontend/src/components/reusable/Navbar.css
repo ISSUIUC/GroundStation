@@ -1,0 +1,55 @@
+.navbar-container {
+    display: flex;
+    flex-flow: row nowrap;
+    background-color: #373737;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-items {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-start;
+}
+
+.navbar-item {
+    margin-right: 10px;
+    padding: 5px;
+    font-size: 0.8em;
+    border-radius: 3px;
+    background-color: #313131;
+    cursor: pointer;
+    transition: background-color 0.25s;
+}
+
+.navbar-active {
+    color: #ffffaa;
+    background-color: #222;
+}
+
+.navbar-item:hover {
+    background-color: #222;
+}
+
+.stream-select-dropdown {
+    color: white;
+    font-family: Digital-7 Mono,monospace !important;
+    font-size: 1em;
+}
+
+.alt-tab-select {
+    display: none;
+}
+
+@media only screen and (max-width: 750px) {
+    .navbar-items {
+        display: none;
+    }
+
+    .alt-tab-select {
+        display: block;
+    }
+
+}
