@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 
 function ws_url() {
-    return window.location.hostname + ":5000";
+    return window.location.hostname + ":5001";
 }
 
 
