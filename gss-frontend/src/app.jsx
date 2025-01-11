@@ -7,6 +7,8 @@ import { Breadcrumb } from './components/reusable/Breadcrumb.jsx';
 import { Navbar } from './components/reusable/Navbar.jsx';
 import { FullTelemetryView } from './components/views/FullTelemetryView.jsx';
 import { SystemHealthView } from './components/views/SystemHealthView.jsx';
+import { CommandingView } from './components/views/CommandingView.jsx';
+import { RecoveryView } from './components/views/RecoveryView.jsx';
 
 
 function ShowIf({condition, children}) {
@@ -30,8 +32,16 @@ export function App() {
             <FullTelemetryView />
           </ShowIf>
 
+          <ShowIf condition={currentTab === "commanding"}>
+            <CommandingView />
+          </ShowIf>
+
           <ShowIf condition={currentTab === "structures"}>
             <StructuresView />
+          </ShowIf>
+
+          <ShowIf condition={currentTab === "recovery"}>
+            <RecoveryView />
           </ShowIf>
 
           <ShowIf condition={currentTab === "sys_diag"}>

@@ -19,5 +19,5 @@
     "@preact/preset-vite": "^2.9.3",
     "vite": "^6.0.5"
   },
-  "proxy": "http://backend:5000"
+  "proxy": "http://backend:5001"
 }

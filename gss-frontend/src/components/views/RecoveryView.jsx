@@ -8,7 +8,7 @@ import '../reusable/Common.css';
 import { FlightCountTimer } from '../spec/FlightCountTimer.jsx';
 import GSSButton from '../reusable/Button.jsx';
 
-export function FullTelemetryView() {
+export function RecoveryView() {
 
   return (
     <>
