@@ -143,4 +143,4 @@ class RelayMqtt:
         print("Initializing mqtt relay")
         self._MQTT.init_app(app)
         print("Running server...")
-        self._SOCKETIO.run(app, host='0.0.0.0', port=5000, debug=False, allow_unsafe_werkzeug=True)
+        self._SOCKETIO.run(app, host='0.0.0.0', port=5001, debug=False, allow_unsafe_werkzeug=True)
