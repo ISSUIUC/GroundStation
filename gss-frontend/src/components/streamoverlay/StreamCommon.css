@@ -1,0 +1,350 @@
+
+
+.spot-overlay {
+    background: radial-gradient(ellipse at center, rgba(0, 0, 0, 1) 0%, rgba(0,0,0,1) 1%, rgba(0,0,0,0.95) 10%, rgba(0,0,0,0.75) 35%, rgba(0, 0, 0, 0) 60%);
+    width: 200%;
+    height: 80%;
+    position: fixed;
+    top: 60%;
+    left: -50%;
+    z-index: -2;
+}
+
+.start-hidden {
+    opacity: 0;
+}
+
+.spot-overlay-out {
+    opacity: 1;
+    animation: fadeOut 1s forwards;
+    animation-delay: 0.1s;
+}
+
+.overlay-row-out {
+    opacity: 1;
+    animation: fadeOut 1s forwards;
+}
+
+.spot-overlay-in {
+    animation: fadeIn 1s forwards;
+}
+
+.overlay-row-in {
+    animation: fadeIn 1.5s forwards;
+    animation-delay: 0.5s;
+}
+
+.generic-fade-in {
+    animation: fadeIn 1s forwards;
+}
+
+.generic-fade-out {
+    opacity: 1;
+    animation: fadeOut 1s forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+    }
+}
+
+
+.overlay-position-bottom {
+    height: 100%;
+    width: 100%;
+    justify-content: end;
+    display: flex;
+    flex-flow: column nowrap;
+    margin-bottom: 1em;
+}
+
+.overlay-row {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+}
+
+.overlay-row-element {
+    margin: 10px;
+    font-size: 1.5em;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+}
+
+.overlay-row-group {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-around;
+    flex-grow: 1;
+}
+
+
+.overlay-spot-timer-above-label {
+    color: #bbb;
+    text-align: center;
+    font-size: 1.25em;
+    white-space: pre;
+}
+
+.overlay-spot-timer-main {
+    font-weight: bold;
+    font-size: 2.25em;
+}
+
+.overlay-spot-timer-paused {
+    animation: pulse-pause-stream 3s infinite;
+}
+
+@keyframes pulse-pause-stream {
+    0%, 100% {
+      color: #dddd00;
+    }
+    50% {
+      color:#888800;
+    }
+  }
+
+.stream-passive-timer-main {
+    font-size: 2.5em;
+    margin-left: 25px;
+    margin-right: 25px;
+}
+
+.stream-passive-timer-sep {
+  height: 3px;
+  background-color: white;
+  padding-left: 0px;
+  padding-right: 0px;
+  position: relative;
+  width: 0%;
+  left: 50%;
+}
+
+.stream-passive-timer-sep-in {
+    animation: growInSep 1s forwards;
+}
+
+.stream-passive-timer-sep-out {
+    width: 100%;
+    left: 0%;
+    padding-left: 10px;
+    padding-right: 10px;
+    animation: growOutSep 1s forwards;
+    animation-delay: 0.25s;
+}
+
+.svg-trace-line {
+    fill: #fff;
+    stroke: #fff;
+    stroke-miterlimit: 10;
+    stroke-width: 2px;
+}
+
+.overlay-tilt-wrapper {
+    width: 100px;
+    height: 100px;
+    position: relative;
+}
+
+.overlay-tilt-hind {
+    position: absolute;
+    height: 1px;
+    width: 0%;
+    top: 50%;
+    z-index: -1;
+    left: 0%;
+    background-color: #888;
+}
+
+.overlay-tilt-vind {
+  position: absolute;
+  height: 0%;
+  width: 1px;
+  top: 0%;
+  z-index: -1;
+  left: 50%;
+  border-left: 1px dotted #aaa;
+}
+
+.fade-in-delay {
+    opacity: 0;
+    animation: fadeIn 1s forwards;
+    animation-delay: 2s;
+}
+
+.no-fade-out {
+    opacity: 1;
+}
+
+.tilt-hind-in {
+    animation: drawin-h 2s forwards;
+    animation-delay: 1s;
+}
+
+.tilt-vind-in {
+    animation: drawin-v 1s forwards;
+    animation-delay: 1s;
+}
+
+.tilt-hind-out {
+    width: 100%;
+    animation: fadeOut 1s forwards;
+}
+
+.tilt-vind-out {
+    height: 50%;
+    animation: fadeOut 1s forwards;
+}
+
+@keyframes drawin-v {
+    to {
+        height: 50%;
+    }
+}
+
+@keyframes drawin-h {
+    to {
+        width: 100%;
+    }
+}
+
+
+.svg-small {
+    width: 100px;
+    height: 100px;
+}
+
+@keyframes growInSep {
+    to {
+        width: 100%;
+        left: 0%;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+}
+
+@keyframes growOutSep {
+    to {
+        width: 0%;
+        left: 50%;
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+}
+
+
+
+.stream-passive-timer-name {
+    font-size: 1.75em;
+    margin-left: 25px;
+    margin-right: 25px;
+}
+
+.stream-passive-timer {
+    display: flex;
+    flex-flow: column nowrap;
+    text-align: center;
+}
+
+.stream-passive-timer-wrapper {
+    position: absolute;
+    margin: 50px;
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.stream-passive-timer-hold {
+    background-color: #ccc;
+    padding: 5px;
+    color: black;
+    height: 0%;
+    margin-top: 25px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1.5em;
+}
+
+.stream-hide {
+    display: none;
+}
+
+.stream-passive-timer-hold-wrapper {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+}
+
+
+.stream-passive-timer-m-text {
+    color: #a6a6a6;
+}
+
+
+.overlay-row-telem-group {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.overlay-row-telem-title {
+    display: flex;
+    margin-right: 15px;
+    flex-flow: column nowrap;
+}
+
+.overlay-row-telem-title-name {
+    color: white;
+    font-weight: bold;
+    font-size: 1.25em;
+}
+
+.overlay-row-telem-title-qty {
+    color: #ccc;
+    font-size: 0.9em;
+}
+
+.overlay-v-align {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+}
+
+.overlay-b-align {
+    display: flex;
+    height:100%;
+    flex-flow: column nowrap;
+    justify-content: end;
+}
+
+.overlay-row-telem-main {
+    color: #fff;
+    font-size: 2em;
+    font-weight: bold;
+    white-space: pre;
+}
+
+.overlay-row-group-disabled * {
+    color: #666;
+}
+
+.overlay-row-telem-unit {
+    color: #aaa;
+    font-size: 0.75;
+    margin-left: 5px;
+    font-weight: bold;
+}
+
+
+
+.force-hide {
+    opacity: 0;
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
+import { getSetting } from './settings';
 
 function ws_url() {
     return window.location.hostname + ":5001";
@@ -7,39 +8,132 @@ function ws_url() {
 
 
 const GSSData = React.createContext({});
+const GSSTelemetryHistory = React.createContext([]); // Stores values of GSSData snapshot in "circular buffer", only updates snapshots when telemetry packets come in
 const GSSChannel = React.createContext("sustainer");
 
 const socket = io(ws_url(), {
     transports: ['websocket']
 });
 
+let global_state_callbacks = []; // Stores functions to invoke whenever the @GSS context changes
+let telemetry_callbacks = []; // Stores functions to invoke whenever the GSSData context changes from a telemetry packet
+let telemetry_calculator_hooks = {}; // Stores necessary translation functions (such as unit changes) to be used across the local system
+// Calculator hooks are stored in the format {output1: [target, func]}, where target and output are telemetry codes (i.e. @booster/src)
+
+export let CLEAR_T_DATA_FUNC = () => {}
+
+
+
+export function useGlobalStateCallback(callable) {
+    global_state_callbacks.push(callable);
+}
+
+export function useTelemetryCallback(callable) {
+    telemetry_callbacks.push(callable);
+}
+
+export function clearCalculators() {
+    telemetry_calculator_hooks = {};
+}
+
+export function addTranslator(valuehook, output, func) {
+    if(telemetry_calculator_hooks[output] == undefined) {
+        telemetry_calculator_hooks[output] = [valuehook, func]
+    } else {
+        console.warn(`addTranslator called with duplicate out-value ${output}, duplicate outvalues are not supported and will be overriden!`);
+    }
+}
+
+export function addRecalculator(valuehook, func) {
+    addTranslator(valuehook, valuehook, func);
+}
+
 export function GSSDataProvider({ children, default_stream }) {
     const [value, setValue] = useState({});
+    const [hist, setHist] = useState([]);
     
+    CLEAR_T_DATA_FUNC = () => {
+        setValue({});
+        setHist([]);
+    }
+
     useEffect(async () => {
+
+        // Load stored data
+        const stored_value = JSON.parse(localStorage.getItem("telem_snapshot"));
+        const stored_hist = JSON.parse(localStorage.getItem("telem_history"));
+
+        if(stored_value) {
+            setValue(stored_value);
+        }
+
+        if(stored_hist) {
+            setHist(stored_hist);
+        }
+
+        socket.on("sync_response", (syncdata) => {
+            // Sync response only gets called when a datasync is invoked, and should directly set the necessary sync variables
+            let {type, data} = JSON.parse(syncdata);
+            console.log("Sync invoked: ", type);
+            if(type === "globals") {
+                setValue(prevData => {
+                    let new_state = {...prevData};
+                    new_state["GSS"] = data;
+                    
+                    global_state_callbacks.forEach((callback) => {
+                        callback();
+                    })
+
+                    return new_state;
+                })
+            }
+        })
+
         socket.on('mqtt_message', (data) => {
             let json_data = JSON.parse(data)
             if(json_data["metadata"]["type"] === "telemetry" || json_data["metadata"]["type"] === "gss_health") {
                 // valid telemetry packet
                 let channel = json_data["metadata"]["stream"]
+                let data_ret_policy = getSetting("data_retention");
 
                 setValue(prevData => {
                     let new_state = {...prevData};
                     new_state[channel] = json_data;
+
+                    // Update history if it's a telemetry packet
+                    if(json_data["metadata"]["type"] === "telemetry") {
+                        setHist(prevHist => {
+                            let new_hist = [...prevHist, new_state];
+                            // Maintain circular buffer
+                            if(new_hist.length > data_ret_policy && data_ret_policy >= 0) {
+                                new_hist = new_hist.slice(-data_ret_policy)
+                            }
+                            return new_hist;
+                        })
+                    }
+
                     return new_state;
+                })
+
+                telemetry_callbacks.forEach((callback) => {
+                    callback();
                 })
             }
             if(json_data["metadata"]["type"] === "gss_msg") {
                 // Not a telemetry packet, just set the necessary values in the "GSS" channel
                 setValue(prevData => {
                     let ns = json_data["data"];
-                    console.log("prevdata", prevData);
                     if(prevData["GSS"]) {
                         ns = {...prevData["GSS"], ...json_data["data"]}
                     }
 
                     let new_state = {...prevData};
                     new_state["GSS"] = ns;
+                    
+                    global_state_callbacks.forEach((callback) => {
+                        callback();
+                    })
+
                     return new_state;
                 })
 
@@ -53,22 +147,29 @@ export function GSSDataProvider({ children, default_stream }) {
         }
     }, [])
 
+    useEffect(() => {
+        localStorage.setItem("telem_snapshot", JSON.stringify(value));
+        localStorage.setItem("telem_history", JSON.stringify(hist));
+    }, [value, hist])
+
     return (
         <GSSChannel.Provider value={default_stream}>
             <GSSData.Provider value={value}>
-                {children}
+                <GSSTelemetryHistory.Provider value={hist}>
+                    {children}
+                </GSSTelemetryHistory.Provider>
             </GSSData.Provider>
         </GSSChannel.Provider>
     )
 }
 
-export function useGSSWebsocket() {
+export function useGSSWebsocket(event_tag="gss") {
     /**
      * Returns a function that encodes and sends a message to the GSS server. Does not auto-publish to MQTT
      */
 
     const send = (data_string) => {
-        socket.emit("gss", data_string);
+        socket.emit(event_tag, data_string);
     }
 
     return send;
@@ -105,7 +206,7 @@ export function useChannel() {
     return React.useContext(GSSChannel);
 }
 
-export function useTelemetry(telem_code=undefined, metadata=false) {
+function getTelemetryRaw(snapshot=null, telem_code=undefined, metadata=false, defaultvalue=null) {
     // telemetry code system:
     // Passing in a telemetry code basically indicates what value you are trying to access from the telemetry system.
     // Since our telemetry is shared between booster/sustainer/common/etc networks, you need to specify which network you are accessing
@@ -117,15 +218,12 @@ export function useTelemetry(telem_code=undefined, metadata=false) {
     // This allows you to contextually switch which stream you are accessing depending on the value of the GSSStream react context.
     // I.E: Setting GSSstream to "booster" will automatically transliterate "/value.highG_ax" to "@booster/value.highG_ax"
 
-    const value = React.useContext(GSSData);
-
-    if(telem_code === undefined) {
-        return value;
+    if(snapshot==null) {
+        snapshot = React.useContext(GSSData);
     }
 
-    if(telem_code[0] === "/") {
-        const gss_default_channel = React.useContext(GSSChannel);
-        telem_code = "@" + gss_default_channel + telem_code;
+    if(telem_code === undefined) {
+        return snapshot;
     }
 
     // Get prefix
@@ -136,15 +234,15 @@ export function useTelemetry(telem_code=undefined, metadata=false) {
     }
 
 
-    if(!value[channel_match[1]]) {
-        return null // The data not being present is valid, but returns null here so that the caller can handle it by short circuiting.
+    if(!snapshot[channel_match[1]]) {
+        return defaultvalue // The data not being present is valid, but returns null here so that the caller can handle it by short circuiting.
     }
 
     // Since telemetry packets are split into "metadata" and "data" we automatically target "data" here for ease of readibility, unless specified otherwise
     let r_valuetype = metadata ? "metadata" : "data";
 
     // The exception is for the "GSS" channel.
-    let r_value = value[channel_match[1]]
+    let r_value = snapshot[channel_match[1]]
     if(channel_match[1] !== "GSS") {
         r_value = r_value[r_valuetype];
     }
@@ -162,3 +260,60 @@ export function useTelemetry(telem_code=undefined, metadata=false) {
 
     return r_value;
 }
+
+/** Functionally equivalent to useTelemetry, but instead returns historical values arranged from earliest to oldest. */
+export function useTelemetryHistory(telem_code=undefined, metadata=false, defaultvalue=null) {
+    if(telem_code === undefined) {
+        return React.useContext(GSSTelemetryHistory); // But why
+    }
+
+    if(telem_code[0] === "/") {
+        const gss_default_channel = React.useContext(GSSChannel);
+        telem_code = "@" + gss_default_channel + telem_code;
+    }
+
+    const h_data = React.useContext(GSSTelemetryHistory);
+
+    return h_data.map((telemetry_snapshot) => {
+        if(telemetry_calculator_hooks[telem_code]) {
+            // This telemetry data is translated
+            const [target_code, translator_func] = telemetry_calculator_hooks[telem_code]
+            const raw_telem = getTelemetryRaw(telemetry_snapshot, target_code, metadata, defaultvalue) || 0;
+            return translator_func(raw_telem);
+        }
+    
+        return getTelemetryRaw(telemetry_snapshot, telem_code, metadata, defaultvalue);
+    })
+}
+
+export function useTelemetry(telem_code=undefined, metadata=false, defaultvalue=null) {
+
+    if(telem_code===undefined) {
+        return getTelemetryRaw(undefined, false, null);
+    }
+
+    if(telem_code[0] === "/") {
+        const gss_default_channel = React.useContext(GSSChannel);
+        telem_code = "@" + gss_default_channel + telem_code;
+    }
+
+    const telemetry_snapshot = React.useContext(GSSData);
+    
+    if(telemetry_calculator_hooks[telem_code]) {
+        // This telemetry data is translated
+        const [target_code, translator_func] = telemetry_calculator_hooks[telem_code]
+        const raw_telem = getTelemetryRaw(telemetry_snapshot, target_code, metadata, defaultvalue) || 0;
+        return translator_func(raw_telem);
+    }
+
+    return getTelemetryRaw(telemetry_snapshot, telem_code, metadata, defaultvalue);
+}
+
+function syncGlobals() {
+    const send = useGSSWebsocket("sync");
+
+    send("sync_globals");
+}
+
+/** After defining all systems, request a sync from the global vars packet */
+syncGlobals();

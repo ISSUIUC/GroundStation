@@ -9,15 +9,9 @@ import { FullTelemetryView } from './components/views/FullTelemetryView.jsx';
 import { SystemHealthView } from './components/views/SystemHealthView.jsx';
 import { CommandingView } from './components/views/CommandingView.jsx';
 import { RecoveryView } from './components/views/RecoveryView.jsx';
-
-
-function ShowIf({condition, children}) {
-  if(condition) {
-    return children;
-  } else {
-    return <></>;
-  }
-}
+import OverlayController from './components/streamoverlay/OverlayController.jsx';
+import { ShowIf, ShowPath, ShowPathExact } from './components/reusable/UtilityComponents.jsx';
+import { SettingsView } from './components/views/SettingsView.jsx';
 
 export function App() {
   const [currentStream, setCurrentStream] = useState("sustainer");
@@ -25,31 +19,43 @@ export function App() {
 
   return (
     <>
+      
       <GSSDataProvider default_stream={currentStream}>
-        <Navbar streamCallback={setCurrentStream} currentStream={currentStream} tabCallback={setCurrentTab} currentTab={currentTab} />
-        <div className='main-content'>
-          <ShowIf condition={currentTab === "default"}>
-            <FullTelemetryView />
-          </ShowIf>
+        {/* Main window */}
+        <ShowPathExact path={"/"}>
+          <Navbar streamCallback={setCurrentStream} currentStream={currentStream} tabCallback={setCurrentTab} currentTab={currentTab} />
+          <div className='main-content'>
+            <ShowIf condition={currentTab === "default"}>
+              <FullTelemetryView />
+            </ShowIf>
 
-          <ShowIf condition={currentTab === "commanding"}>
-            <CommandingView />
-          </ShowIf>
+            <ShowIf condition={currentTab === "commanding"}>
+              <CommandingView />
+            </ShowIf>
 
-          <ShowIf condition={currentTab === "structures"}>
-            <StructuresView />
-          </ShowIf>
+            <ShowIf condition={currentTab === "structures"}>
+              <StructuresView />
+            </ShowIf>
 
-          <ShowIf condition={currentTab === "recovery"}>
-            <RecoveryView />
-          </ShowIf>
+            <ShowIf condition={currentTab === "recovery"}>
+              <RecoveryView />
+            </ShowIf>
 
-          <ShowIf condition={currentTab === "sys_diag"}>
-            <SystemHealthView />
-          </ShowIf>
-        </div>
-        
-        <Breadcrumb />
+            <ShowIf condition={currentTab === "sys_diag"}>
+              <SystemHealthView />
+            </ShowIf>
+
+            <ShowIf condition={currentTab === "settings"}>
+              <SettingsView />
+            </ShowIf>
+          </div>
+          
+          <Breadcrumb />
+        </ShowPathExact>
+
+        <ShowPath path={"/stream"}>
+          <OverlayController />
+        </ShowPath>
       </GSSDataProvider>
     </>
   )

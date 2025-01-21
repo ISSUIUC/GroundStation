@@ -1,0 +1,42 @@
+
+
+.gss-choice-text-main {
+    font-weight: bold;
+    font-size: 1.25em;
+}
+
+.gss-choice-text-alt {
+    font-size: 0.8em;
+    color: #bbb;
+    margin-left: 15px;
+}
+
+.gss-choice-select {
+    width: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+}
+
+.gss-choice-c-wrapper {
+    display: flex;
+    flex-flow: row nowrap;
+    background-color: #111;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.gss-choice-single {
+  padding: 5px;
+  border-radius: 5px;
+  color: #ccc;
+  padding-left: 10px;
+  padding-right: 10px;
+  cursor: pointer;
+}
+
+.gss-choice-selected {
+    color: white;
+    background-color: #660;
+    font-weight: bold;
+}

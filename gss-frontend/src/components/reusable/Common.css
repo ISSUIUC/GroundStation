@@ -14,6 +14,22 @@
     transform: translate(-50%, -50%);
 }
 
+.gss-horizontal-group-elem-25 {
+    width: 25%;
+}
+
+.gss-horizontal-group-elem-50 {
+    width: 50%;
+}
+
+.gss-horizontal-group-elem-75 {
+    width: 75%;
+}
+
+.gss-horizontal-group-elem-100 {
+    width: 100%;
+}
+
 .value-card {
     padding-left: 5px;
     padding-right: 5px;
@@ -66,6 +82,17 @@
     justify-content: left;
 }
 
+.gss-flex-grow {
+    flex-grow: 1;
+}
+
+
+
+.gss-horizontal-group .value-card-group {
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
 .gss-horizontal-group-sb {
     display:flex;
     flex-flow: row nowrap;
@@ -74,6 +101,10 @@
 
 /* For moving horizontal groups to vertical ones on small screens */
 .gss-horizontal-small-restack {
+    display: flex;
+}
+
+.gss-horizontal-large-restack {
     display: flex;
 }
 
@@ -167,6 +198,16 @@
     background-color: #252525;
 }
 
+@media only screen and (max-width: 1000px) {
+    .gss-horizontal-large-restack {
+        display: block;
+    }
+
+    .gss-horizontal-large-restack .gss-horizontal-group-elem-restack {
+        width: 100%;
+    }
+}
+
 @media only screen and (max-width: 450px) {
     .shrink-text {
         font-size: 0.85rem;
@@ -180,6 +221,12 @@
     .gss-horizontal-small-restack {
         display: block;
     }
+}
+
+.h-graph-group {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-around;
 }
 
 @media only screen and (max-width: 375px) {

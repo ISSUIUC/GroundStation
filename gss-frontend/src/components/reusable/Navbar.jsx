@@ -23,7 +23,8 @@ export function Navbar({ tabCallback, currentTab, streamCallback, currentStream 
         "structures": "Structures",
         "recovery": "Recovery",
         "video": "Video System",
-        "sys_diag": "System Diagnostics"
+        "sys_diag": "System",
+        "settings": "Settings"
     }
 
     return (

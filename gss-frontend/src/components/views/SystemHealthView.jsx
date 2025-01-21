@@ -84,8 +84,6 @@ export function SystemHealthView() {
 
   const mqtt_health_status = parse_health(mqtt_health);
 
-
-
   // Generate latency data
   const booster_t_published = useTelemetry("@booster/time_published", true);
   const sustainer_t_published = useTelemetry("@sustainer/time_published", true);

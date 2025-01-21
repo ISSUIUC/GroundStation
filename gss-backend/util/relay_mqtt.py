@@ -1,5 +1,5 @@
 from flask_mqtt import Mqtt
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 import configparser
 import json
 import time
@@ -23,11 +23,31 @@ def get_common_channel():
     return config['default']['common_channel']
 
 ALL_CHANNELS = get_telemetry_channels()
+GSS_GLOBALS = {}
+
+def update_gss_globals(incoming):
+    global GSS_GLOBALS
+
+    for key in incoming:
+        GSS_GLOBALS[key] = incoming[key]
+
 
 class RelayMqtt:
     def __init__(self, app):
         mqtt = Mqtt(app)
         socketio = SocketIO(app, cors_allowed_origins="*")
+        self.__gss_globals = {}
+
+
+        @socketio.on("sync")
+        def handle_sync_ws(sync_type):
+            # Handles any client sync packets
+            # sync_type defines which packet to return.
+            # sync_globals --> sync the @GSS data stored here
+            if sync_type == "sync_globals":
+                payload = {"type": "globals", "data": GSS_GLOBALS}
+
+                emit("sync_response", json.dumps(payload))
 
         @socketio.on("gss")
         def handle_gss_comm(data):
@@ -103,6 +123,7 @@ class RelayMqtt:
                 if("type" in msg_payload["metadata"]):
                     if(msg_payload["metadata"]["type"] == "gss_msg"):
                         print("Emitting packet (gss auto-emit)", flush=True)
+                        update_gss_globals(msg_payload["data"])
                         socketio.start_background_task(target=emit_mqtt_msg, message=msg_payload)
                         return
 

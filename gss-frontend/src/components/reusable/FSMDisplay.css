@@ -65,6 +65,8 @@
     font-size: 1rem;
     text-align: center;
     align-items: center;
+    margin-left: 3px;
+    margin-right: 3px;
 }
 
 .value-card-group .value-card {

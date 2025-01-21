@@ -45,6 +45,10 @@
     align-items: center;
 }
 
+.value-card-group-smalllabel .shrink-text {
+    font-size: 0.85em;
+}
+
 .value-card-group .value-card {
     border: none;
     box-shadow: none;

@@ -57,9 +57,9 @@ export const MultiValue = ({ label, titles, values, units, label_colors, hidden 
     );
 };
 
-export const ValueGroup = ({ label, children, hidden, hidden_label_text="NO DATA" }) => {
+export const ValueGroup = ({ label, children, hidden=false, hidden_label_text="NO DATA", use_smaller_labels=false }) => {
     return (
-        <div className="value-card-group">
+        <div className={`value-card-group ${use_smaller_labels ? "value-card-group-smalllabel" : ""}`}>
             {hidden ?  <div className='card-overlay'>{hidden_label_text}</div> : null}
 
             <div className="value-card-gname">
