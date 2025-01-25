@@ -223,15 +223,35 @@
     }
 }
 
+.aspect-warning {
+    color: #ff9999;
+    font-weight: bold;
+    font-size: 0.7em;
+    display: none;
+    text-align: center;
+}
+
 .h-graph-group {
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-around;
 }
 
+
+@media only screen and (max-width: 1000px) {
+    .aspect-warning {
+        display: block;
+    }
+}
+
+
 @media only screen and (max-width: 375px) {
     .shrink-text {
         font-size: 0.7rem;
+    }
+
+    .aspect-warning {
+        font-size: 0.6em;
     }
 }
 

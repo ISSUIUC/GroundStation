@@ -154,6 +154,10 @@ export const TelemetryGraph = ({ telem_channels, yaxis_label="", yaxis_unit }) =
     let xaxis = "Time"
 
     let yaxis_t = `${yaxis_label} (${getUnit(yaxis_unit)})`;
+    if(yaxis_unit != null) {
+        yaxis_t = `${yaxis_label} (${getUnit(yaxis_unit)})`;
+    }
+    
     
 
     return <GenericGraph xvalues={xvalues} yvalues={yvalues} legends={legends} colors={colors} xaxis={xaxis} yaxis={yaxis_t} />
