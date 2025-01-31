@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { GSSDataProvider, useGSSMQTT, useSetGlobalVar, useSyncGlobalVars, useTelemetry, useTelemetryHistory } from '../dataflow/gssdata.jsx'
+import { GSSDataProvider, useGSSMQTT, useSyncGlobalVars, useTelemetry, useTelemetryHistory } from '../dataflow/gssdata.jsx'
 import { Timer } from '../reusable/Timer.jsx'
 import { SingleValue, MultiValue, ValueGroup, SingleValueGroupRow, StatusDisplay, StatusDisplayWithValue } from '../reusable/ValueDisplay.jsx'
 import { AngleGauge } from '../spec/AngleGauge.jsx'
@@ -7,16 +7,57 @@ import { AngleGauge } from '../spec/AngleGauge.jsx'
 import '../reusable/Common.css';
 import { FlightCountTimer } from '../spec/FlightCountTimer.jsx';
 import GSSButton from '../reusable/Button.jsx';
-import { Graph, TelemetryGraph } from '../reusable/Graph.jsx';
+import { TelemetryGraph } from '../reusable/Graph.jsx';
 import { getUnit } from '../dataflow/settings.jsx';
+import { state_int_to_state_name } from '../dataflow/midasconversion.jsx';
+import { PositionDataProvider, useGPSPosition } from '../dataflow/positioning.jsx';
 
+import haversine from 'haversine';
+import { options } from 'preact';
+
+function DistanceTracker({ rocket_lat, rocket_long }) {
+  const [loc_available, loc_data] = useGPSPosition()
+
+  if(rocket_lat == 0 && rocket_long == 0) {
+    <>
+      <SingleValue label={"Tracking Distance"} value={"Missing Rocket Location"} unit={""} />
+    </>
+  }
+
+  if(!loc_available) {
+    return (
+      <>
+        <SingleValue label={"Tracking Distance"} value={"User location unavailable"} unit={""} />
+      </>
+    );
+  }
+
+  let user_lat = loc_data.latitude;
+  let user_long = loc_data.longitude;
+
+  let point1 = {"latitude": user_lat, "longitude": user_long}
+  let point2 = {"latitude": rocket_lat, "longitude": rocket_long}
+
+  const unit = getUnit("distance") == "m" ? "km" : "mi"
+  let distance = haversine(point1, point2, {
+    unit: unit
+  })
+
+  return (
+    <>
+      <SingleValue label={"Tracking Distance"} value={distance.toFixed(4)} unit={unit} />
+    </>
+  );
+
+} 
 
 export function FullTelemetryView() {
 
   // More efficient to just get all the data at once
-  const tvalues = useTelemetry("/value");
+  const fsm_state = useTelemetry("/value.FSM_State") || null;
 
-  console.log("tvalues", tvalues);
+  const gps_lat = useTelemetry("/value.latitude") || 0;
+  const gps_long = useTelemetry("/value.longitude") || 0;
 
   return (
     <>
@@ -96,7 +137,7 @@ export function FullTelemetryView() {
                     units={[getUnit("power"), "MHz", ""]}
                 />
 
-                <SingleValue label={"Stage State"} value={"BOOST"} unit={""} />
+                <SingleValue label={"Stage State"} value={fsm_state==null ? "NO_DATA" : state_int_to_state_name(fsm_state)} unit={""} />
 
                 <MultiValue
                     label={"Tracking"}
@@ -104,9 +145,11 @@ export function FullTelemetryView() {
                     values={[0, 0, 0]}
                     units={["°", "°", getUnit("distance")]}
                 />
-              
-                <SingleValue label={"Tracking Distance"} value={0} unit={getUnit("distance")} />
-              
+
+                <PositionDataProvider>
+                  <DistanceTracker rocket_lat={gps_lat} rocket_long={gps_long} />
+                </PositionDataProvider>
+
             </ValueGroup>
           </div>
 

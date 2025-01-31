@@ -1,7 +1,6 @@
 import { useState } from 'preact/hooks'
 import './app.css'
-import React, { useContext, useEffect } from 'react';
-import { GSSDataProvider, useTelemetry } from './components/dataflow/gssdata.jsx'
+import { GSSDataProvider } from './components/dataflow/gssdata.jsx'
 import { StructuresView } from './components/views/StructuresView.jsx';
 import { Breadcrumb } from './components/reusable/Breadcrumb.jsx';
 import { Navbar } from './components/reusable/Navbar.jsx';

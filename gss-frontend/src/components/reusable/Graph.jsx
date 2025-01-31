@@ -9,8 +9,6 @@ import zoomPlugin from 'chartjs-plugin-zoom'
 
 ChartJS.register(LineElement, PointElement, LinearScale, Title, Tooltip, Legend, CategoryScale, zoomPlugin);
 
-
-
 export const GenericGraph = ({ yvalues, xvalues, legends, colors, xaxis, yaxis }) => {
 
     // yvalues format: Array of arrays, corresponding to data

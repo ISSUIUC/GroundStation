@@ -22,8 +22,6 @@ let telemetry_calculator_hooks = {}; // Stores necessary translation functions (
 
 export let CLEAR_T_DATA_FUNC = () => {}
 
-
-
 export function useGlobalStateCallback(callable) {
     global_state_callbacks.push(callable);
 }

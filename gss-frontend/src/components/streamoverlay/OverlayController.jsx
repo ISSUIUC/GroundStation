@@ -110,20 +110,19 @@ export default function OverlayController() {
         <>
             <ShowPathExact path={"/stream/control"}>
                 <ValueGroup label="Visibility">
-
+                    <button onClick={() => {
+                        sync_vars({"stream_spot_overlay_visible": !spot_vis});
+                    }}>toggle spot vis</button>
+                    <button onClick={() => {
+                        sync_vars({"stream_top_timer_visible": !top_timer_vis});
+                    }}>toggle top vis</button>
                 </ValueGroup>
-                control view
-                <button onClick={() => {
-                    sync_vars({"stream_spot_overlay_visible": !spot_vis});
-                }}>toggle spot vis</button>
-                <button onClick={() => {
-                    sync_vars({"stream_top_timer_visible": !top_timer_vis});
-                }}>toggle top vis</button>
+
             </ShowPathExact>
 
             <ShowPathExact path={"/stream"}>
                 <div className={`spot-overlay start-hidden spot-overlay-${spot_vis ? "in" : "out"}`} />
-                <PassiveTimer progName={"Kairos III"} visible={top_timer_vis} />
+                <PassiveTimer progName={"Aether I"} visible={top_timer_vis} />
                 <div className={`overlay-position-bottom start-hidden overlay-row-${spot_vis ? "in" : "out"}`}>
                     <div className="overlay-row">
 
