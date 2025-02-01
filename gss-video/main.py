@@ -114,7 +114,9 @@ thread.start()
 @app.route('/')
 def index():
     print("Rendering index..")
-    return render_template('./index.html')
+    temp = render_template('index.html')
+    print(temp)
+    return temp
 
 def generate_frames():
     while True:
