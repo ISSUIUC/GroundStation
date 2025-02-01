@@ -58,15 +58,17 @@ export function GSSDataProvider({ children, default_stream }) {
     useEffect(async () => {
 
         // Load stored data
-        const stored_value = JSON.parse(localStorage.getItem("telem_snapshot"));
-        const stored_hist = JSON.parse(localStorage.getItem("telem_history"));
-
-        if(stored_value) {
-            setValue(stored_value);
-        }
-
-        if(stored_hist) {
-            setHist(stored_hist);
+        if(getSetting("retain_on_reload")) {
+            const stored_value = JSON.parse(localStorage.getItem("telem_snapshot"));
+            const stored_hist = JSON.parse(localStorage.getItem("telem_history"));
+    
+            if(stored_value) {
+                setValue(stored_value);
+            }
+    
+            if(stored_hist) {
+                setHist(stored_hist);
+            }
         }
 
         socket.on("sync_response", (syncdata) => {
@@ -88,6 +90,11 @@ export function GSSDataProvider({ children, default_stream }) {
         })
 
         socket.on('mqtt_message', (data) => {
+            if(!getSetting("global_sync")) {
+                return;
+            }
+
+
             let json_data = JSON.parse(data)
             if(json_data["metadata"]["type"] === "telemetry" || json_data["metadata"]["type"] === "gss_health") {
                 // valid telemetry packet
