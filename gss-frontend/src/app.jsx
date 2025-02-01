@@ -13,6 +13,8 @@ import { ShowIf, ShowPath, ShowPathExact } from './components/reusable/UtilityCo
 import { SettingsView } from './components/views/SettingsView.jsx';
 import { getSetting } from './components/dataflow/settings.jsx';
 
+import { MapView } from './components/views/MapView.jsx';
+
 export function App() {
   const [currentStream, setCurrentStream] = useState("sustainer");
   const [currentTab, setCurrentTab] = useState("default");
@@ -53,6 +55,10 @@ export function App() {
           </div>
           
           <Breadcrumb />
+        </ShowPathExact>
+
+        <ShowPathExact path={"/map"}>
+          <MapView/>
         </ShowPathExact>
 
         <ShowPath path={"/stream"}>
