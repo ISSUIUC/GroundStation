@@ -13,6 +13,7 @@
     "chartjs-plugin-zoom": "^2.2.0",
     "config-ini-parser": "^1.6.1",
     "haversine": "^1.1.1",
+    "leaflet": "^1.9.4",
     "preact": "^10.25.3",
     "react-chartjs-2": "^5.2.0",
     "socket.io-client": "^4.8.1"
