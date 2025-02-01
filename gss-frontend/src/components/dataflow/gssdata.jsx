@@ -2,8 +2,12 @@ import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import { getSetting } from './settings';
 
-function ws_url() {
-    return window.location.hostname + ":5001";
+function ws_url(path="") {
+    return window.location.hostname + ":5001" + path;
+}
+
+export function video_server_url(path="") {
+    return window.location.hostname + ":5002" + path;
 }
 
 

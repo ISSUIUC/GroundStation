@@ -11,6 +11,7 @@ import { RecoveryView } from './components/views/RecoveryView.jsx';
 import OverlayController from './components/streamoverlay/OverlayController.jsx';
 import { ShowIf, ShowPath, ShowPathExact } from './components/reusable/UtilityComponents.jsx';
 import { SettingsView } from './components/views/SettingsView.jsx';
+import { VideoView } from './components/views/VideoView.jsx';
 
 export function App() {
   const [currentStream, setCurrentStream] = useState("sustainer");
@@ -38,6 +39,10 @@ export function App() {
 
             <ShowIf condition={currentTab === "recovery"}>
               <RecoveryView />
+            </ShowIf>
+
+            <ShowIf condition={currentTab === "video"}>
+              <VideoView />
             </ShowIf>
 
             <ShowIf condition={currentTab === "sys_diag"}>
