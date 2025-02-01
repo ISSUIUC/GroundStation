@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // Default settings
-const GLOBAL_SETTINGS = {
+let GLOBAL_SETTINGS = {
     "unit_system": "METRIC", // Choices: "METRIC", "IMPERIAL"
     "accel_unit_type": "Unit System", // Choices: "Unit System", "Force G"
     "display_type": "DARK", // Choices: "LIGHT", "DARK"
@@ -43,4 +43,12 @@ export function getSetting(setting_key) {
 
 export function setSetting(setting_key, setting_val) {
     GLOBAL_SETTINGS[setting_key] = setting_val
+    localStorage.setItem("settings", JSON.stringify(GLOBAL_SETTINGS))
+}
+
+// Load value
+const stored_settings = JSON.parse(localStorage.getItem("settings"));
+
+if(stored_settings) {
+    GLOBAL_SETTINGS = stored_settings
 }
