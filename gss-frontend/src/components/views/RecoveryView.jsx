@@ -50,11 +50,13 @@ export function RecoveryView() {
           <PositionDataProvider>
             <Thingy />
           </PositionDataProvider>
-          <button>
-              <a href="/map" style={{ color: 'inherit', textDecoration: 'none'}}>
-                Full Screen Map View
-              </a>
-          </button>
+          <div>
+            <button>
+                <a href="/map" style={{ color: 'inherit', textDecoration: 'none'}}>
+                  Full Screen Map View
+                </a>
+            </button>
+          </div>
         </div>
         <div style = {{ display: 'flex', flex: 1, justifyContent: 'space-between' }}>
           <div style= {{ flex: 1, padding: '20px'}}>
