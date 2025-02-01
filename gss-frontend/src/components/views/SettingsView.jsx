@@ -72,7 +72,7 @@ export function SettingsView() {
                 setAccelUnitType(c);
             }} curchoice={accel_unit_type}/>
 
-            <ChoiceSelect text="Contrast Display" alt_text='Determines which display mode to use for the local user' choices={["LIGHT", "DARK"]} onSelect={(c) => {
+            <ChoiceSelect text="Contrast Display" alt_text='Determines which display mode to use (Requires page re-render!)' choices={["LIGHT", "DARK"]} onSelect={(c) => {
               setSetting("display_type", c);
               setDisplayType(c);
             }} curchoice={display_type}/>
