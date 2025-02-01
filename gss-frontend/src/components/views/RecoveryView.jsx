@@ -32,7 +32,7 @@ export function RecoveryView() {
         <PositionDataProvider>
           <Thingy />
         </PositionDataProvider>
-
+        <a href="/map">Go to Map</a>
         <h1> Map Coords</h1>
       </div>
     </>
