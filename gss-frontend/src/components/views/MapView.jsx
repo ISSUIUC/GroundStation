@@ -50,7 +50,6 @@ export function MapView() {
     };
   }, []); // This effect runs only once on mount
 
-  // Update markers when telemetry data changes
   useEffect(() => {
     if (map && rocket_latitude && rocket_longitude) {
       const newMarker = L.marker([rocket_latitude, rocket_longitude], { icon: redDotIcon }).addTo(map);
@@ -58,7 +57,6 @@ export function MapView() {
     }
   }, [rocket_latitude, rocket_longitude, map]); // Only runs when telemetry or map changes
 
-  // Update map view when location changes
   useEffect(() => {
     if (map) {
       map.setView([selectedLocation.latitude, selectedLocation.longitude], 17);
@@ -81,6 +79,11 @@ export function MapView() {
             <h3>Selected Location Details</h3>
             <p>Latitude: {selectedLocation.latitude}° {selectedLocation.ns}</p>
             <p>Longitude: {selectedLocation.longitude}° {selectedLocation.we}</p>
+          </div>
+          <div>
+            <h3>Last Pinged Rocket Position</h3>
+            <p>Latitude: {rocket_latitude}</p>
+            <p>Longitude: {rocket_longitude}</p>
           </div>
         </div>
         <div id="map" style={mapSectionStyle}></div>
