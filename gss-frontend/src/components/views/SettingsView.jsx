@@ -23,20 +23,25 @@ export function SettingsView() {
         case "METRIC":
             console.log("Converting to metric units...");
             clearCalculators(); // Default is metric so we don't need to add any translators
+            // except the default conversions!
             break;
         case "IMPERIAL":
             console.log("Converting to imperial units...");
             clearCalculators();
             ["booster", "sustainer"].forEach((stg) => {
                 addRecalculator(`@${stg}/value.barometer_altitude`, CONVERSIONS.METER_TO_FEET);
-                addRecalculator(`@${stg}/value.highG_ax`, CONVERSIONS.METER_TO_FEET);
-                addRecalculator(`@${stg}/value.highG_ay`, CONVERSIONS.METER_TO_FEET);
-                addRecalculator(`@${stg}/value.highG_az`, CONVERSIONS.METER_TO_FEET);
+                addRecalculator(`@${stg}/value.kf_vx`, CONVERSIONS.METER_TO_FEET);
             })
             break;
         default:
             clearCalculators() // Use metric by default
     }
+
+    ["booster", "sustainer"].forEach((stg) => {
+      addRecalculator(`@${stg}/value.highG_ax`, CONVERSIONS.ACCEL_G_TO_UNIT_CONVERSION);
+      addRecalculator(`@${stg}/value.highG_ay`, CONVERSIONS.ACCEL_G_TO_UNIT_CONVERSION);
+      addRecalculator(`@${stg}/value.highG_az`, CONVERSIONS.ACCEL_G_TO_UNIT_CONVERSION);
+    })
   }
 
   let selected_data_retention_choice = "ALL";

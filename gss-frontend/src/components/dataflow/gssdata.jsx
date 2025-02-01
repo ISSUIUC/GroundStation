@@ -278,7 +278,6 @@ export function useTelemetryHistory(telem_code=undefined, metadata=false, defaul
     }
 
     const h_data = React.useContext(GSSTelemetryHistory);
-
     return h_data.map((telemetry_snapshot) => {
         if(telemetry_calculator_hooks[telem_code]) {
             // This telemetry data is translated
@@ -289,6 +288,23 @@ export function useTelemetryHistory(telem_code=undefined, metadata=false, defaul
     
         return getTelemetryRaw(telemetry_snapshot, telem_code, metadata, defaultvalue);
     })
+}
+
+export function useTelemetryRaw(telem_code=undefined, metadata=false, defaultvalue=null) {
+    /**
+     * Gets raw telem values (translators are not applied)
+     */
+    if(telem_code===undefined) {
+        return getTelemetryRaw(undefined, false, null);
+    }
+
+    if(telem_code[0] === "/") {
+        const gss_default_channel = React.useContext(GSSChannel);
+        telem_code = "@" + gss_default_channel + telem_code;
+    }
+
+    const telemetry_snapshot = React.useContext(GSSData);
+    return getTelemetryRaw(telemetry_snapshot, telem_code, metadata, defaultvalue);
 }
 
 export function useTelemetry(telem_code=undefined, metadata=false, defaultvalue=null) {
