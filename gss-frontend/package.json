@@ -16,7 +16,8 @@
     "leaflet": "^1.9.4",
     "preact": "^10.25.3",
     "react-chartjs-2": "^5.2.0",
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.1",
+    "standard-atmosphere": "^0.3.5"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.9.3",

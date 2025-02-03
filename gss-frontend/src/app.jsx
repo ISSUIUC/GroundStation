@@ -11,6 +11,7 @@ import { RecoveryView } from './components/views/RecoveryView.jsx';
 import OverlayController from './components/streamoverlay/OverlayController.jsx';
 import { ShowIf, ShowPath, ShowPathExact } from './components/reusable/UtilityComponents.jsx';
 import { SettingsView } from './components/views/SettingsView.jsx';
+import { getSetting } from './components/dataflow/settings.jsx';
 
 import { MapView } from './components/views/MapView.jsx';
 
@@ -18,9 +19,11 @@ export function App() {
   const [currentStream, setCurrentStream] = useState("sustainer");
   const [currentTab, setCurrentTab] = useState("default");
 
+  const use_light_mode = getSetting("display_type") == "LIGHT"
+  console.log(getSetting("display_type"))
+
   return (
-    <>
-      
+    <div className={`fullscreen ${use_light_mode ? "invert" : ""}`}>
       <GSSDataProvider default_stream={currentStream}>
         {/* Main window */}
         <ShowPathExact path={"/"}>
@@ -62,6 +65,6 @@ export function App() {
           <OverlayController />
         </ShowPath>
       </GSSDataProvider>
-    </>
+    </div>
   )
 }

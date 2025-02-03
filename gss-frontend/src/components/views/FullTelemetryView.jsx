@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { GSSDataProvider, useGSSMQTT, useSyncGlobalVars, useTelemetry, useTelemetryHistory } from '../dataflow/gssdata.jsx'
+import { GSSDataProvider, useGSSMQTT, useSyncGlobalVars, useTelemetry, useTelemetryHistory, useTelemetryRaw } from '../dataflow/gssdata.jsx'
 import { Timer } from '../reusable/Timer.jsx'
 import { SingleValue, MultiValue, ValueGroup, SingleValueGroupRow, StatusDisplay, StatusDisplayWithValue } from '../reusable/ValueDisplay.jsx'
 import { AngleGauge } from '../spec/AngleGauge.jsx'
@@ -8,9 +8,11 @@ import '../reusable/Common.css';
 import { FlightCountTimer } from '../spec/FlightCountTimer.jsx';
 import GSSButton from '../reusable/Button.jsx';
 import { TelemetryGraph } from '../reusable/Graph.jsx';
-import { getUnit } from '../dataflow/settings.jsx';
+import { getSetting, getUnit } from '../dataflow/settings.jsx';
 import { state_int_to_state_name } from '../dataflow/midasconversion.jsx';
 import { PositionDataProvider, useGPSPosition } from '../dataflow/positioning.jsx';
+
+import standardAtmosphere from "standard-atmosphere"
 
 import haversine from 'haversine';
 import { options } from 'preact';
@@ -54,10 +56,44 @@ export function DistanceTracker({ rocket_lat, rocket_long }) {
 export function FullTelemetryView() {
 
   // More efficient to just get all the data at once
-  const fsm_state = useTelemetry("/value.FSM_State") || null;
+  const data = useTelemetry("/value");
 
-  const gps_lat = useTelemetry("/value.latitude") || 0;
-  const gps_long = useTelemetry("/value.longitude") || 0;
+  const data_num = (key) => {
+    if(!data) { return 0; }
+    return data[key] == null ? 0 : data[key];
+  }
+
+  const fsm_state = data_num("FSM_State");
+
+  const gps_lat = data_num("latitude");
+  const gps_long = data_num("longitude");
+
+  const tilt_angle = data_num("tilt_angle");
+  
+  const pyro_cont = [data_num("pyro_a"), data_num("pyro_b"), data_num("pyro_c"), data_num("pyro_d")]
+  
+  const rssi = data_num("RSSI")
+  const freq = data_num("frequency")
+  const is_sus = data_num("is_sustainer")
+
+  const accel_unit = getUnit("acceleration")
+
+  // Translated units need to be gotten directly :(, this is a limitation of the telemetry hook system :(
+  const altitude_gps = useTelemetry("/value.altitude") || 0;
+  const altitude_baro = useTelemetry("/value.barometer_altitude") || 0;
+  const accel = [useTelemetry("/value.highG_ax") || 0, useTelemetry("/value.highG_ay") || 0, data_num("/value.highG_az") || 0]
+  const kf_velocity = useTelemetry("/value.kf_vx") || 0;
+
+  const accel_magnitude = Math.sqrt(accel[0]*accel[0] + accel[1]+accel[1] + accel[2]+accel[2])
+
+  // Atmosphere calcs
+  const altitude_baro_raw = useTelemetryRaw("/value.barometer_altitude") || 0;
+  const velocity_raw = useTelemetryRaw("/value.kf_vx");
+  const { density, ssound, temperature } = standardAtmosphere(altitude_baro_raw, true);
+  const mach_number = velocity_raw/ssound;
+  const dynamic_pressure = (1/2)*density*(velocity_raw*velocity_raw) * (0.000145038) // pascal to psi conversion
+
+  const stag_temp = temperature*(1 + (mach_number**2 * (1.4 - 1)/2))
 
   return (
     <>
@@ -82,7 +118,7 @@ export function FullTelemetryView() {
                   "/value.highG_ay": {name: "Y", color: "#00cc00"},
                   "/value.highG_az": {name: "Z", color: "#0000cc"}
                   
-                }} yaxis_label='KX Acceleration' yaxis_unit={"acceleration"} />
+                }} yaxis_label='KX Acceleration' yaxis_unit={getUnit("acceleration")} />
 
                 <TelemetryGraph telem_channels={{
                   "/value.RSSI": {name: "RSSI", color: "#d97400"}
@@ -94,8 +130,8 @@ export function FullTelemetryView() {
                 }} yaxis_label='Angle (deg)' />
 
                 <TelemetryGraph telem_channels={{
-                  "/value.altitude": {name: "Altitude (G)", color: "#d97400"}
-                }} yaxis_label='GPS Altitude' yaxis_unit={"distance"} />
+                  "/value.kf_vx": {name: "Velocity", color: "#d97400"}
+                }} yaxis_label='Velocity' yaxis_unit={"velocity"} />
 
                 <TelemetryGraph telem_channels={{
                   "/value.battery_voltage": {name: "Battery Voltage", color: "#d97400"}
@@ -109,40 +145,52 @@ export function FullTelemetryView() {
                 <MultiValue
                     label={"Gyroscopic"}
                     titles={["Tilt", "Tilt @ Burnout", "Roll Rate"]}
-                    values={[0, 0, 0]}
+                    values={[tilt_angle.toFixed(1), tilt_angle.toFixed(1), "ND"]}
                     units={["°", "°", "°/s"]}
                 />
 
                 <MultiValue
                     label={"Dynamics"}
-                    titles={["Altitude (Baro)", "Velocity", "Acceleration (Mag)"]}
-                    values={[0, 0, 0]}
-                    units={[getUnit("distance"), getUnit("velocity"), "G"]}
+                    titles={["Altitude (Baro)", "Velocity", "Acceleration"]}
+                    values={[altitude_baro.toFixed(2), kf_velocity.toFixed(2), accel_magnitude.toFixed(2)]}
+                    units={[getUnit("distance"), getUnit("velocity"), accel_unit]}
                 />
 
-                <SingleValue label={"Dynamic Pressure"} value={0} unit={getUnit("pressure")} />
+                <MultiValue
+                    label={""}
+                    titles={["Mach", "Dynamic Pressure", "Stag Temp"]}
+                    values={[mach_number.toFixed(2), dynamic_pressure.toFixed(2), stag_temp.toFixed(0)]}
+                    units={["", getUnit("pressure"), "°K"]}
+                />
 
                 <MultiValue
                     label={"Acceleration"}
                     titles={["X", "Y", "Z"]}
-                    values={[0, 0, 0]}
+                    values={[accel[0].toFixed(2), accel[1].toFixed(2), accel[2].toFixed(2)]}
                     label_colors={["#ff0000", "#00ff00", "#0000ff"]}
-                    units={[getUnit("acceleration"), getUnit("acceleration"), getUnit("acceleration")]}
+                    units={[accel_unit, accel_unit, accel_unit]}
                 />
 
                 <MultiValue
                     label={"Comms"}
                     titles={["RSSI", "Frequency", "SUSTAINER Flag"]}
-                    values={[0, 0, 0]}
+                    values={[rssi, freq.toFixed(2), is_sus]}
                     units={[getUnit("power"), "MHz", ""]}
                 />
 
                 <SingleValue label={"Stage State"} value={fsm_state==null ? "NO_DATA" : state_int_to_state_name(fsm_state)} unit={""} />
 
                 <MultiValue
+                    label={"Pyro"}
+                    titles={["Channel A", "Channel B", "Channel C", "Channel D"]}
+                    values={[pyro_cont[0].toFixed(2), pyro_cont[1].toFixed(2), pyro_cont[2].toFixed(2), pyro_cont[3].toFixed(2)]}
+                    units={["V", "V", "V", "V"]}
+                />
+
+                <MultiValue
                     label={"Tracking"}
                     titles={["LAT", "LONG", "ALT (GPS)"]}
-                    values={[0, 0, 0]}
+                    values={[gps_lat, gps_long, altitude_gps.toFixed(1)]}
                     units={["°", "°", getUnit("distance")]}
                 />
 

@@ -58,15 +58,17 @@ export function GSSDataProvider({ children, default_stream }) {
     useEffect(async () => {
 
         // Load stored data
-        const stored_value = JSON.parse(localStorage.getItem("telem_snapshot"));
-        const stored_hist = JSON.parse(localStorage.getItem("telem_history"));
-
-        if(stored_value) {
-            setValue(stored_value);
-        }
-
-        if(stored_hist) {
-            setHist(stored_hist);
+        if(getSetting("retain_on_reload")) {
+            const stored_value = JSON.parse(localStorage.getItem("telem_snapshot"));
+            const stored_hist = JSON.parse(localStorage.getItem("telem_history"));
+    
+            if(stored_value) {
+                setValue(stored_value);
+            }
+    
+            if(stored_hist) {
+                setHist(stored_hist);
+            }
         }
 
         socket.on("sync_response", (syncdata) => {
@@ -88,6 +90,11 @@ export function GSSDataProvider({ children, default_stream }) {
         })
 
         socket.on('mqtt_message', (data) => {
+            if(!getSetting("global_sync")) {
+                return;
+            }
+
+
             let json_data = JSON.parse(data)
             if(json_data["metadata"]["type"] === "telemetry" || json_data["metadata"]["type"] === "gss_health") {
                 // valid telemetry packet
@@ -271,7 +278,6 @@ export function useTelemetryHistory(telem_code=undefined, metadata=false, defaul
     }
 
     const h_data = React.useContext(GSSTelemetryHistory);
-
     return h_data.map((telemetry_snapshot) => {
         if(telemetry_calculator_hooks[telem_code]) {
             // This telemetry data is translated
@@ -282,6 +288,23 @@ export function useTelemetryHistory(telem_code=undefined, metadata=false, defaul
     
         return getTelemetryRaw(telemetry_snapshot, telem_code, metadata, defaultvalue);
     })
+}
+
+export function useTelemetryRaw(telem_code=undefined, metadata=false, defaultvalue=null) {
+    /**
+     * Gets raw telem values (translators are not applied)
+     */
+    if(telem_code===undefined) {
+        return getTelemetryRaw(undefined, false, null);
+    }
+
+    if(telem_code[0] === "/") {
+        const gss_default_channel = React.useContext(GSSChannel);
+        telem_code = "@" + gss_default_channel + telem_code;
+    }
+
+    const telemetry_snapshot = React.useContext(GSSData);
+    return getTelemetryRaw(telemetry_snapshot, telem_code, metadata, defaultvalue);
 }
 
 export function useTelemetry(telem_code=undefined, metadata=false, defaultvalue=null) {

@@ -1,5 +1,7 @@
 
 const MIDAS_STATES = [
+    "STATE_SAFE",
+    "STATE_PYRO_TEST",
     "STATE_IDLE",
     "STATE_FIRST_BOOST",
     "STATE_BURNOUT",
