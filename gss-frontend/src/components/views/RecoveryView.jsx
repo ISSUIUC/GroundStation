@@ -10,6 +10,8 @@ import GSSButton from '../reusable/Button.jsx';
 import { PositionDataProvider, useGPSPosition } from '../dataflow/positioning.jsx';
 import { MapView } from './MapView.jsx';
 import { TelemetryGraph } from '../reusable/Graph.jsx';
+import { DistanceTracker } from './FullTelemetryView.jsx';
+import { getUnit } from '../dataflow/settings.jsx';
 
 function Thingy() {
 
@@ -24,42 +26,18 @@ function Thingy() {
 export function RecoveryView() {
   let baro_alt = useTelemetry("/value.barometer_altitude") || 0;
   let altitude = useTelemetry("/value.altitude") || 0;
-  let angle = (useTelemetry("/value.tilt_angle") || 0) * (180/64);
+  let velocity = useTelemetry("/value.kf_velocity") || 0;
+  let angle = (useTelemetry("/value.tilt_angle") || 0);
   let latitude = (useTelemetry("/value.latitude") || 0);
   let longitude = (useTelemetry("/value.longitude") || 0);
   const has_telem = useTelemetry("/src") != null;
 
-  //Haversine formula - Calculates distance from rocket around earth
-  let original_lat = 41.49116
-  let original_long = -89.50192
-  let phi_1 = original_lat * (Math.PI / 180);
-  let phi_2 = latitude * (Math.PI / 180);
-  let lambda_1 = original_long * (Math.PI / 180);
-  let lambda_2 = longitude * (Math.PI / 180);
-  let delta_phi = phi_1 - phi_2;
-  let delta_lambda = lambda_1 - lambda_2;
-  let a = Math.pow(Math.sin( delta_phi/2 ), 2 ) + Math.cos(phi_1) * Math.cos(phi_2) * Math.pow( Math.sin(delta_lambda/2) , 2 );
-  let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  let R = 6371000 // In meters
-  let distance = R * c
   return (
     <>
       <div className='telemetry-view'>
-        <div style= {{width: '100%', textAlign:'center'}}>
-          <FlightCountTimer />
-          <PositionDataProvider>
-            <Thingy />
-          </PositionDataProvider>
-          <div>
-            <button>
-                <a href="/map" style={{ color: 'inherit', textDecoration: 'none'}}>
-                  Full Screen Map View
-                </a>
-            </button>
-          </div>
-        </div>
-        <div style = {{ display: 'flex', flex: 1, justifyContent: 'space-between' }}>
-          <div style= {{ flex: 1, padding: '20px'}}>
+      <FlightCountTimer />
+        <div className='gss-horizontal-group gss-horizontal-large-restack'>
+          <div className='gss-horizontal-group-elem-33 gss-horizontal-group-elem-restack'>
             <ValueGroup label={"Rocket Tilt"}>
               <div className='str-angle-visualaid'>
                 <div>
@@ -76,21 +54,29 @@ export function RecoveryView() {
               </div>
             </ValueGroup>
             <ValueGroup label={"Altitude"}>
-              <StatusDisplayWithValue label={"Altitude (Baro)"} status={"N/A"} value={has_telem ? `${baro_alt}` : "no data"}></StatusDisplayWithValue>
-              <StatusDisplayWithValue label={"Altitude (Altimeter)"} status={"N/A"} value={has_telem ? `${altitude}` : "no data"}></StatusDisplayWithValue>
+              <MultiValue
+                  label={"Dynamics"}
+                  titles={["Altitude (Baro)", "Altitude (GPS)", "Velocity"]}
+                  values={[baro_alt, altitude, velocity]}
+                  units={[getUnit("distance"), getUnit("distance"), getUnit("velocity")]}
+              />
+              
               <TelemetryGraph telem_channels={{
-                "/value.altitude": {name: "Altitude (G)", color: "#d97400"}
-              }} yaxis_label='GPS Altitude' yaxis_unit={"distance"} />
+                "/value.barometer_altitude": {name: "Altitude", color: "#d97400"}
+              }} yaxis_label='Baro Altitude' yaxis_unit={"distance"} />
             </ValueGroup>
             <ValueGroup label={"Distance from Rocket"}>
-              <div style={{ textAlign: 'center' }}>
-                <h1>{distance} m</h1>
-              </div>
+              <PositionDataProvider>
+                <DistanceTracker rocket_lat={latitude} rocket_long={longitude} />
+              </PositionDataProvider>
             </ValueGroup>
 
           </div>
-          <div style = {{flex: 2, padding: '20px', maxHeight:'80vh', overflowY: 'auto'}}>
-            <MapView/>
+          <div className='gss-horizontal-group-elem-66 gss-horizontal-group-elem-restack'>
+            <ValueGroup label={"Map position"}>
+              <MapView/>
+            </ValueGroup>
+            
           </div> 
         </div>
       </div>  

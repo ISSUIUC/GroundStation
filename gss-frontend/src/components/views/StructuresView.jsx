@@ -16,7 +16,7 @@ export function StructuresView() {
   const accel_multiplier = (force_gs ? 1*imperial_cancel : 9.81);
   const accel_unit = force_gs ? "G" : getUnit("acceleration");
 
-  let angle = (useTelemetry("/value.tilt_angle") || 0) * (180/64);
+  let angle = (useTelemetry("/value.tilt_angle") || 0);
   let accel_x = (useTelemetry("/value.highG_ax") || 0) * accel_multiplier;
   let accel_y = (useTelemetry("/value.highG_ay") || 0) * accel_multiplier;
   let accel_z = (useTelemetry("/value.highG_az") || 0) * accel_multiplier;

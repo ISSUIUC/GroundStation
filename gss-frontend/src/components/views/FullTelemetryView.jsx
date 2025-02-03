@@ -15,7 +15,7 @@ import { PositionDataProvider, useGPSPosition } from '../dataflow/positioning.js
 import haversine from 'haversine';
 import { options } from 'preact';
 
-function DistanceTracker({ rocket_lat, rocket_long }) {
+export function DistanceTracker({ rocket_lat, rocket_long }) {
   const [loc_available, loc_data] = useGPSPosition()
 
   if(rocket_lat == 0 && rocket_long == 0) {
