@@ -90,18 +90,9 @@ export default function OverlayController() {
 
     const sync_vars = useSyncGlobalVars();
 
-    const raw_sus_angle = useTelemetry("@sustainer/value.tilt_angle");
-    const raw_boo_angle = useTelemetry("@booster/value.tilt_angle");
+    const sus_angle = useTelemetry("@sustainer/value.tilt_angle") || 0;
+    const boo_angle = useTelemetry("@booster/value.tilt_angle") || 0;
 
-    let sus_angle = 0;
-    if(has_sustainer_telem) {
-        sus_angle = raw_sus_angle*(180/64)
-    }
-
-    let boo_angle = 0;
-    if(has_booster_telem) {
-        boo_angle = raw_boo_angle*(180/64);
-    }
     
     const booster_alt = useTelemetry("@booster/value.barometer_altitude") || 0;
     const sustainer_alt = useTelemetry("@sustainer/value.barometer_altitude") || 0;

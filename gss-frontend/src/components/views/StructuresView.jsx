@@ -11,7 +11,8 @@ import { state_int_to_state_name } from '../dataflow/midasconversion.jsx';
 export function StructuresView() {
   // This view handles all telemetry needs for the structures-based view of the rocket.
 
-  let angle = (useTelemetry("/value.tilt_angle") || 0) * (180/64);
+
+  let angle = (useTelemetry("/value.tilt_angle") || 0);
   let accel_x = (useTelemetry("/value.highG_ax") || 0);
   let accel_y = (useTelemetry("/value.highG_ay") || 0);
   let accel_z = (useTelemetry("/value.highG_az") || 0);

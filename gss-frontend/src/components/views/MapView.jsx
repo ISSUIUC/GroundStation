@@ -85,6 +85,11 @@ export function MapView() {
             <p>Latitude: {rocket_latitude}</p>
             <p>Longitude: {rocket_longitude}</p>
           </div>
+          <button>
+            <a href="/" style={{ color: 'inherit', textDecoration: 'none'}}>
+              Go to Home
+            </a>
+          </button>
         </div>
         <div id="map" style={mapSectionStyle}></div>
       </div>
