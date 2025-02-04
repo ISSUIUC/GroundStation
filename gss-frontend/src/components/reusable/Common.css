@@ -3,6 +3,17 @@
     pointer-events: none;
 }
 
+.live-feed-iframe {
+    position: relative;
+    height: 100%; 
+    width: 100%;
+    border: none;
+}
+
+.tlm-flex-grow {
+    flex-grow: 2;
+}
+
 .card-overlay {
     z-index: 50;
     color: #ff9999;

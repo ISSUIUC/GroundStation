@@ -15,12 +15,12 @@ export function VideoView() {
 
   return (
     <>
-      <div className='telemetry-view'>
+      <div className='telemetry-view-flex'>
         <FlightCountTimer />
 
-        <img src={"http://" + video_url} />
-
-
+        <ValueGroup label={"Live Feed"} style_override={{"flex-grow": "2"}} child_style_override={{"height": "100%"}}>
+          <iframe src="http://10.193.148.153:5002" className='live-feed-iframe' allowtransparency="true" />
+        </ValueGroup>
       </div>
     </>
   )

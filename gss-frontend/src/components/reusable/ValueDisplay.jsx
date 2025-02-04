@@ -57,15 +57,15 @@ export const MultiValue = ({ label, titles, values, units, label_colors, hidden 
     );
 };
 
-export const ValueGroup = ({ label, children, hidden=false, hidden_label_text="NO DATA", use_smaller_labels=false }) => {
+export const ValueGroup = ({ label, children, hidden=false, hidden_label_text="NO DATA", use_smaller_labels=false, style_override={}, child_style_override={} }) => {
     return (
-        <div className={`value-card-group ${use_smaller_labels ? "value-card-group-smalllabel" : ""}`}>
+        <div className={`value-card-group ${use_smaller_labels ? "value-card-group-smalllabel" : ""}`} style={style_override}>
             {hidden ?  <div className='card-overlay'>{hidden_label_text}</div> : null}
 
             <div className="value-card-gname">
                 {label}
             </div>
-            <div className={hidden ? "card-hide" : ""}>
+            <div className={hidden ? "card-hide" : ""} style={child_style_override}>
                 {children}
             </div>
             
