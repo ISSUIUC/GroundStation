@@ -20,7 +20,7 @@ export function StructuresView() {
   const has_telem = useTelemetry("/src") != null;
   const motor_cont = useTelemetry("/value.pyro_c") || 0;
 
-  const velocity = useTelemetry("/value.kf_vx") || 0;
+  const velocity = useTelemetry("/value.kf_velocity") || 0;
 
   let fsm_state = useTelemetry("/value.FSM_State");
   if(fsm_state == null) {
@@ -31,12 +31,12 @@ export function StructuresView() {
 
   // Atmosphere calcs
   const altitude_baro_raw = useTelemetryRaw("/value.barometer_altitude") || 0;
-  const velocity_raw = useTelemetryRaw("/value.kf_vx") || 0;
+  const velocity_raw = useTelemetryRaw("/value.kf_velocity") || 0;
   const { density, ssound, temperature } = standardAtmosphere(altitude_baro_raw, true);
   const mach_number = velocity_raw/ssound;
   const dynamic_pressure = (1/2)*density*(velocity_raw*velocity_raw) * (0.000145038) // pascal to psi conversion
 
-  const stag_temp = temperature*(1 + (mach_number**2 * (1.4 - 1)/2))
+  const stag_temp = (temperature*(1 + (mach_number**2 * (1.4 - 1)/2))) - 273.15 // K to C
 
   const liftoff_status = fsm_state==-1 ? "N/A" : (fsm_state > 2 ? "GO" : "STBY");
   const burnout_status = fsm_state==-1 ? "N/A" : (fsm_state > 3 ? "GO" : "STBY");
@@ -70,7 +70,7 @@ export function StructuresView() {
                 label={""}
                 titles={["Mach", "Dynamic Pressure", "Stag Temp"]}
                 values={[mach_number.toFixed(2), dynamic_pressure.toFixed(2), stag_temp.toFixed(0)]}
-                units={["", getUnit("pressure"), "°K"]}
+                units={["", getUnit("pressure"), "°C"]}
             />
 
             <ValueGroup label={"Rocket Tilt"}>

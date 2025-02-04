@@ -82,18 +82,18 @@ export function FullTelemetryView() {
   const altitude_gps = useTelemetry("/value.altitude") || 0;
   const altitude_baro = useTelemetry("/value.barometer_altitude") || 0;
   const accel = [useTelemetry("/value.highG_ax") || 0, useTelemetry("/value.highG_ay") || 0, data_num("/value.highG_az") || 0]
-  const kf_velocity = useTelemetry("/value.kf_vx") || 0;
+  const kf_velocity = useTelemetry("/value.kf_velocity") || 0;
 
   const accel_magnitude = Math.sqrt(accel[0]*accel[0] + accel[1]+accel[1] + accel[2]+accel[2])
 
   // Atmosphere calcs
   const altitude_baro_raw = useTelemetryRaw("/value.barometer_altitude") || 0;
-  const velocity_raw = useTelemetryRaw("/value.kf_vx");
+  const velocity_raw = useTelemetryRaw("/value.kf_velocity");
   const { density, ssound, temperature } = standardAtmosphere(altitude_baro_raw, true);
   const mach_number = velocity_raw/ssound;
   const dynamic_pressure = (1/2)*density*(velocity_raw*velocity_raw) * (0.000145038) // pascal to psi conversion
 
-  const stag_temp = temperature*(1 + (mach_number**2 * (1.4 - 1)/2))
+  const stag_temp = (temperature*(1 + (mach_number**2 * (1.4 - 1)/2))) - 273.15 // K to C
 
   return (
     <>
@@ -130,7 +130,7 @@ export function FullTelemetryView() {
                 }} yaxis_label='Angle (deg)' />
 
                 <TelemetryGraph telem_channels={{
-                  "/value.kf_vx": {name: "Velocity", color: "#d97400"}
+                  "/value.kf_velocity": {name: "Velocity", color: "#d97400"}
                 }} yaxis_label='Velocity' yaxis_unit={"velocity"} />
 
                 <TelemetryGraph telem_channels={{
@@ -160,7 +160,7 @@ export function FullTelemetryView() {
                     label={""}
                     titles={["Mach", "Dynamic Pressure", "Stag Temp"]}
                     values={[mach_number.toFixed(2), dynamic_pressure.toFixed(2), stag_temp.toFixed(0)]}
-                    units={["", getUnit("pressure"), "°K"]}
+                    units={["", getUnit("pressure"), "°C"]}
                 />
 
                 <MultiValue
@@ -174,7 +174,7 @@ export function FullTelemetryView() {
                 <MultiValue
                     label={"Comms"}
                     titles={["RSSI", "Frequency", "SUSTAINER Flag"]}
-                    values={[rssi, freq.toFixed(2), is_sus]}
+                    values={[rssi.toFixed(0), freq.toFixed(2), is_sus]}
                     units={[getUnit("power"), "MHz", ""]}
                 />
 
@@ -190,7 +190,7 @@ export function FullTelemetryView() {
                 <MultiValue
                     label={"Tracking"}
                     titles={["LAT", "LONG", "ALT (GPS)"]}
-                    values={[gps_lat, gps_long, altitude_gps.toFixed(1)]}
+                    values={[gps_lat.toFixed(6), gps_long.toFixed(6), altitude_gps.toFixed(1)]}
                     units={["°", "°", getUnit("distance")]}
                 />
 

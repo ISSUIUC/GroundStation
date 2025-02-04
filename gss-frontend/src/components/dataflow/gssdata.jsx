@@ -180,6 +180,21 @@ export function useGSSWebsocket(event_tag="gss") {
     return send;
 }
 
+export function useGSSMQTTRaw() {
+    /**
+     * Sends data to the network raw.
+     */
+
+    const sendws = useGSSWebsocket();
+    const send = (channel_name, js_object) => {
+        // Accepts only a string
+        const payload = {"source": "gss-frontend", "type": "mqtt-autosend-raw", "stream": channel_name, "data": JSON.stringify(js_object)};
+        sendws(JSON.stringify(payload));
+    }
+
+    return send;
+}
+
 export function useGSSMQTT() {
     /**
      * Returns a function that encodes and sends a js object as JSON data to the GSS server. Wraps it in additional metadata to send the data to the network as well.

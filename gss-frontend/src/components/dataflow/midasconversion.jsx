@@ -22,6 +22,9 @@ export function state_int_to_state_name(state) {
     if(state == -1) {
         return "NO_DATA"
     }
+    if(!MIDAS_STATES[state]) {
+        return "ERR"
+    }
     let st_name = MIDAS_STATES[state].replace("STATE_", "")
     return st_name
 }

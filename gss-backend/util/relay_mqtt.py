@@ -57,6 +57,12 @@ class RelayMqtt:
                 if data_json["source"] == "gss-frontend":
                     print("Decoded msg from frontend", flush=True)
 
+                    if data_json["type"] == "mqtt-autosend-raw":
+                        # Relay but don't wrap in metadata
+                        channel = data_json["stream"]
+                        mqtt.publish(channel, data_json['data'])
+                        return
+
                     if data_json["type"] == "mqtt-autosend":
                         # Immediately relay the msg through mqtt
                         # Get channel

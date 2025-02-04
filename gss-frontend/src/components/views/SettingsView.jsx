@@ -4,6 +4,7 @@ import ChoiceSelect from '../reusable/ChoiceSelect.jsx';
 import { addRecalculator, CLEAR_T_DATA_FUNC, clearCalculators } from '../dataflow/gssdata.jsx';
 import { CONVERSIONS, getSetting, setSetting } from '../dataflow/settings.jsx';
 import GSSButton from '../reusable/Button.jsx';
+import { DataTestButton } from '../spec/DataTest.jsx';
  
 
 
@@ -30,7 +31,7 @@ export function SettingsView() {
             clearCalculators();
             ["booster", "sustainer"].forEach((stg) => {
                 addRecalculator(`@${stg}/value.barometer_altitude`, CONVERSIONS.METER_TO_FEET);
-                addRecalculator(`@${stg}/value.kf_vx`, CONVERSIONS.METER_TO_FEET);
+                addRecalculator(`@${stg}/value.kf_velocity`, CONVERSIONS.METER_TO_FEET);
             })
             break;
         default:
@@ -127,6 +128,7 @@ export function SettingsView() {
           }} curchoice={retain_on_reload ? "RETAIN" : "DISCARD"}/>
 
           <GSSButton onClick={() => {CLEAR_T_DATA_FUNC()}} variant={"blue"} disabled={false}>Clear Data</GSSButton>
+          <DataTestButton />
         </ValueGroup>
 
       </div>

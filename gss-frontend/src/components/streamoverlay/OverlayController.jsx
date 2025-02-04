@@ -93,7 +93,6 @@ export default function OverlayController() {
     const sus_angle = useTelemetry("@sustainer/value.tilt_angle") || 0;
     const boo_angle = useTelemetry("@booster/value.tilt_angle") || 0;
 
-    
     const booster_alt = useTelemetry("@booster/value.barometer_altitude") || 0;
     const sustainer_alt = useTelemetry("@sustainer/value.barometer_altitude") || 0;
 
