@@ -5,6 +5,7 @@ import { ValueGroup } from '../reusable/ValueDisplay.jsx'
 import '../reusable/Common.css';
 import { FlightCountTimer } from '../spec/FlightCountTimer.jsx';
 import GSSButton from '../reusable/Button.jsx';
+import { state_int_to_state_name } from '../dataflow/midasconversion.jsx';
 
 
 export function CommandingView() {
@@ -14,6 +15,13 @@ export function CommandingView() {
 
   const current_channel = useChannel();
   const send_mqtt = useGSSMQTTRaw();
+
+  const cont_channels = Math.round(useTelemetry("/value.pyro_a") || 0);
+  const fsm_state = Math.round(useTelemetry("/value.FSM_State") || 0);
+  const is_pyro_test = (fsm_state == 1)
+  const pyro_en = (cont_channels > 0) && is_pyro_test;
+
+
 
   const send_telem_cmd = (raw_cmd) => {
     // Determine which channel to send it to
@@ -101,9 +109,9 @@ export function CommandingView() {
             <div className='gss-horizontal-group'>
               <div>
                 <div className='gss-center-text gss-text-dim'>
-                  N/A
+                  Channels:
                 </div>
-                <GSSButton variant={"red"} disabled={true} onClick={() => {
+                <GSSButton variant={"red"} disabled={!pyro_en} onClick={() => {
                   send_telem_cmd("PA");
                 }}>
                   Fire A
@@ -112,9 +120,9 @@ export function CommandingView() {
 
               <div>
                 <div className='gss-center-text gss-text-dim'>
-                  N/A
+                {cont_channels}
                 </div>
-                <GSSButton variant={"red"} disabled={true} onClick={() => {
+                <GSSButton variant={"red"} disabled={!pyro_en} onClick={() => {
                   send_telem_cmd("PB");
                 }}>
                   Fire B
@@ -123,9 +131,9 @@ export function CommandingView() {
 
               <div>
                 <div className='gss-center-text gss-text-dim'>
-                  N/A
+                  State:
                 </div>
-                <GSSButton variant={"red"} disabled={true} onClick={() => {
+                <GSSButton variant={"red"} disabled={!pyro_en} onClick={() => {
                   send_telem_cmd("PC");
                 }}>
                   Fire C
@@ -134,9 +142,9 @@ export function CommandingView() {
 
               <div>
                 <div className='gss-center-text gss-text-dim'>
-                  N/A
+                  {fsm_state}
                 </div>
-                <GSSButton variant={"red"} disabled={true} onClick={() => {
+                <GSSButton variant={"red"} disabled={!pyro_en} onClick={() => {
                   send_telem_cmd("PD");
                 }}>
                   Fire D
@@ -158,7 +166,7 @@ export function CommandingView() {
               <GSSButton variant={"yellow"} disabled={true} onClick={() => {
                 // this doesn't do anything yet
               }}>
-                RESET ORIENTATION
+                CAM TOGGLE
               </GSSButton>
             </div>
 

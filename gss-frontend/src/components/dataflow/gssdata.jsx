@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import { getSetting } from './settings';
+import { __SEQUENCER_UPDATE_EVENTS } from './sequencer';
 
 function ws_url() {
     return window.location.hostname + ":5001";
@@ -84,9 +85,12 @@ export function GSSDataProvider({ children, default_stream }) {
                         callback();
                     })
 
+                    __SEQUENCER_UPDATE_EVENTS(new_state); // Fire necessary sequencer events
+
                     return new_state;
                 })
             }
+            
         })
 
         socket.on('mqtt_message', (data) => {
@@ -117,6 +121,8 @@ export function GSSDataProvider({ children, default_stream }) {
                         })
                     }
 
+                    __SEQUENCER_UPDATE_EVENTS(new_state); // Fire necessary sequencer events
+
                     return new_state;
                 })
 
@@ -139,12 +145,12 @@ export function GSSDataProvider({ children, default_stream }) {
                         callback();
                     })
 
+                    __SEQUENCER_UPDATE_EVENTS(new_state); // Fire necessary sequencer events
+
                     return new_state;
                 })
 
             }
-
-
         });
 
         return () => {
@@ -279,6 +285,17 @@ function getTelemetryRaw(snapshot=null, telem_code=undefined, metadata=false, de
     }
 
     return r_value;
+}
+
+export function useTelemetrySnapshot(snapshot, telem_code=undefined, metadata=false, defaultvalue=null) {
+    if(telemetry_calculator_hooks[telem_code]) {
+        // This telemetry data is translated
+        const [target_code, translator_func] = telemetry_calculator_hooks[telem_code]
+        const raw_telem = getTelemetryRaw(snapshot, target_code, metadata, defaultvalue) || 0;
+        return translator_func(raw_telem);
+    }
+
+    return getTelemetryRaw(snapshot, telem_code, metadata, defaultvalue);
 }
 
 /** Functionally equivalent to useTelemetry, but instead returns historical values arranged from earliest to oldest. */

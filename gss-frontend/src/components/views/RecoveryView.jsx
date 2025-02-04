@@ -12,6 +12,7 @@ import { MapView } from './MapView.jsx';
 import { TelemetryGraph } from '../reusable/Graph.jsx';
 import { DistanceTracker } from './FullTelemetryView.jsx';
 import { getUnit } from '../dataflow/settings.jsx';
+import { SUSTAINER_TILT_LOCKOUT } from '../dataflow/midasconversion.jsx';
 
 function Thingy() {
 
@@ -49,13 +50,13 @@ export function RecoveryView() {
             <ValueGroup label={"Rocket Tilt"}>
               <div className='str-angle-visualaid'>
                 <div>
-                  <AngleGauge angle={angle} limit={35} />
+                  <AngleGauge angle={angle} limit={SUSTAINER_TILT_LOCKOUT} />
                 </div>
                 <div className='str-angle-visualaid-stat'>
                   <span className='shrink-text'>Motor Ignition Criteria</span>
                   <StatusDisplay label={"Liftoff"} status={liftoff_status}></StatusDisplay>
                   <StatusDisplay label={"Burnout"} status={burnout_status}></StatusDisplay>
-                  <StatusDisplayWithValue label={"Angle"} status={has_telem ? (angle < 35 ? "GO" : "NOGO") : "N/A"} value={has_telem ? `${angle.toFixed(1)}<35°` : "no data"}></StatusDisplayWithValue>
+                  <StatusDisplayWithValue label={"Angle"} status={has_telem ? (angle < SUSTAINER_TILT_LOCKOUT ? "GO" : "NOGO") : "N/A"} value={has_telem ? `${angle.toFixed(1)}<${SUSTAINER_TILT_LOCKOUT}°` : "no data"}></StatusDisplayWithValue>
                   <StatusDisplayWithValue label={"Continuity"} status={cont_status} value={"no data"}></StatusDisplayWithValue>
                   <StatusDisplayWithValue label={"Coast"} status={"N/A"} value={""}></StatusDisplayWithValue>
                 </div>

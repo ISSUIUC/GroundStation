@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { GSSDataProvider, useTelemetry, useTelemetryRaw } from '../dataflow/gssdata.jsx'
 import { Timer } from '../reusable/Timer.jsx'
 import { SingleValue, MultiValue, ValueGroup, SingleValueGroupRow, StatusDisplay, StatusDisplayWithValue } from '../reusable/ValueDisplay.jsx'
@@ -6,11 +6,18 @@ import { AngleGauge } from '../spec/AngleGauge.jsx'
 import { FlightCountTimer } from '../spec/FlightCountTimer.jsx';
 import { CONVERSIONS, getSetting, getUnit } from '../dataflow/settings.jsx';
 import standardAtmosphere from 'standard-atmosphere';
-import { state_int_to_state_name } from '../dataflow/midasconversion.jsx';
+import { state_int_to_state_name, SUSTAINER_COAST_TIME, SUSTAINER_TILT_LOCKOUT } from '../dataflow/midasconversion.jsx';
+import { add_event_listener } from '../dataflow/sequencer.jsx';
+
+// Static
+let ANGLE_BURNOUT = 0;
+let ANGLE_IGN = 0;
 
 export function StructuresView() {
   // This view handles all telemetry needs for the structures-based view of the rocket.
-
+  const [is_burnout, set_is_burnout] = useState(false);
+  const [sus_ign, set_sus_ign] = useState(false);
+  const [sus_ign_time, set_sus_ign_time] = useState(0);
 
   let angle = (useTelemetry("/value.tilt_angle") || 0);
   let accel_x = (useTelemetry("/value.highG_ax") || 0);
@@ -46,7 +53,24 @@ export function StructuresView() {
   // TODO
   const coast_status = fsm_state==-1 ? "N/A" : (fsm_state == 3 ? "STBY" : "N/A")
 
-  
+  if(!is_burnout) {
+    ANGLE_BURNOUT = angle;
+  }
+
+  if(!sus_ign) {
+    ANGLE_IGN = angle;
+  }
+
+  useEffect(() => {
+    add_event_listener("sustainer_burnout", () => {
+      set_is_burnout(true);
+      set_sus_ign_time(Date.now() + (1000*SUSTAINER_COAST_TIME));
+    })
+
+    add_event_listener("sustainer_ignition", () => {
+      set_sus_ign(true);
+    })
+  }, [])
 
   return (
     <>
@@ -57,9 +81,9 @@ export function StructuresView() {
             <SingleValue label={"State"} value={state_int_to_state_name(fsm_state)} unit={""}></SingleValue>
             <MultiValue
                 label={"Gyroscopic"}
-                titles={["Tilt", "Tilt @ burnout", "Roll Rate"]}
-                values={[angle.toFixed(2), angle.toFixed(2), "ND"]}
-                units={["°", "°", "°/s"]}
+                titles={["Tilt", "Tilt @ burnout", "Tilt @ ignition", "Roll Rate"]}
+                values={[angle.toFixed(2), ANGLE_BURNOUT.toFixed(2), ANGLE_IGN.toFixed(2), "ND"]}
+                units={["°", "°", "°", "°/s"]}
             />
 
             <MultiValue
@@ -80,13 +104,13 @@ export function StructuresView() {
 
               <div className='str-angle-visualaid'>
                 <div>
-                  <AngleGauge angle={angle} limit={35} />
+                  <AngleGauge angle={angle} limit={SUSTAINER_TILT_LOCKOUT} />
                 </div>
                 <div className='str-angle-visualaid-stat'>
                   <span className='shrink-text'>Motor Ignition Criteria</span>
                   <StatusDisplay label={"Liftoff"} status={liftoff_status}></StatusDisplay>
                   <StatusDisplay label={"Burnout"} status={burnout_status}></StatusDisplay>
-                  <StatusDisplayWithValue label={"Angle"} status={has_telem ? (angle < 35 ? "GO" : "NOGO") : "N/A"} value={has_telem ? `${angle.toFixed(1)}<35°` : "no data"}></StatusDisplayWithValue>
+                  <StatusDisplayWithValue label={"Angle"} status={has_telem ? (angle < SUSTAINER_TILT_LOCKOUT ? "GO" : "NOGO") : "N/A"} value={has_telem ? `${angle.toFixed(1)}<${SUSTAINER_TILT_LOCKOUT}°` : "no data"}></StatusDisplayWithValue>
                   <StatusDisplayWithValue label={"Continuity"} status={cont_status} value={"Channels: " + Math.round(motor_cont).toFixed(0)}></StatusDisplayWithValue>
                   <StatusDisplayWithValue label={"Coast"} status={"N/A"} value={""}></StatusDisplayWithValue>
                 </div>
@@ -96,11 +120,12 @@ export function StructuresView() {
 
         <Timer 
             mode="t-"
-            targetTime={Date.now() + 15000}
+            targetTime={sus_ign_time}
             neg_t_text={"in "}
             pos_t_text={"+  "}
             timer_name={"Sustainer Ignition"}
-            hidden={!has_telem}
+            hidden_text_override={has_telem ? "AWAITING COAST" : "NO DATA"}
+            hidden={!has_telem || !is_burnout}
         />
 
 

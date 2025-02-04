@@ -20,7 +20,6 @@ export const Breadcrumb = () => {
             OFFLINE</div>
     }
 
-    console.log(t_published);
     // Check for disconnect
     useEffect(() => {
 

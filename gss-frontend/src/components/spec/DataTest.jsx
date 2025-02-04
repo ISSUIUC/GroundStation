@@ -54,7 +54,6 @@ export const DataTestButton = () => {
         const intv = setInterval(() => {
             let cur_time = Date.now()
             let t = (cur_time - starttime) / 1000;
-            console.log("Send ", t);
             send_mqtt("FlightData-Sustainer", generate_ref_packet(starttime, t))
 
         }, 1000 * (1/8))
