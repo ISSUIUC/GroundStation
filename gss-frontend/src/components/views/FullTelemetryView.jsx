@@ -180,11 +180,12 @@ export function FullTelemetryView() {
 
                 <SingleValue label={"Stage State"} value={fsm_state==null ? "NO_DATA" : state_int_to_state_name(fsm_state)} unit={""} />
 
+                {/* Lol. Only have this for SG1.4 fr */}
                 <MultiValue
                     label={"Pyro"}
-                    titles={["Channel A", "Channel B", "Channel C", "Channel D"]}
-                    values={[pyro_cont[0].toFixed(2), pyro_cont[1].toFixed(2), pyro_cont[2].toFixed(2), pyro_cont[3].toFixed(2)]}
-                    units={["V", "V", "V", "V"]}
+                    titles={["Channels", "Abs Current", "Exp Current", "BUSV"]}
+                    values={[Math.round(pyro_cont[0]).toFixed(0), pyro_cont[1].toFixed(3), pyro_cont[2].toFixed(3), pyro_cont[3].toFixed(2)]}
+                    units={["", "A", "A", "V"]}
                 />
 
                 <MultiValue

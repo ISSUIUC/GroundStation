@@ -7,8 +7,8 @@ const generate_ref_packet = (start_t, t) => {
         "metadata": {
             "raw_stream": "FlightData-Sustainer",
             "interpret_as": "sustainer",
-            "time_published": start_t + (t*1000),
-            "time_recieved": start_t + (t*1000) + 100
+            "time_published": start_t/1000 + t,
+            "time_recieved": (start_t/1000) + t + 0.1
         },
         "data": {
             "value": {

@@ -18,7 +18,7 @@ export function StructuresView() {
   let accel_z = (useTelemetry("/value.highG_az") || 0);
   let baro_alt = (useTelemetry("/value.barometer_altitude") || 0);
   const has_telem = useTelemetry("/src") != null;
-  const motor_cont = useTelemetry("/value.pyro_c") || 0;
+  const motor_cont = useTelemetry("/value.pyro_a") || 0;
 
   const velocity = useTelemetry("/value.kf_velocity") || 0;
 
@@ -40,10 +40,13 @@ export function StructuresView() {
 
   const liftoff_status = fsm_state==-1 ? "N/A" : (fsm_state > 2 ? "GO" : "STBY");
   const burnout_status = fsm_state==-1 ? "N/A" : (fsm_state > 3 ? "GO" : "STBY");
-  const cont_status = motor_cont > 3 ? "GO" : "NOGO"
+  const num_continuous_channels = Math.round(motor_cont);
+  const cont_status = num_continuous_channels >= 3 ? "GO" : "NOGO"
 
   // TODO
   const coast_status = fsm_state==-1 ? "N/A" : (fsm_state == 3 ? "STBY" : "N/A")
+
+  
 
   return (
     <>
@@ -77,14 +80,14 @@ export function StructuresView() {
 
               <div className='str-angle-visualaid'>
                 <div>
-                  <AngleGauge angle={angle} limit={22} />
+                  <AngleGauge angle={angle} limit={35} />
                 </div>
                 <div className='str-angle-visualaid-stat'>
                   <span className='shrink-text'>Motor Ignition Criteria</span>
                   <StatusDisplay label={"Liftoff"} status={liftoff_status}></StatusDisplay>
                   <StatusDisplay label={"Burnout"} status={burnout_status}></StatusDisplay>
-                  <StatusDisplayWithValue label={"Angle"} status={has_telem ? (angle < 22 ? "GO" : "NOGO") : "N/A"} value={has_telem ? `${angle.toFixed(1)}<22°` : "no data"}></StatusDisplayWithValue>
-                  <StatusDisplayWithValue label={"Continuity"} status={cont_status} value={motor_cont.toFixed(2) + "V"}></StatusDisplayWithValue>
+                  <StatusDisplayWithValue label={"Angle"} status={has_telem ? (angle < 35 ? "GO" : "NOGO") : "N/A"} value={has_telem ? `${angle.toFixed(1)}<35°` : "no data"}></StatusDisplayWithValue>
+                  <StatusDisplayWithValue label={"Continuity"} status={cont_status} value={"Channels: " + Math.round(motor_cont).toFixed(0)}></StatusDisplayWithValue>
                   <StatusDisplayWithValue label={"Coast"} status={"N/A"} value={""}></StatusDisplayWithValue>
                 </div>
               </div>

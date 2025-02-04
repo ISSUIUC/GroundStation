@@ -30,7 +30,15 @@ export function RecoveryView() {
   let angle = (useTelemetry("/value.tilt_angle") || 0);
   let latitude = (useTelemetry("/value.latitude") || 0);
   let longitude = (useTelemetry("/value.longitude") || 0);
+
+  const motor_cont = useTelemetry("/value.pyro_a") || 0;
+
   const has_telem = useTelemetry("/src") != null;
+  let fsm_state = useTelemetry("/value.FSM_State");
+
+  const liftoff_status = fsm_state==-1 ? "N/A" : (fsm_state > 2 ? "GO" : "STBY");
+  const burnout_status = fsm_state==-1 ? "N/A" : (fsm_state > 3 ? "GO" : "STBY");
+  const cont_status = Math.round(motor_cont) >= 3 ? "GO" : "NOGO"
 
   return (
     <>
@@ -41,14 +49,14 @@ export function RecoveryView() {
             <ValueGroup label={"Rocket Tilt"}>
               <div className='str-angle-visualaid'>
                 <div>
-                  <AngleGauge angle={angle} limit={22} />
+                  <AngleGauge angle={angle} limit={35} />
                 </div>
                 <div className='str-angle-visualaid-stat'>
                   <span className='shrink-text'>Motor Ignition Criteria</span>
-                  <StatusDisplay label={"Liftoff"} status={"STBY"}></StatusDisplay>
-                  <StatusDisplayWithValue label={"Burnout"} status={"N/A"} value={"no data"}></StatusDisplayWithValue>
-                  <StatusDisplayWithValue label={"Angle"} status={has_telem ? (angle < 22 ? "GO" : "NOGO") : "N/A"} value={has_telem ? `${angle.toFixed(1)}<22°` : "no data"}></StatusDisplayWithValue>
-                  <StatusDisplayWithValue label={"Continuity"} status={"N/A"} value={"no data"}></StatusDisplayWithValue>
+                  <StatusDisplay label={"Liftoff"} status={liftoff_status}></StatusDisplay>
+                  <StatusDisplay label={"Burnout"} status={burnout_status}></StatusDisplay>
+                  <StatusDisplayWithValue label={"Angle"} status={has_telem ? (angle < 35 ? "GO" : "NOGO") : "N/A"} value={has_telem ? `${angle.toFixed(1)}<35°` : "no data"}></StatusDisplayWithValue>
+                  <StatusDisplayWithValue label={"Continuity"} status={cont_status} value={"no data"}></StatusDisplayWithValue>
                   <StatusDisplayWithValue label={"Coast"} status={"N/A"} value={""}></StatusDisplayWithValue>
                 </div>
               </div>
@@ -57,7 +65,7 @@ export function RecoveryView() {
               <MultiValue
                   label={"Dynamics"}
                   titles={["Altitude (Baro)", "Altitude (GPS)", "Velocity"]}
-                  values={[baro_alt, altitude, velocity]}
+                  values={[baro_alt.toFixed(1), altitude.toFixed(1), velocity.toFixed(1)]}
                   units={[getUnit("distance"), getUnit("distance"), getUnit("velocity")]}
               />
               
