@@ -32,7 +32,7 @@ export function CommandingView() {
       channel = "Control-Booster";
     }
 
-    send_mqtt(channel, {"type": "telemetry_command", "raw": `${raw_cmd} \n`})
+    send_mqtt(channel, {"type": "telemetry_command", "raw": raw_cmd})
   }
 
   useEffect(() => {
