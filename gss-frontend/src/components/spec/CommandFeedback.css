@@ -1,0 +1,87 @@
+
+.cmd-feedback-wrapper {
+  position: fixed;
+  left: 0%;
+  bottom: 0%;
+  z-index: 5;
+  margin: 20px;
+  
+  background-color: #181818;
+  border-left: 2px solid orange;
+
+  cursor: pointer;
+}
+
+.cmd-feedback-wrapper:hover {
+    background-color: #383838;
+}
+
+.cmd-feedback-text {
+    padding: 10px;
+}
+
+.cmd-feedback-sliders {
+    width: 100%;
+    height: 5px;
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.cmd-feedback-s {
+    width: 25%;
+    background-color: #444;
+    height: 5px;
+}
+
+.cmd-feedback-sfail {
+    background-color: #ff0000;
+}
+
+.cmd-feedback-sdone {
+    background-color: #06bb06;
+}
+
+.cmd-feedback-text-titleaction {
+    color: #aaa;
+    font-weight: bold;
+    font-size: 0.6em;
+}
+
+.cmd-feedback-text-actiontext {
+    color: white;
+}
+
+.cmd-feedback-text-cmd {
+    font-weight: bold;
+    color: white;
+}
+
+.cmd-feedback-txt-cmd-fail {
+    color: #ffaaaa
+}
+
+.cmd-feedback-txt-cmd-good {
+    color: #aaffaa;
+}
+
+.cmd-feedback-hidden {
+    display: none;
+}
+
+.cmd-feedback-failtext {
+    color: #ff4444;
+}
+
+.cmd-feedback-comptext {
+    color: #44ff44;
+}
+
+
+@media only screen and (max-width: 450px) {
+    .cmd-feedback-wrapper {
+        width: 100%;
+        left: 0%;
+        bottom: 1em;
+        margin: 0;
+    }
+}

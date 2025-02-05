@@ -16,6 +16,7 @@ import { getSetting } from './components/dataflow/settings.jsx';
 
 import { MapView } from './components/views/MapView.jsx';
 import { SequencerSetupElement } from './components/dataflow/sequencer.jsx';
+import { CommandFeedback } from './components/spec/CommandFeedback.jsx';
 
 export function App() {
   const [currentStream, setCurrentStream] = useState("sustainer");
@@ -28,6 +29,7 @@ export function App() {
     <div className={`fullscreen ${use_light_mode ? "invert" : ""}`}>
       <GSSDataProvider default_stream={currentStream}>
         <SequencerSetupElement />
+        <CommandFeedback />
         {/* Main window */}
         <ShowPathExact path={"/"}>
           <Navbar streamCallback={setCurrentStream} currentStream={currentStream} tabCallback={setCurrentTab} currentTab={currentTab} />

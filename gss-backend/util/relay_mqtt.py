@@ -57,10 +57,13 @@ class RelayMqtt:
                 if data_json["source"] == "gss-frontend":
                     print("Decoded msg from frontend", flush=True)
 
-                    if data_json["type"] == "mqtt-autosend-raw":
+                    if data_json["type"] == "mqtt-autosend-cmd" or data_json["type"] == "mqtt-autosend-raw":
                         # Relay but don't wrap in metadata
                         channel = data_json["stream"]
                         mqtt.publish(channel, data_json['data'])
+
+                        if data_json["type"] == "mqtt-autosend-cmd":
+                            socketio.start_background_task(target=cmd_stat_msg, message=1)
                         return
 
                     if data_json["type"] == "mqtt-autosend":
@@ -106,12 +109,38 @@ class RelayMqtt:
         def emit_mqtt_msg(message):
             socketio.emit('mqtt_message', json.dumps(message))
 
+        def cmd_stat_msg(message):
+            socketio.emit('cmd_stat', message)
+
         @mqtt.on_message()
         def handle_mqtt_message(client, userdata, message):
             # print('Received message on topic {}: {}'.format(message.topic, message.payload.decode()), flush=True)
 
             # parse packet
             msg_payload = json.loads(message.payload)
+
+            if("type" in msg_payload):
+                # Ack / cmd status packets
+                if(msg_payload["type"] == "bad_command"):
+                    print("Emitting packet (ack/bad)")
+                    socketio.start_background_task(target=cmd_stat_msg, message=99)
+                    return
+                
+                if(msg_payload["type"] == "acknowledge_combiner"):
+                    print("Emitting packet (cmb ack)")
+                    socketio.start_background_task(target=cmd_stat_msg, message=2)
+                    return
+
+                if(msg_payload["type"] == "command_sent"):
+                    print("Emitting packet (ack/sent)")
+                    socketio.start_background_task(target=cmd_stat_msg, message=3)
+                    return
+                
+                if(msg_payload["type"] == "command_acknowledged"):
+                    print("Emitting packet (ack/good)")
+                    socketio.start_background_task(target=cmd_stat_msg, message=4)
+                    return
+                
 
             if("source" in msg_payload):
                 if(msg_payload["source"] == "gss_combiner"):

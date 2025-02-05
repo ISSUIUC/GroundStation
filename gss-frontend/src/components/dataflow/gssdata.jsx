@@ -11,10 +11,25 @@ export function video_server_url(path="") {
     return window.location.hostname + ":5002" + path;
 }
 
+const COMMAND_FEEDBACK_SETTINGS_DEFAULT = {
+    has_cmd: false,
+    cur_cmd: "",
+    cur_state: 0, // 0: SENT, 1: SV ACK, 2: MQTT ACK, 3: MIDAS SENT, 4: MIDAS ACK, 99: FAIL
+    has_explicit_failure: false,
+    last_event_t: Date.now()
+}
 
 const GSSData = React.createContext({});
 const GSSTelemetryHistory = React.createContext([]); // Stores values of GSSData snapshot in "circular buffer", only updates snapshots when telemetry packets come in
+const CMDStat = React.createContext(COMMAND_FEEDBACK_SETTINGS_DEFAULT);
 const GSSChannel = React.createContext("sustainer");
+
+export const useCommandFeedback = () => {
+    return React.useContext(CMDStat);
+}
+
+export let requestCommandFeedback = (command) => {}; // Gets overridden by the provider
+export let hideCommandFeedback = () => {} // Gets overridden by provider
 
 const socket = io(ws_url(), {
     transports: ['websocket']
@@ -54,6 +69,7 @@ export function addRecalculator(valuehook, func) {
 export function GSSDataProvider({ children, default_stream }) {
     const [value, setValue] = useState({});
     const [hist, setHist] = useState([]);
+    const [cmd_stat, set_cmd_stat] = useState(COMMAND_FEEDBACK_SETTINGS_DEFAULT)
     
     CLEAR_T_DATA_FUNC = () => {
         setValue({});
@@ -95,6 +111,24 @@ export function GSSDataProvider({ children, default_stream }) {
                 })
             }
             
+        })
+
+        socket.on('cmd_stat', (data) => {
+            if(data == 99) {
+                set_cmd_stat(prevData => {
+                    let new_state = {...prevData};
+                    new_state.has_explicit_failure = true;
+                    return new_state;
+                })
+                return;
+            }
+
+            set_cmd_stat(prevData => {
+                let new_state = {...prevData};
+                new_state.cur_state = data;
+                new_state.last_event_t = Date.now();
+                return new_state;
+            })
         })
 
         socket.on('mqtt_message', (data) => {
@@ -157,6 +191,26 @@ export function GSSDataProvider({ children, default_stream }) {
             }
         });
 
+        requestCommandFeedback = (command) => {
+            set_cmd_stat({
+                has_cmd: true,
+                cur_cmd: command,
+                cur_state: 0, // 0: SENT, 1: SV ACK, 2: MQTT ACK, 3: MIDAS SENT, 4: MIDAS ACK, 99: FAIL
+                has_explicit_failure: false,
+                last_event_t: Date.now()
+            })
+        }
+
+        hideCommandFeedback = () => {
+            set_cmd_stat({
+                has_cmd: false,
+                cur_cmd: "",
+                cur_state: 0, // 0: SENT, 1: SV ACK, 2: MQTT ACK, 3: MIDAS SENT, 4: MIDAS ACK, 99: FAIL
+                has_explicit_failure: false,
+                last_event_t: Date.now()
+            })
+        }
+
         return () => {
             socket.disconnect();
         }
@@ -171,7 +225,9 @@ export function GSSDataProvider({ children, default_stream }) {
         <GSSChannel.Provider value={default_stream}>
             <GSSData.Provider value={value}>
                 <GSSTelemetryHistory.Provider value={hist}>
-                    {children}
+                    <CMDStat.Provider value={cmd_stat}>
+                        {children}
+                    </CMDStat.Provider>
                 </GSSTelemetryHistory.Provider>
             </GSSData.Provider>
         </GSSChannel.Provider>
@@ -185,6 +241,21 @@ export function useGSSWebsocket(event_tag="gss") {
 
     const send = (data_string) => {
         socket.emit(event_tag, data_string);
+    }
+
+    return send;
+}
+
+export function useGSSMQTTCMD() {
+    /**
+     * Sends data to the network raw.
+     */
+
+    const sendws = useGSSWebsocket();
+    const send = (channel_name, js_object) => {
+        // Accepts only a string
+        const payload = {"source": "gss-frontend", "type": "mqtt-autosend-cmd", "stream": channel_name, "data": JSON.stringify(js_object)};
+        sendws(JSON.stringify(payload));
     }
 
     return send;

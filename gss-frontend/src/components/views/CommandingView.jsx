@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useChannel, useGSSMQTTRaw, useSyncGlobalVars, useTelemetry } from '../dataflow/gssdata.jsx'
+import { requestCommandFeedback, useChannel, useGSSMQTTCMD, useSyncGlobalVars, useTelemetry } from '../dataflow/gssdata.jsx'
 import { ValueGroup } from '../reusable/ValueDisplay.jsx'
 
 import '../reusable/Common.css';
@@ -14,7 +14,7 @@ export function CommandingView() {
   const [isLOS, setisLOS] = useState(false);
 
   const current_channel = useChannel();
-  const send_mqtt = useGSSMQTTRaw();
+  const send_mqtt = useGSSMQTTCMD();
 
   const cont_channels = Math.round(useTelemetry("/value.pyro_a") || 0);
   const fsm_state = Math.round(useTelemetry("/value.FSM_State") || 0);
@@ -84,6 +84,7 @@ export function CommandingView() {
           <GSSButton variant={"red"} onClick={() => {
             send_telem_cmd("SAFE");
             sync_vars({"countdown_t0":  Date.now(), "countdown_t0_paused": true, "countdown_t0_paused_value": 0});
+            requestCommandFeedback("ABORT");
           }} disabled={isLOS}>
             ABORT
           </GSSButton>
@@ -95,12 +96,14 @@ export function CommandingView() {
             <div className='gss-horizontal-group'>
               <GSSButton variant={"blue"} onClick={() => {
                 send_telem_cmd("SAFE");
+                requestCommandFeedback("SAFE");
               }}>
                 FORCE SAFE
               </GSSButton>
 
               <GSSButton variant={"yellow"} onClick={() => {
                 send_telem_cmd("PT");
+                requestCommandFeedback("PYRO_TEST");
               }}>
                 PYRO TEST
               </GSSButton>
@@ -113,6 +116,7 @@ export function CommandingView() {
                 </div>
                 <GSSButton variant={"red"} disabled={!pyro_en} onClick={() => {
                   send_telem_cmd("PA");
+                  requestCommandFeedback("FIRE A");
                 }}>
                   Fire A
                 </GSSButton>
@@ -124,6 +128,7 @@ export function CommandingView() {
                 </div>
                 <GSSButton variant={"red"} disabled={!pyro_en} onClick={() => {
                   send_telem_cmd("PB");
+                  requestCommandFeedback("FIRE B");
                 }}>
                   Fire B
                 </GSSButton>
@@ -135,6 +140,7 @@ export function CommandingView() {
                 </div>
                 <GSSButton variant={"red"} disabled={!pyro_en} onClick={() => {
                   send_telem_cmd("PC");
+                  requestCommandFeedback("FIRE C");
                 }}>
                   Fire C
                 </GSSButton>
@@ -146,6 +152,7 @@ export function CommandingView() {
                 </div>
                 <GSSButton variant={"red"} disabled={!pyro_en} onClick={() => {
                   send_telem_cmd("PD");
+                  requestCommandFeedback("FIRE D");
                 }}>
                   Fire D
                 </GSSButton>
@@ -159,12 +166,14 @@ export function CommandingView() {
             <div className='gss-horizontal-group'>
               <GSSButton variant={"yellow"} onClick={() => {
                 send_telem_cmd("RESET_KF");
+                requestCommandFeedback("RESET KF");
               }}>
                 RESET KF
               </GSSButton>
 
               <GSSButton variant={"yellow"} disabled={true} onClick={() => {
                 // this doesn't do anything yet
+                requestCommandFeedback("TOGGLE CAM");
               }}>
                 CAM TOGGLE
               </GSSButton>
@@ -173,11 +182,13 @@ export function CommandingView() {
             <div className='gss-horizontal-group'>
               <GSSButton variant={"yellow"} onClick={() => {
                 send_telem_cmd("SAFE");
+                requestCommandFeedback("SAFE");
               }}>
                 FORCE SAFE
               </GSSButton>
               <GSSButton variant={"yellow"} onClick={() => {
                 send_telem_cmd("IDLE");
+                requestCommandFeedback("PAD");
               }}>
                 FORCE PAD
               </GSSButton>
@@ -185,6 +196,7 @@ export function CommandingView() {
                 let launch_confirm = confirm("ARE YOU SURE ABOUT THIS?\n\n(OK) - Initiate Launch Sequencing\n(CANCEL) - Cancel Operation");
                 if(launch_confirm) {
                   send_telem_cmd("IDLE");
+                  requestCommandFeedback("PAD");
 
                   // For stargazer we will use T-1:00
                   const cur_time = Date.now();

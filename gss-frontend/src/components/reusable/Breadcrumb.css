@@ -67,3 +67,10 @@
 .bc-text-err {
     color: #f44;
 }
+
+@media only screen and (max-width: 450px) {
+    .breadcrumb {
+        width: 100%;
+        justify-content: center;
+    }
+}
