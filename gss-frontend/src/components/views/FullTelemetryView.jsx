@@ -9,7 +9,7 @@ import { FlightCountTimer } from '../spec/FlightCountTimer.jsx';
 import GSSButton from '../reusable/Button.jsx';
 import { TelemetryGraph } from '../reusable/Graph.jsx';
 import { getSetting, getUnit } from '../dataflow/settings.jsx';
-import { state_int_to_state_name } from '../dataflow/midasconversion.jsx';
+import { fix_type_int_to_fix_type_name, state_int_to_state_name } from '../dataflow/midasconversion.jsx';
 import { PositionDataProvider, useGPSPosition } from '../dataflow/positioning.jsx';
 
 import standardAtmosphere from "standard-atmosphere"
@@ -84,6 +84,11 @@ export function FullTelemetryView() {
   const accel = [useTelemetry("/value.highG_ax") || 0, useTelemetry("/value.highG_ay") || 0, data_num("/value.highG_az") || 0]
   const kf_velocity = useTelemetry("/value.kf_velocity") || 0;
 
+  const sat_count_raw = useTelemetry("/value.sat_count");
+
+  const fix_type = (sat_count_raw==null) ? -1 : sat_count_raw;
+  const fix_type_name = fix_type_int_to_fix_type_name(fix_type);
+
   const accel_magnitude = Math.sqrt(accel[0]*accel[0] + accel[1]+accel[1] + accel[2]+accel[2])
 
   // Atmosphere calcs
@@ -142,6 +147,8 @@ export function FullTelemetryView() {
 
           <div className='gss-horizontal-group-elem-25 gss-horizontal-group-elem-restack'>
             <ValueGroup label={"Telemetry Data"} hidden={false} use_smaller_labels={true}>
+                <SingleValue label={"Stage State"} value={fsm_state==null ? "NO_DATA" : state_int_to_state_name(fsm_state)} unit={""} />
+
                 <MultiValue
                     label={"Gyroscopic"}
                     titles={["Tilt", "Tilt @ Burnout", "Roll Rate"]}
@@ -178,8 +185,6 @@ export function FullTelemetryView() {
                     units={[getUnit("power"), "MHz", ""]}
                 />
 
-                <SingleValue label={"Stage State"} value={fsm_state==null ? "NO_DATA" : state_int_to_state_name(fsm_state)} unit={""} />
-
                 {/* Lol. Only have this for SG1.4 fr */}
                 <MultiValue
                     label={"Pyro"}
@@ -193,6 +198,12 @@ export function FullTelemetryView() {
                     titles={["LAT", "LONG", "ALT (GPS)"]}
                     values={[gps_lat.toFixed(6), gps_long.toFixed(6), altitude_gps.toFixed(1)]}
                     units={["°", "°", getUnit("distance")]}
+                />
+
+                <SingleValue
+                  label={"GNSS Fix Type"}
+                  value={fix_type_name}
+                  unit={""}
                 />
 
                 <PositionDataProvider>
