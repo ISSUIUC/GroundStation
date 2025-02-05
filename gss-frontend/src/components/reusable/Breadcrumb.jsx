@@ -8,7 +8,7 @@ export const Breadcrumb = () => {
     const [last_tvalue, setlast_tvalue] = useState(0);
     const [latency, setlatency] = useState(0);
     const t_published = useTelemetry("/time_published", true);
-    const rssi = useTelemetry("/value.RSSI");
+    const rssi = Math.round(useTelemetry("/value.RSSI") || 0);
 
     const channel = useChannel().toUpperCase();
 
@@ -22,6 +22,7 @@ export const Breadcrumb = () => {
 
     // Check for disconnect
     useEffect(() => {
+
         if(t_published != last_tvalue) {
             const t_pubished_js = Math.floor(t_published*1000)
             const deltatime = Math.abs(Date.now() - t_pubished_js)

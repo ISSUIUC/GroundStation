@@ -4,6 +4,7 @@ import ChoiceSelect from '../reusable/ChoiceSelect.jsx';
 import { addRecalculator, CLEAR_T_DATA_FUNC, clearCalculators } from '../dataflow/gssdata.jsx';
 import { CONVERSIONS, getSetting, setSetting } from '../dataflow/settings.jsx';
 import GSSButton from '../reusable/Button.jsx';
+import { DataTestButton } from '../spec/DataTest.jsx';
  
 
 
@@ -23,20 +24,25 @@ export function SettingsView() {
         case "METRIC":
             console.log("Converting to metric units...");
             clearCalculators(); // Default is metric so we don't need to add any translators
+            // except the default conversions!
             break;
         case "IMPERIAL":
             console.log("Converting to imperial units...");
             clearCalculators();
             ["booster", "sustainer"].forEach((stg) => {
                 addRecalculator(`@${stg}/value.barometer_altitude`, CONVERSIONS.METER_TO_FEET);
-                addRecalculator(`@${stg}/value.highG_ax`, CONVERSIONS.METER_TO_FEET);
-                addRecalculator(`@${stg}/value.highG_ay`, CONVERSIONS.METER_TO_FEET);
-                addRecalculator(`@${stg}/value.highG_az`, CONVERSIONS.METER_TO_FEET);
+                addRecalculator(`@${stg}/value.kf_velocity`, CONVERSIONS.METER_TO_FEET);
             })
             break;
         default:
             clearCalculators() // Use metric by default
     }
+
+    ["booster", "sustainer"].forEach((stg) => {
+      addRecalculator(`@${stg}/value.highG_ax`, CONVERSIONS.ACCEL_G_TO_UNIT_CONVERSION);
+      addRecalculator(`@${stg}/value.highG_ay`, CONVERSIONS.ACCEL_G_TO_UNIT_CONVERSION);
+      addRecalculator(`@${stg}/value.highG_az`, CONVERSIONS.ACCEL_G_TO_UNIT_CONVERSION);
+    })
   }
 
   let selected_data_retention_choice = "ALL";
@@ -72,7 +78,7 @@ export function SettingsView() {
                 setAccelUnitType(c);
             }} curchoice={accel_unit_type}/>
 
-            <ChoiceSelect text="Contrast Display" alt_text='Determines which display mode to use for the local user' choices={["LIGHT", "DARK"]} onSelect={(c) => {
+            <ChoiceSelect text="Contrast Display" alt_text='Determines which display mode to use (Requires page re-render!)' choices={["LIGHT", "DARK"]} onSelect={(c) => {
               setSetting("display_type", c);
               setDisplayType(c);
             }} curchoice={display_type}/>
@@ -122,6 +128,7 @@ export function SettingsView() {
           }} curchoice={retain_on_reload ? "RETAIN" : "DISCARD"}/>
 
           <GSSButton onClick={() => {CLEAR_T_DATA_FUNC()}} variant={"blue"} disabled={false}>Clear Data</GSSButton>
+          <DataTestButton />
         </ValueGroup>
 
       </div>

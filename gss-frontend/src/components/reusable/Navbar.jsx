@@ -1,3 +1,4 @@
+import { DataTestButton } from '../spec/DataTest';
 import './Navbar.css';
 
 function NavbarItem({ tab_value, text, selected_tab, tabCallback }) {

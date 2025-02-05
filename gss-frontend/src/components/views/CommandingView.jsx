@@ -1,15 +1,39 @@
 import React, { useEffect, useState } from 'react';
-import { useSyncGlobalVars, useTelemetry } from '../dataflow/gssdata.jsx'
+import { useChannel, useGSSMQTTRaw, useSyncGlobalVars, useTelemetry } from '../dataflow/gssdata.jsx'
 import { ValueGroup } from '../reusable/ValueDisplay.jsx'
 
 import '../reusable/Common.css';
 import { FlightCountTimer } from '../spec/FlightCountTimer.jsx';
 import GSSButton from '../reusable/Button.jsx';
+import { state_int_to_state_name } from '../dataflow/midasconversion.jsx';
+
 
 export function CommandingView() {
   // Taken from breadcrumb.jsx to set pyro visibility in LOS/no-LOS
   const t_published = useTelemetry("/time_published", true);
   const [isLOS, setisLOS] = useState(false);
+
+  const current_channel = useChannel();
+  const send_mqtt = useGSSMQTTRaw();
+
+  const cont_channels = Math.round(useTelemetry("/value.pyro_a") || 0);
+  const fsm_state = Math.round(useTelemetry("/value.FSM_State") || 0);
+  const is_pyro_test = (fsm_state == 1)
+  const pyro_en = (cont_channels > 0) && is_pyro_test;
+
+
+
+  const send_telem_cmd = (raw_cmd) => {
+    // Determine which channel to send it to
+    let channel = "_dump";
+    if(current_channel === "sustainer") {
+      channel = "Control-Sustainer";
+    } else if(current_channel === "booster") {
+      channel = "Control-Booster";
+    }
+
+    send_mqtt(channel, {"type": "telemetry_command", "raw": `${raw_cmd} \n`})
+  }
 
   useEffect(() => {
       if(t_published == null) {
@@ -54,13 +78,12 @@ export function CommandingView() {
   return (
     <>
       <div className='telemetry-view'>
-        <FlightCountTimer 
-            set_callback={set_timer_val}
-        />
+        <FlightCountTimer set_callback={set_timer_val} />
 
         <ValueGroup label={"Launch Abort"} hidden={isLOS} hidden_label_text='NO CONNECTION'>
           <GSSButton variant={"red"} onClick={() => {
-            set_timer(0);
+            send_telem_cmd("SAFE");
+            sync_vars({"countdown_t0":  Date.now(), "countdown_t0_paused": true, "countdown_t0_paused_value": 0});
           }} disabled={isLOS}>
             ABORT
           </GSSButton>
@@ -70,11 +93,15 @@ export function CommandingView() {
         <span className='shrink-text'>WARNING: Ensure area is clear before initiating pyro test</span>
           <div className='gss-horizontal-group-sb gss-horizontal-small-restack'>
             <div className='gss-horizontal-group'>
-              <GSSButton variant={"blue"} onClick={toggle_pause}>
+              <GSSButton variant={"blue"} onClick={() => {
+                send_telem_cmd("SAFE");
+              }}>
                 FORCE SAFE
               </GSSButton>
 
-              <GSSButton variant={"yellow"} onClick={toggle_pause}>
+              <GSSButton variant={"yellow"} onClick={() => {
+                send_telem_cmd("PT");
+              }}>
                 PYRO TEST
               </GSSButton>
             </div>
@@ -82,36 +109,44 @@ export function CommandingView() {
             <div className='gss-horizontal-group'>
               <div>
                 <div className='gss-center-text gss-text-dim'>
-                  OPEN
+                  Channels:
                 </div>
-                <GSSButton variant={"red"} disabled={true} onClick={() => {set_timer(10)}}>
+                <GSSButton variant={"red"} disabled={!pyro_en} onClick={() => {
+                  send_telem_cmd("PA");
+                }}>
                   Fire A
                 </GSSButton>
               </div>
 
               <div>
                 <div className='gss-center-text gss-text-dim'>
-                  OPEN
+                {cont_channels}
                 </div>
-                <GSSButton variant={"red"} disabled={true} onClick={() => {set_timer(10)}}>
+                <GSSButton variant={"red"} disabled={!pyro_en} onClick={() => {
+                  send_telem_cmd("PB");
+                }}>
                   Fire B
                 </GSSButton>
               </div>
 
               <div>
                 <div className='gss-center-text gss-text-dim'>
-                  OPEN
+                  State:
                 </div>
-                <GSSButton variant={"red"} disabled={true} onClick={() => {set_timer(10)}}>
+                <GSSButton variant={"red"} disabled={!pyro_en} onClick={() => {
+                  send_telem_cmd("PC");
+                }}>
                   Fire C
                 </GSSButton>
               </div>
 
               <div>
                 <div className='gss-center-text gss-text-dim'>
-                  OPEN
+                  {fsm_state}
                 </div>
-                <GSSButton variant={"red"} disabled={true} onClick={() => {set_timer(10)}}>
+                <GSSButton variant={"red"} disabled={!pyro_en} onClick={() => {
+                  send_telem_cmd("PD");
+                }}>
                   Fire D
                 </GSSButton>
               </div>
@@ -122,26 +157,39 @@ export function CommandingView() {
         <ValueGroup label={"MIDAS Control"} hidden={isLOS} hidden_label_text='NO CONNECTION'>
           <div className='gss-horizontal-group-sb gss-horizontal-small-restack'>
             <div className='gss-horizontal-group'>
-              <GSSButton variant={"yellow"} onClick={toggle_pause}>
+              <GSSButton variant={"yellow"} onClick={() => {
+                send_telem_cmd("RESET_KF");
+              }}>
                 RESET KF
               </GSSButton>
 
-              <GSSButton variant={"yellow"} onClick={toggle_pause}>
-                RESET ORIENTATION
+              <GSSButton variant={"yellow"} disabled={true} onClick={() => {
+                // this doesn't do anything yet
+              }}>
+                CAM TOGGLE
               </GSSButton>
             </div>
 
             <div className='gss-horizontal-group'>
-              <GSSButton variant={"yellow"} onClick={toggle_pause}>
+              <GSSButton variant={"yellow"} onClick={() => {
+                send_telem_cmd("SAFE");
+              }}>
                 FORCE SAFE
               </GSSButton>
-              <GSSButton variant={"yellow"} onClick={toggle_pause}>
+              <GSSButton variant={"yellow"} onClick={() => {
+                send_telem_cmd("IDLE");
+              }}>
                 FORCE PAD
               </GSSButton>
               <GSSButton variant={"red"} onClick={() => {
                 let launch_confirm = confirm("ARE YOU SURE ABOUT THIS?\n\n(OK) - Initiate Launch Sequencing\n(CANCEL) - Cancel Operation");
                 if(launch_confirm) {
-                  alert("boom");
+                  send_telem_cmd("IDLE");
+
+                  // For stargazer we will use T-1:00
+                  const cur_time = Date.now();
+                  const t0_time = cur_time + (60*1000)
+                  sync_vars({"countdown_t0": t0_time, "countdown_t0_paused": false, "countdown_t0_paused_value": t0_time});
                 }
               }}>
                 INITIATE LAUNCH SEQUENCE

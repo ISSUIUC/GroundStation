@@ -113,7 +113,7 @@ export const GenericGraph = ({ yvalues, xvalues, legends, colors, xaxis, yaxis }
             zoom: zoomOptions,
         },
         animation: {
-            duration: 50
+            duration: 0
         }
     };
 

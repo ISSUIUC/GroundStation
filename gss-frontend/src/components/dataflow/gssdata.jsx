@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 import { getSetting } from './settings';
+import { __SEQUENCER_UPDATE_EVENTS } from './sequencer';
 
 function ws_url(path="") {
     return window.location.hostname + ":5001" + path;
@@ -62,15 +63,17 @@ export function GSSDataProvider({ children, default_stream }) {
     useEffect(async () => {
 
         // Load stored data
-        const stored_value = JSON.parse(localStorage.getItem("telem_snapshot"));
-        const stored_hist = JSON.parse(localStorage.getItem("telem_history"));
-
-        if(stored_value) {
-            setValue(stored_value);
-        }
-
-        if(stored_hist) {
-            setHist(stored_hist);
+        if(getSetting("retain_on_reload")) {
+            const stored_value = JSON.parse(localStorage.getItem("telem_snapshot"));
+            const stored_hist = JSON.parse(localStorage.getItem("telem_history"));
+    
+            if(stored_value) {
+                setValue(stored_value);
+            }
+    
+            if(stored_hist) {
+                setHist(stored_hist);
+            }
         }
 
         socket.on("sync_response", (syncdata) => {
@@ -86,12 +89,20 @@ export function GSSDataProvider({ children, default_stream }) {
                         callback();
                     })
 
+                    __SEQUENCER_UPDATE_EVENTS(new_state); // Fire necessary sequencer events
+
                     return new_state;
                 })
             }
+            
         })
 
         socket.on('mqtt_message', (data) => {
+            if(!getSetting("global_sync")) {
+                return;
+            }
+
+
             let json_data = JSON.parse(data)
             if(json_data["metadata"]["type"] === "telemetry" || json_data["metadata"]["type"] === "gss_health") {
                 // valid telemetry packet
@@ -113,6 +124,8 @@ export function GSSDataProvider({ children, default_stream }) {
                             return new_hist;
                         })
                     }
+
+                    __SEQUENCER_UPDATE_EVENTS(new_state); // Fire necessary sequencer events
 
                     return new_state;
                 })
@@ -136,12 +149,12 @@ export function GSSDataProvider({ children, default_stream }) {
                         callback();
                     })
 
+                    __SEQUENCER_UPDATE_EVENTS(new_state); // Fire necessary sequencer events
+
                     return new_state;
                 })
 
             }
-
-
         });
 
         return () => {
@@ -172,6 +185,21 @@ export function useGSSWebsocket(event_tag="gss") {
 
     const send = (data_string) => {
         socket.emit(event_tag, data_string);
+    }
+
+    return send;
+}
+
+export function useGSSMQTTRaw() {
+    /**
+     * Sends data to the network raw.
+     */
+
+    const sendws = useGSSWebsocket();
+    const send = (channel_name, js_object) => {
+        // Accepts only a string
+        const payload = {"source": "gss-frontend", "type": "mqtt-autosend-raw", "stream": channel_name, "data": JSON.stringify(js_object)};
+        sendws(JSON.stringify(payload));
     }
 
     return send;
@@ -263,6 +291,17 @@ function getTelemetryRaw(snapshot=null, telem_code=undefined, metadata=false, de
     return r_value;
 }
 
+export function useTelemetrySnapshot(snapshot, telem_code=undefined, metadata=false, defaultvalue=null) {
+    if(telemetry_calculator_hooks[telem_code]) {
+        // This telemetry data is translated
+        const [target_code, translator_func] = telemetry_calculator_hooks[telem_code]
+        const raw_telem = getTelemetryRaw(snapshot, target_code, metadata, defaultvalue) || 0;
+        return translator_func(raw_telem);
+    }
+
+    return getTelemetryRaw(snapshot, telem_code, metadata, defaultvalue);
+}
+
 /** Functionally equivalent to useTelemetry, but instead returns historical values arranged from earliest to oldest. */
 export function useTelemetryHistory(telem_code=undefined, metadata=false, defaultvalue=null) {
     if(telem_code === undefined) {
@@ -275,7 +314,6 @@ export function useTelemetryHistory(telem_code=undefined, metadata=false, defaul
     }
 
     const h_data = React.useContext(GSSTelemetryHistory);
-
     return h_data.map((telemetry_snapshot) => {
         if(telemetry_calculator_hooks[telem_code]) {
             // This telemetry data is translated
@@ -286,6 +324,23 @@ export function useTelemetryHistory(telem_code=undefined, metadata=false, defaul
     
         return getTelemetryRaw(telemetry_snapshot, telem_code, metadata, defaultvalue);
     })
+}
+
+export function useTelemetryRaw(telem_code=undefined, metadata=false, defaultvalue=null) {
+    /**
+     * Gets raw telem values (translators are not applied)
+     */
+    if(telem_code===undefined) {
+        return getTelemetryRaw(undefined, false, null);
+    }
+
+    if(telem_code[0] === "/") {
+        const gss_default_channel = React.useContext(GSSChannel);
+        telem_code = "@" + gss_default_channel + telem_code;
+    }
+
+    const telemetry_snapshot = React.useContext(GSSData);
+    return getTelemetryRaw(telemetry_snapshot, telem_code, metadata, defaultvalue);
 }
 
 export function useTelemetry(telem_code=undefined, metadata=false, defaultvalue=null) {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './Timer.css';
 import './Common.css';
 
-export const Timer = ({ mode, targetTime, timer_name, neg_t_text, pos_t_text, hidden, paused, set_callback }) => {
+export const Timer = ({ mode, targetTime, timer_name, neg_t_text, pos_t_text, hidden, paused, set_callback, hidden_text_override="NO DATA" }) => {
     const [currentTime, setCurrentTime] = useState(getInitialTime());
 
     function getInitialTime() {
@@ -49,7 +49,7 @@ export const Timer = ({ mode, targetTime, timer_name, neg_t_text, pos_t_text, hi
 
     return (
         <div className="value-card">
-            {hidden ?  <div className='card-overlay'>NO DATA</div> : null}
+            {hidden ?  <div className='card-overlay'>{hidden_text_override}</div> : null}
             <div className="value-card-name">
                 {timer_name}
             </div>
