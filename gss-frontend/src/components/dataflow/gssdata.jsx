@@ -3,8 +3,12 @@ import io from 'socket.io-client';
 import { getSetting } from './settings';
 import { __SEQUENCER_UPDATE_EVENTS } from './sequencer';
 
-function ws_url() {
-    return window.location.hostname + ":5001";
+function ws_url(path="") {
+    return window.location.hostname + ":5001" + path;
+}
+
+export function video_server_url(path="") {
+    return window.location.hostname + ":5002" + path;
 }
 
 
