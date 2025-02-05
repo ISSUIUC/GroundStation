@@ -12,6 +12,7 @@ export function CommandingView() {
   // Taken from breadcrumb.jsx to set pyro visibility in LOS/no-LOS
   const t_published = useTelemetry("/time_published", true);
   const [isLOS, setisLOS] = useState(false);
+  const [has_pass, set_has_pass] = useState(false);
 
   const current_channel = useChannel();
   const send_mqtt = useGSSMQTTCMD();
@@ -21,6 +22,22 @@ export function CommandingView() {
   const is_pyro_test = (fsm_state == 1)
   const pyro_en = (cont_channels > 0) && is_pyro_test;
 
+  useEffect(() => {
+
+    let user_pin_pass = +prompt("[pin input] Input commanding pin");
+
+    // lol.
+    if(user_pin_pass == 155) {
+      set_has_pass(true);
+    } else {
+      set_has_pass(false);
+    }
+
+  }, [])
+
+  if(!has_pass) {
+    return <>Unauthorized</>;
+  }
 
 
   const send_telem_cmd = (raw_cmd) => {
