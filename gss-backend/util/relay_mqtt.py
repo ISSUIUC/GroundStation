@@ -136,7 +136,7 @@ class RelayMqtt:
                     socketio.start_background_task(target=cmd_stat_msg, message=3)
                     return
                 
-                if(msg_payload["type"] == "command_acknowledged"):
+                if(msg_payload["type"] == "command_acknowledge"):
                     print("Emitting packet (ack/good)")
                     socketio.start_background_task(target=cmd_stat_msg, message=4)
                     return

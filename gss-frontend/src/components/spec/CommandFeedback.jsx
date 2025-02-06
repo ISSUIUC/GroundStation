@@ -27,18 +27,16 @@ export const CommandFeedback = () => {
         if(!cmd_stat.has_cmd) { return; }
         if(cmd_stat.has_explicit_failure) { return; }
         
-        if(fail && stage == 0) {
+        if(fail && cmd_stat.cur_state == 0) {
             console.log('unfail!')
             setfail(false);
             return;
         }
 
-        if(!fail) {
+        if(!fail && (cmd_stat.cur_state != 4)) {
             const timeout = setTimeout(() => {
                 setfail(true);
-            }, 3000);
-    
-
+            }, 5000);
 
             return () => { clearTimeout(timeout); }
         }
