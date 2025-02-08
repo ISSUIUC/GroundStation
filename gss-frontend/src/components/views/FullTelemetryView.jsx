@@ -81,7 +81,7 @@ export function FullTelemetryView() {
   // Translated units need to be gotten directly :(, this is a limitation of the telemetry hook system :(
   const altitude_gps = useTelemetry("/value.altitude") || 0;
   const altitude_baro = useTelemetry("/value.barometer_altitude") || 0;
-  const accel = [useTelemetry("/value.highG_ax") || 0, useTelemetry("/value.highG_ay") || 0, data_num("/value.highG_az") || 0]
+  const accel = [useTelemetry("/value.highG_ax") || 0, useTelemetry("/value.highG_ay") || 0, useTelemetry("/value.highG_az") || 0]
   const kf_velocity = useTelemetry("/value.kf_velocity") || 0;
 
   const sat_count_raw = useTelemetry("/value.sat_count");
