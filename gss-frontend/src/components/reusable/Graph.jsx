@@ -151,7 +151,7 @@ export const TelemetryGraph = ({ telem_channels, yaxis_label="", yaxis_unit }) =
     let colors = t_keys.map(key => telem_channels[key].color);
     let xaxis = "Time"
 
-    let yaxis_t = `${yaxis_label} (${getUnit(yaxis_unit)})`;
+    let yaxis_t = yaxis_label;
     if(yaxis_unit != null) {
         yaxis_t = `${yaxis_label} (${getUnit(yaxis_unit)})`;
     }

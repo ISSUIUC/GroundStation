@@ -136,12 +136,17 @@ export function SystemHealthView() {
   let booster_comm_status = (booster_is_los || !booster_has_telem) ? "LOS" : (last_booster_latency < 200 ? "OK" : "CAUT");
   let booster_rssi_status = "N/A";
   if(!booster_is_los && booster_has_telem) {
+
     if(booster_rssi < -80) {
       booster_rssi_status = "CAUT";
     }
 
     if(booster_rssi < -115) {
       booster_rssi_status = "WARN";
+    }
+
+    if(booster_rssi < 0) {
+      booster_rssi_status = "OK"
     }
   }
   
@@ -154,6 +159,10 @@ export function SystemHealthView() {
 
     if(sustainer_rssi < -115) {
       sustainer_rssi_status = "WARN";
+    }
+
+    if(sustainer_rssi < 0) {
+      sustainer_rssi_status = "OK"
     }
   }
 
