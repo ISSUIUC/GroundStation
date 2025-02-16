@@ -18,6 +18,7 @@ export function SettingsView() {
   const [global_sync, setGlobalsync] = useState(getSetting("global_sync"));
   const [data_retention, setDataRetention] = useState(getSetting("data_retention"));
   const [retain_on_reload, setRetainOnReload] = useState(getSetting("retain_on_reload"));
+  const [allow_nocont_pyro, setAllownocontPyro] = useState(getSetting("allow_no_cont_pyro"));
 
   const handle_unit_translation = (set_units) => {
     switch(set_units) {
@@ -86,6 +87,12 @@ export function SettingsView() {
         </ValueGroup>
 
         <ValueGroup label={"Control Settings"}>
+
+        <ChoiceSelect text="Always allow pyro" alt_text='Whether pyro commands can be sent without continuity' choices={["YES", "NO"]} onSelect={(c) => {
+            setSetting("allow_no_cont_pyro", c === "YES");
+            setAllownocontPyro(c === "YES");
+          }} curchoice={allow_nocont_pyro ? "YES" : "NO"}/>
+
           <ChoiceSelect text="Follow Autosync" alt_text='Whether autosync / clear calls made by the sequencer should be followed' choices={["AUTOSYNC", "NO SYNC"]} onSelect={(c) => {
             setSetting("autosync", c === "AUTOSYNC");
             setAutosync(c === "AUTOSYNC");

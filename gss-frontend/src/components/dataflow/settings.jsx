@@ -8,7 +8,8 @@ let GLOBAL_SETTINGS = {
     "autosync": true, // Choices "AUTOSYNC" -> true, "NO SYNC" -> false
     "global_sync": true, // Choices "ENABLED" -> true, "DISABLED" -> false
     "data_retention": 100, // Choices: "ALL" -> -1, LAST 100 -> 100, LAST 50 -> 50, LAST 15 -> 15
-    "retain_on_reload": true // Choices: "RETAIN" -> true, "DISCARD" -> false
+    "retain_on_reload": true, // Choices: "RETAIN" -> true, "DISCARD" -> false
+    "allow_no_cont_pyro": false // Choices "YES" -> true, "NO" -> false
 }
 
 // Maps unit types to the corresponding unit based on unit system

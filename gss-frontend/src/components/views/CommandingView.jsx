@@ -6,6 +6,7 @@ import '../reusable/Common.css';
 import { FlightCountTimer } from '../spec/FlightCountTimer.jsx';
 import GSSButton from '../reusable/Button.jsx';
 import { state_int_to_state_name } from '../dataflow/midasconversion.jsx';
+import { getSetting } from '../dataflow/settings.jsx';
 
 
 export function CommandingView() {
@@ -20,7 +21,7 @@ export function CommandingView() {
   const cont_channels = Math.round(useTelemetry("/value.pyro_a") || 0);
   const fsm_state = Math.round(useTelemetry("/value.FSM_State") || 0);
   const is_pyro_test = (fsm_state == 1)
-  let pyro_en = (cont_channels > 0) && is_pyro_test;
+  
 
   useEffect(() => {
 
@@ -91,6 +92,9 @@ export function CommandingView() {
     sync_vars({"countdown_t0": cur_time + tvalue, "countdown_t0_paused_value": tvalue, "countdown_t0_paused": pv});
   }
 
+  const allow_pyro_always = getSetting("allow_no_cont_pyro");
+  // let pyro_en = ( (cont_channels > 0) || allow_pyro_always ) && is_pyro_test;
+  let pyro_en = allow_pyro_always;
 
   return (
     <>
