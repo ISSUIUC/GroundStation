@@ -20,7 +20,7 @@ export function CommandingView() {
   const cont_channels = Math.round(useTelemetry("/value.pyro_a") || 0);
   const fsm_state = Math.round(useTelemetry("/value.FSM_State") || 0);
   const is_pyro_test = (fsm_state == 1)
-  const pyro_en = (cont_channels > 0) && is_pyro_test;
+  let pyro_en = (cont_channels > 0) && is_pyro_test;
 
   useEffect(() => {
 

@@ -27,7 +27,7 @@ const GPS_FIX_TYPES = [
     "G3DDR"
 ]
 
-export const SUSTAINER_TILT_LOCKOUT = 35 // degrees
+export const SUSTAINER_TILT_LOCKOUT = 36 // degrees
 export const SUSTAINER_COAST_TIME = 3 // seconds
 
 export function fix_type_int_to_fix_type_name(fix_type) {

@@ -50,9 +50,6 @@ export function StructuresView() {
   const num_continuous_channels = Math.round(motor_cont);
   const cont_status = num_continuous_channels >= 3 ? "GO" : "NOGO"
 
-  // TODO
-  const coast_status = fsm_state==-1 ? "N/A" : (fsm_state == 3 ? "STBY" : "N/A")
-
   if(!is_burnout) {
     ANGLE_BURNOUT = angle;
   }
@@ -71,6 +68,19 @@ export function StructuresView() {
       set_sus_ign(true);
     })
   }, [])
+
+  // get coast values
+  let coast_status = "N/A"
+  let coast_value = "Awaiting coast..."
+  if(has_telem) {
+    if(is_burnout) {
+      coast_status = "STBY"
+      coast_value = Math.max((sus_ign_time - Date.now())/1000, 0).toFixed(1) + "s"
+      if((sus_ign_time - Date.now()) <= 0) {
+        coast_status = "GO"
+      }
+    } 
+  }
 
   return (
     <>
@@ -112,7 +122,7 @@ export function StructuresView() {
                   <StatusDisplay label={"Burnout"} status={burnout_status}></StatusDisplay>
                   <StatusDisplayWithValue label={"Angle"} status={has_telem ? (angle < SUSTAINER_TILT_LOCKOUT ? "GO" : "NOGO") : "N/A"} value={has_telem ? `${angle.toFixed(1)}<${SUSTAINER_TILT_LOCKOUT}°` : "no data"}></StatusDisplayWithValue>
                   <StatusDisplayWithValue label={"Continuity"} status={cont_status} value={"Channels: " + Math.round(motor_cont).toFixed(0)}></StatusDisplayWithValue>
-                  <StatusDisplayWithValue label={"Coast"} status={"N/A"} value={""}></StatusDisplayWithValue>
+                  <StatusDisplayWithValue label={"Coast"} status={coast_status} value={coast_value}></StatusDisplayWithValue>
                 </div>
               </div>
             </ValueGroup>
