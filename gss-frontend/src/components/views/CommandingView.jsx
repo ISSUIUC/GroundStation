@@ -192,8 +192,8 @@ export function CommandingView() {
                 RESET KF
               </GSSButton>
 
-              <GSSButton variant={"yellow"} disabled={true} onClick={() => {
-                // this doesn't do anything yet
+              <GSSButton variant={"yellow"} onClick={() => {
+                send_telem_cmd("TOGGLE_CAM");
                 requestCommandFeedback("TOGGLE CAM");
               }}>
                 CAM TOGGLE
@@ -243,12 +243,12 @@ export function CommandingView() {
               Set to 0:10
             </GSSButton>
 
-            <GSSButton onClick={() => {set_timer(60)}}>
-              Set to 1:00
+            <GSSButton onClick={() => {set_timer(30)}}>
+              Set to 0:30
             </GSSButton>
 
-            <GSSButton onClick={() => {set_timer(120)}}>
-              Set to 2:00
+            <GSSButton onClick={() => {set_timer(90)}}>
+              Set to 1:30
             </GSSButton>
 
             <GSSButton onClick={() => {
