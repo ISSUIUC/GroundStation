@@ -93,8 +93,8 @@ export function CommandingView() {
   }
 
   const allow_pyro_always = getSetting("allow_no_cont_pyro");
-  // let pyro_en = ( (cont_channels > 0) || allow_pyro_always ) && is_pyro_test;
-  let pyro_en = allow_pyro_always;
+  let pyro_en = ( (cont_channels > 0) || allow_pyro_always ) && is_pyro_test;
+  // let pyro_en = allow_pyro_always;
 
   return (
     <>
