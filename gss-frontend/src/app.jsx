@@ -1,4 +1,4 @@
-import { useState } from 'preact/hooks'
+import { useEffect, useState } from 'preact/hooks'
 import './app.css'
 import { GSSDataProvider } from './components/dataflow/gssdata.jsx'
 import { StructuresView } from './components/views/StructuresView.jsx';
@@ -10,7 +10,7 @@ import { CommandingView } from './components/views/CommandingView.jsx';
 import { RecoveryView } from './components/views/RecoveryView.jsx';
 import OverlayController from './components/streamoverlay/OverlayController.jsx';
 import { ShowIf, ShowPath, ShowPathExact } from './components/reusable/UtilityComponents.jsx';
-import { SettingsView } from './components/views/SettingsView.jsx';
+import { handle_unit_translation, SettingsView } from './components/views/SettingsView.jsx';
 import { VideoView } from './components/views/VideoView.jsx';
 import { getSetting } from './components/dataflow/settings.jsx';
 
@@ -24,6 +24,10 @@ export function App() {
 
   const use_light_mode = getSetting("display_type") == "LIGHT"
   console.log(getSetting("display_type"))
+
+  useEffect(() => {
+    handle_unit_translation(getSetting("unit_system"));
+  }, [])
 
   return (
     <div className={`fullscreen ${use_light_mode ? "invert" : ""}`}>

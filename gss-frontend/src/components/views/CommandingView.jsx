@@ -193,7 +193,7 @@ export function CommandingView() {
               </GSSButton>
 
               <GSSButton variant={"yellow"} onClick={() => {
-                send_telem_cmd("TOGGLE_CAM");
+                send_telem_cmd("CAMT");
                 requestCommandFeedback("TOGGLE CAM");
               }}>
                 CAM TOGGLE
@@ -213,7 +213,7 @@ export function CommandingView() {
               }}>
                 FORCE PAD
               </GSSButton>
-              <GSSButton variant={"red"} onClick={() => {
+              <GSSButton variant={"red"} disabled={true} onClick={() => {
                 let launch_confirm = confirm("ARE YOU SURE ABOUT THIS?\n\n(OK) - Initiate Launch Sequencing\n(CANCEL) - Cancel Operation");
                 if(launch_confirm) {
                   send_telem_cmd("IDLE");

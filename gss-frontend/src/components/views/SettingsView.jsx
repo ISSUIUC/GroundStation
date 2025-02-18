@@ -6,8 +6,31 @@ import { CONVERSIONS, getSetting, setSetting } from '../dataflow/settings.jsx';
 import GSSButton from '../reusable/Button.jsx';
 import { DataTestButton } from '../spec/DataTest.jsx';
  
+export const handle_unit_translation = (set_units) => {
+  switch(set_units) {
+      case "METRIC":
+          console.log("Converting to metric units...");
+          clearCalculators(); // Default is metric so we don't need to add any translators
+          // except the default conversions!
+          break;
+      case "IMPERIAL":
+          console.log("Converting to imperial units...");
+          clearCalculators();
+          ["booster", "sustainer"].forEach((stg) => {
+              addRecalculator(`@${stg}/value.barometer_altitude`, CONVERSIONS.METER_TO_FEET);
+              addRecalculator(`@${stg}/value.kf_velocity`, CONVERSIONS.METER_TO_FEET);
+          })
+          break;
+      default:
+          clearCalculators() // Use metric by default
+  }
 
-
+  ["booster", "sustainer"].forEach((stg) => {
+    addRecalculator(`@${stg}/value.highG_ax`, CONVERSIONS.ACCEL_G_TO_UNIT_CONVERSION);
+    addRecalculator(`@${stg}/value.highG_ay`, CONVERSIONS.ACCEL_G_TO_UNIT_CONVERSION);
+    addRecalculator(`@${stg}/value.highG_az`, CONVERSIONS.ACCEL_G_TO_UNIT_CONVERSION);
+  })
+}
 
 export function SettingsView() {
   // This view handles user settings
@@ -19,32 +42,6 @@ export function SettingsView() {
   const [data_retention, setDataRetention] = useState(getSetting("data_retention"));
   const [retain_on_reload, setRetainOnReload] = useState(getSetting("retain_on_reload"));
   const [allow_nocont_pyro, setAllownocontPyro] = useState(getSetting("allow_no_cont_pyro"));
-
-  const handle_unit_translation = (set_units) => {
-    switch(set_units) {
-        case "METRIC":
-            console.log("Converting to metric units...");
-            clearCalculators(); // Default is metric so we don't need to add any translators
-            // except the default conversions!
-            break;
-        case "IMPERIAL":
-            console.log("Converting to imperial units...");
-            clearCalculators();
-            ["booster", "sustainer"].forEach((stg) => {
-                addRecalculator(`@${stg}/value.barometer_altitude`, CONVERSIONS.METER_TO_FEET);
-                addRecalculator(`@${stg}/value.kf_velocity`, CONVERSIONS.METER_TO_FEET);
-            })
-            break;
-        default:
-            clearCalculators() // Use metric by default
-    }
-
-    ["booster", "sustainer"].forEach((stg) => {
-      addRecalculator(`@${stg}/value.highG_ax`, CONVERSIONS.ACCEL_G_TO_UNIT_CONVERSION);
-      addRecalculator(`@${stg}/value.highG_ay`, CONVERSIONS.ACCEL_G_TO_UNIT_CONVERSION);
-      addRecalculator(`@${stg}/value.highG_az`, CONVERSIONS.ACCEL_G_TO_UNIT_CONVERSION);
-    })
-  }
 
   let selected_data_retention_choice = "ALL";
   switch(data_retention) {
