@@ -6,6 +6,7 @@ import "./StreamCommon.css"
 import { ValueGroup } from "../reusable/ValueDisplay";
 import { BoosterSVG, SustainerSVG } from "./OverlayVis";
 import { CONVERSIONS } from "../dataflow/settings";
+import { state_int_to_state_name } from "../dataflow/midasconversion";
 
 function PassiveTimer({ progName, visible }) {
     const timer_paused = useTelemetry("@GSS/countdown_t0_paused");
@@ -15,7 +16,7 @@ function PassiveTimer({ progName, visible }) {
         <div className="stream-passive-timer-wrapper">
             <div className="stream-passive-timer">
                 <div className={`stream-passive-timer-main start-hidden ${fade_classname}`}>
-                    <span className="stream-passive-timer-m-text">T-</span>
+                    <span className="stream-passive-timer-m-text">T</span>
                     <CountdownTimer digitmode={4} anim={false} />
                 </div>
                 <div className={`stream-passive-timer-sep ${grow_classname}`} />
@@ -43,31 +44,19 @@ function formatTelemetryDigits(value, num_digits) {
     if(value_abs > max_value_abs) {
         value_abs = max_value_abs;
     }
+    
+    const real_digits = value_abs.toString().padStart(num_digits, "0")
 
-    const value_digits = value_abs.toString().split("").slice(-num_digits)
-
-    let zero_pad = (num_digits - value_digits.length);
-    let zero_pad_left = zero_pad
-    let output_num = ""
-    let space_ctr = 0
-
-    while(zero_pad_left > 3) {
-        output_num += "000 ";
-        zero_pad_left -= 3;
-    }
-
-    output_num += "0".repeat(zero_pad_left)
-    space_ctr = zero_pad_left
-
-    for(let i = 0; i < value_digits.length; i++) {        
-        if(space_ctr % 3 == 0 && space_ctr != 0) {
-            output_num += " ";
+    let value_digits = real_digits.split("").reverse().slice(-num_digits)
+    let out = [...value_digits]
+    for(let i = 0; i < value_digits.length; i++) {
+        if(i%3 == 0 && i!=0) {
+            out.splice(i, 0, " ")
+            continue;
         }
-        output_num += value_digits[i];
-        space_ctr++;
     }
 
-    return `${value < 0 ? "-" : " "}${output_num.padStart()}`;
+    return `${value < 0 ? "-" : " "}${out.reverse().join("")}`;
 }
 
 export default function OverlayController() {
@@ -75,6 +64,8 @@ export default function OverlayController() {
     /** The stream uses imperial units, irregardless of the current selected unit system.
      * As such we need specific sources for this telemetry that effectively translate from meters to feet.
      */
+
+    
 
     useEffect(() => {
         addRecalculator("@sustainer/value.barometer_altitude", CONVERSIONS.METER_TO_FEET);
@@ -96,6 +87,14 @@ export default function OverlayController() {
     const booster_alt = useTelemetry("@booster/value.barometer_altitude") || 0;
     const sustainer_alt = useTelemetry("@sustainer/value.barometer_altitude") || 0;
 
+    const booster_vel = useTelemetry("@booster/value.kf_velocity") || 0;
+    const sustainer_vel = useTelemetry("@sustainer/value.kf_velocity") || 0;
+
+    let fsm_state = useTelemetry("@sustainer/value.FSM_State");
+    if(fsm_state == null) {
+        fsm_state = -1;
+    }
+
     return (
         <>
             <ShowPathExact path={"/stream/control"}>
@@ -112,7 +111,7 @@ export default function OverlayController() {
 
             <ShowPathExact path={"/stream"}>
                 <div className={`spot-overlay start-hidden spot-overlay-${spot_vis ? "in" : "out"}`} />
-                <PassiveTimer progName={"Aether I"} visible={top_timer_vis} />
+                <PassiveTimer progName={"Aether"} visible={top_timer_vis} />
                 <div className={`overlay-position-bottom start-hidden overlay-row-${spot_vis ? "in" : "out"}`}>
                     <div className="overlay-row">
 
@@ -157,7 +156,7 @@ export default function OverlayController() {
 
                                 <div className="overlay-v-align">
                                     <div className="overlay-row-telem-main">
-                                        {formatTelemetryDigits(0, 4)}
+                                        {formatTelemetryDigits(booster_vel, 4)}
                                     </div>
 
                                 </div>
@@ -182,10 +181,10 @@ export default function OverlayController() {
 
                         <div className="overlay-row-element">
                             <div className="overlay-spot-timer-above-label">
-                                {timer_paused ? "HOLD" : "LAUNCH"}
+                                {timer_paused ? "HOLD" : state_int_to_state_name(fsm_state).replaceAll("_", " ")}
                             </div>
                             <div className="overlay-spot-timer-main">
-                                T-<CountdownTimer digitmode={3} />
+                                T<CountdownTimer digitmode={3} />
                             </div>
                         </div>
 
@@ -242,7 +241,7 @@ export default function OverlayController() {
 
                                 <div className="overlay-v-align">
                                     <div className="overlay-row-telem-main">
-                                        {formatTelemetryDigits(0, 4)}
+                                        {formatTelemetryDigits(sustainer_vel, 4)}
                                     </div>
 
                                 </div>

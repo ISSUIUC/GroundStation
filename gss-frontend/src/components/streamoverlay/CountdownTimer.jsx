@@ -78,9 +78,11 @@ export function CountdownTimer({ digitmode=1, anim=true }) {
   const timer_paused = useTelemetry("@GSS/countdown_t0_paused");
   const timer_pvalue = useTelemetry("@GSS/countdown_t0_paused_value")
 
+  const [tvalue, set_timer_val] = useState(0);
+
   return (
     <span className={(timer_paused && anim) ? "overlay-spot-timer-paused" : ""}>
-        <BaseTimer mode={timer_paused ? "set" : "t-"} targetTime={timer_paused ? timer_pvalue : timer_val} paused={timer_paused} digitMode={digitmode} />
+        {tvalue < 0 ? "+" : "-"}<BaseTimer mode={timer_paused ? "set" : "t-"} targetTime={timer_paused ? timer_pvalue : timer_val} paused={timer_paused} set_callback={set_timer_val} digitMode={digitmode} />
     </span>
     
   )
