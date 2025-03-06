@@ -53,7 +53,7 @@ export const SequencerSetupElement = () => {
         console.log("SEQUENCER: Setting up events..")
         add_sequencer_event("sustainer_burnout", (snapshot) => {
             const fsm_state = useTelemetrySnapshot(snapshot, "@sustainer/value.FSM_State");
-            return fsm_state == 3;
+            return fsm_state == 4;
         })
 
         add_sequencer_event("sustainer_ignition", (snapshot) => {

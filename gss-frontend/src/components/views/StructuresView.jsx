@@ -8,6 +8,7 @@ import { CONVERSIONS, getSetting, getUnit } from '../dataflow/settings.jsx';
 import standardAtmosphere from 'standard-atmosphere';
 import { state_int_to_state_name, SUSTAINER_COAST_TIME, SUSTAINER_TILT_LOCKOUT } from '../dataflow/midasconversion.jsx';
 import { add_event_listener } from '../dataflow/sequencer.jsx';
+import { time_series } from '../dataflow/derivatives.jsx';
 
 // Static
 let ANGLE_BURNOUT = 0;
@@ -33,6 +34,9 @@ export function StructuresView() {
   if(fsm_state == null) {
     fsm_state = -1;
   }
+
+  const descent_vel_frame = time_series("/value.barometer_altitude") || [{m: 0, b:0}, [], []];
+  const descent_vel = descent_vel_frame[0].m || 0;
 
   const accel_norm = Math.sqrt(accel_x*accel_x + accel_y*accel_y + accel_z*accel_z);
 
@@ -88,7 +92,13 @@ export function StructuresView() {
         <FlightCountTimer />
 
         <ValueGroup label={"Telemetry Data"} hidden={!has_telem}>
-            <SingleValue label={"State"} value={state_int_to_state_name(fsm_state)} unit={""}></SingleValue>
+            <MultiValue 
+              label={""}
+              titles={["State", "Descent Rate (DRV)"]}
+              values={[state_int_to_state_name(fsm_state), descent_vel.toFixed(1)]}
+              units={["", getUnit("velocity")]}
+
+            />
             <MultiValue
                 label={"Gyroscopic"}
                 titles={["Tilt", "Tilt @ burnout", "Tilt @ ignition", "Roll Rate"]}

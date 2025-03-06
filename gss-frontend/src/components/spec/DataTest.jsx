@@ -110,26 +110,26 @@ export const DataTestButton = () => {
 
         }, 10)
 
-        let j = START_L2;
-        const intv2 = setInterval(() => {
-            let cur_time = Date.now()
-            let t = (cur_time - starttime) / 1000;
+        // let j = START_L2;
+        // const intv2 = setInterval(() => {
+        //     let cur_time = Date.now()
+        //     let t = (cur_time - starttime) / 1000;
             
-            let initial_time = dat2[START_L2]["metadata"]["time_published"]
+        //     let initial_time = dat2[START_L2]["metadata"]["time_published"]
 
-            // console.log(i);
-            let rt = t + initial_time
-            // console.log(rt, dat[i]["metadata"]["time_published"])
-            while(dat2[j]["metadata"]["time_published"] <= rt) {
-                j++;
-                send_mqtt("FlightData-Booster", dat2[j]);
-            }
+        //     // console.log(i);
+        //     let rt = t + initial_time
+        //     // console.log(rt, dat[i]["metadata"]["time_published"])
+        //     while(dat2[j]["metadata"]["time_published"] <= rt) {
+        //         j++;
+        //         send_mqtt("FlightData-Booster", dat2[j]);
+        //     }
 
-        }, 10)
+        // }, 10)
 
         return () => {
             clearInterval(intv);
-            clearInterval(intv2);
+            // clearInterval(intv2);
         }
 
     }, [starttime])
