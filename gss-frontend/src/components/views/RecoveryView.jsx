@@ -14,6 +14,7 @@ import { DistanceTracker } from './FullTelemetryView.jsx';
 import { getUnit } from '../dataflow/settings.jsx';
 import { SUSTAINER_COAST_TIME, SUSTAINER_TILT_LOCKOUT } from '../dataflow/midasconversion.jsx';
 import { add_event_listener } from '../dataflow/sequencer.jsx';
+import { time_series } from '../dataflow/derivatives.jsx';
 
 export function RecoveryView() {
 
@@ -35,6 +36,9 @@ export function RecoveryView() {
   const liftoff_status = fsm_state==-1 ? "N/A" : (fsm_state > 2 ? "GO" : "STBY");
   const burnout_status = fsm_state==-1 ? "N/A" : (fsm_state > 3 ? "GO" : "STBY");
   const cont_status = Math.round(motor_cont) >= 3 ? "GO" : "NOGO"
+
+  const descent_vel_frame = time_series("/value.barometer_altitude") || [{m: 0, b:0}, [], []];
+  const descent_vel = descent_vel_frame[0].m || 0;
 
   useEffect(() => {
     add_event_listener("sustainer_burnout", () => {
@@ -85,6 +89,13 @@ export function RecoveryView() {
                   titles={["Altitude (Baro)", "Altitude (GPS)", "Velocity"]}
                   values={[baro_alt.toFixed(1), altitude.toFixed(1), velocity.toFixed(1)]}
                   units={[getUnit("distance"), getUnit("distance"), getUnit("velocity")]}
+              />
+
+              <SingleValue
+                label={"Vertical Velocity (Derived)"}
+                value={descent_vel.toFixed(2)}
+                unit={getUnit("velocity")}
+                hidden={false}
               />
               
               <TelemetryGraph telem_channels={{

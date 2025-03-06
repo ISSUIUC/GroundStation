@@ -2,11 +2,9 @@ import React, { useContext, useEffect, useState } from 'react';
 import { GSSDataProvider, useGSSMQTT, useSyncGlobalVars, useTelemetry, useTelemetryHistory, useTelemetryRaw } from '../dataflow/gssdata.jsx'
 import { Timer } from '../reusable/Timer.jsx'
 import { SingleValue, MultiValue, ValueGroup, SingleValueGroupRow, StatusDisplay, StatusDisplayWithValue } from '../reusable/ValueDisplay.jsx'
-import { AngleGauge } from '../spec/AngleGauge.jsx'
 
 import '../reusable/Common.css';
 import { FlightCountTimer } from '../spec/FlightCountTimer.jsx';
-import GSSButton from '../reusable/Button.jsx';
 import { TelemetryGraph } from '../reusable/Graph.jsx';
 import { getSetting, getUnit } from '../dataflow/settings.jsx';
 import { fix_type_int_to_fix_type_name, state_int_to_state_name } from '../dataflow/midasconversion.jsx';
@@ -15,7 +13,7 @@ import { PositionDataProvider, useGPSPosition } from '../dataflow/positioning.js
 import standardAtmosphere from "standard-atmosphere"
 
 import haversine from 'haversine';
-import { options } from 'preact';
+import { time_series } from '../dataflow/derivatives.jsx';
 
 export function DistanceTracker({ rocket_lat, rocket_long }) {
   const [loc_available, loc_data] = useGPSPosition()
@@ -100,6 +98,9 @@ export function FullTelemetryView() {
 
   const stag_temp = (temperature*(1 + (mach_number**2 * (1.4 - 1)/2))) - 273.15 // K to C
 
+  const descent_vel_frame = time_series("/value.barometer_altitude") || [{m: 0, b:0}, [], []];
+  const descent_vel = descent_vel_frame[0].m || 0;
+
   return (
     <>
       <div className='telemetry-view'>
@@ -142,6 +143,8 @@ export function FullTelemetryView() {
                   "/value.battery_voltage": {name: "Battery Voltage", color: "#d97400"}
                 }} yaxis_label='Voltage (V)' />
               </div>
+
+
             </ValueGroup>
           </div>
 
@@ -200,10 +203,11 @@ export function FullTelemetryView() {
                     units={["°", "°", getUnit("distance")]}
                 />
 
-                <SingleValue
-                  label={"GNSS Fix Type"}
-                  value={fix_type_name}
-                  unit={""}
+                <MultiValue
+                  label={""}
+                  titles={["GNSS Fix Type", "Descent V (Derived)"]}
+                  values={[fix_type_name, descent_vel.toFixed(1)]}
+                  units={["", getUnit("velocity")]}
                 />
 
                 <PositionDataProvider>

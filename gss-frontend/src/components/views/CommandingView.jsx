@@ -28,7 +28,7 @@ export function CommandingView() {
     let user_pin_pass = +prompt("[pin input] Input commanding pin");
 
     // lol.
-    if(user_pin_pass == 155) {
+    if(user_pin_pass == 4455) {
       set_has_pass(true);
     } else {
       set_has_pass(false);
@@ -193,10 +193,24 @@ export function CommandingView() {
               </GSSButton>
 
               <GSSButton variant={"yellow"} onClick={() => {
-                send_telem_cmd("CAMT");
-                requestCommandFeedback("TOGGLE CAM");
+                send_telem_cmd("CAMON");
+                requestCommandFeedback("CAM: ON");
               }}>
-                CAM TOGGLE
+                CAM ON
+              </GSSButton>
+
+              <GSSButton variant={"yellow"} onClick={() => {
+                send_telem_cmd("CAMOFF");
+                requestCommandFeedback("CAM: OFF");
+              }}>
+                CAM OFF
+              </GSSButton>
+
+              <GSSButton variant={"blue"} onClick={() => {
+                send_telem_cmd("VMUXT");
+                requestCommandFeedback("TOGGLE VMUX");
+              }}>
+                CAM OFF
               </GSSButton>
             </div>
 
