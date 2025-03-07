@@ -10,6 +10,12 @@
     z-index: -2;
 }
 
+.big-text-warn {
+    color: #f55;
+    font-weight: bold;
+    font-size: 1.25em;
+}
+
 .start-hidden {
     opacity: 0;
 }
@@ -347,4 +353,131 @@
 
 .force-hide {
     opacity: 0;
+}
+
+
+
+.livestream-sequencer-queue {
+    display: flex;
+    flex-flow: row nowrap;
+    background-color: #242424;
+    justify-content: space-between;
+}
+
+.livestream-sequencer-time {
+    background-color: #353535;
+    padding:5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 1.2em;
+}
+
+
+.livestream-sequencer-desc {
+    color: #aaa;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+}
+
+.livestream-sequencer-title {
+    font-weight: bold;
+    background-color: #353535;
+    margin-right: 20px;
+    color: #fff;
+    padding:5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 1.2em;
+}
+
+.row-nowrap-ls {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.livestream-sequencer-next .livestream-sequencer-queue {
+    background-color: #656525;
+}
+
+
+.livestream-sequencer-next .livestream-sequencer-title {
+    background-color: #959565;
+}
+
+.livestream-sequencer-next .livestream-sequencer-time {
+    background-color: #959565;
+}
+
+.stream-timeline-wrapper {
+    position: absolute;
+    right: 0;
+    margin: 50px;
+    display: flex;
+    flex-flow: column nowrap;
+    background-color: #113;
+    border-radius: 10px;
+    padding-top: 10px;
+}
+
+.stream-timeline-footer {
+    font-size: 0.7em;
+    font-style: italic;
+    background-color: #112;
+    text-align: center;
+    padding:5px;
+    border-radius: 0px 0px 10px 10px;
+}
+
+.stream-timeline {
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.stream-timeline-title {
+    text-align: center;
+}
+
+.stream-timeline-title-t {
+    font-size: 0.8em;
+}
+
+.stream-timeline-title-b {
+    font-size: 1.35em;
+    font-weight: bold;
+}
+
+.stream-timeline-holder {
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+.stream-timeline-elem {
+    display: flex;
+    flex-flow: row nowrap;
+    background-color: #225;
+}
+
+.stream-timeline-elem-T {
+    padding-left: 10px;
+    background-color: #337;
+    padding-right: 10px;
+    font-weight: bold;
+    font-size: 0.9em;
+    justify-content: center;
+    display: flex;
+    flex-flow: column nowrap;
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.stream-timeline-elem-desc {
+    padding-right: 10px;
+    padding-left: 10px;
+    font-size: 0.9em;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    justify-content: center;
+    display: flex;
+    flex-flow: column nowrap;
 }

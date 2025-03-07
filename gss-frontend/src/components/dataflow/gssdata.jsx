@@ -165,7 +165,7 @@ export function GSSDataProvider({ children, default_stream }) {
                 })
 
                 telemetry_callbacks.forEach((callback) => {
-                    callback(value);
+                    callback();
                 })
             }
             if(json_data["metadata"]["type"] === "gss_msg") {

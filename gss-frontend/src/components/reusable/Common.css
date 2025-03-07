@@ -205,6 +205,26 @@
     );
 }
 
+.gss-button-green {
+    background: repeating-linear-gradient(
+        45deg,
+        #419f4a,
+        #419f4a 20px,
+        #28742e 20px,
+        #28742e 40px
+    );
+}
+
+.gss-button-green:hover {
+    background: repeating-linear-gradient(
+        45deg,
+        #318f3a,
+        #318f3a 20px,
+        #18641e 20px,
+        #18641e 40px
+    );
+}
+
 .gss-button-disabled {
     background: none;
     background-color: #252525;
