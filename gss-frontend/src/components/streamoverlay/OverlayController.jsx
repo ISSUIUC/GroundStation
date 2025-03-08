@@ -12,6 +12,7 @@ import { FlightCountTimer } from "../spec/FlightCountTimer";
 
 import { OBSWebSocket } from 'obs-websocket-js';
 import { LivestreamSequencer } from "./LivestreamSequencer";
+import { time_series } from "../dataflow/derivatives";
 
 export const obs = new OBSWebSocket();
 
@@ -153,7 +154,10 @@ export default function OverlayController() {
 
     useEffect(() => {
         addRecalculator("@sustainer/value.barometer_altitude", CONVERSIONS.METER_TO_FEET);
+        addRecalculator("@sustainer/value.altitude", CONVERSIONS.METER_TO_FEET);
         addRecalculator("@booster/value.barometer_altitude", CONVERSIONS.METER_TO_FEET)
+        addRecalculator("@sustainer/value.kf_velocity", CONVERSIONS.METER_TO_FEET);
+        addRecalculator("@booster/value.kf_velocity", CONVERSIONS.METER_TO_FEET);
     })
 
 
@@ -175,6 +179,49 @@ export default function OverlayController() {
 
     const booster_vel = useTelemetry("@booster/value.kf_velocity") || 0;
     const sustainer_vel = useTelemetry("@sustainer/value.kf_velocity") || 0;
+
+    // Switch Baro / GPS views:
+    const sustainer_has_gps_lock = (useTelemetry("@sustainer/value.sat_count") || 0) > 0;
+    const sustainer_gps_alt = (useTelemetry("@sustainer/value.altitude") || 0);
+    let real_sustainer_alt = sustainer_alt;
+    let cur_alt_view = "";
+    let alt_text_alternate_style = ""
+
+    if(sustainer_has_gps_lock && (sustainer_gps_alt > 80000 || sustainer_alt > 80000)) {
+        // If the sustainer is detected above 80kft and we have lock, switch the sustainer altitude to GPS mode.
+        real_sustainer_alt = sustainer_gps_alt;
+        cur_alt_view = "(GPS)"
+    } else {
+        if(!sustainer_has_gps_lock && (sustainer_alt > 80000)) {
+            alt_text_alternate_style = "alt-text-no-gps-lock"
+            cur_alt_view = "(B)"
+        }
+    }
+
+    // KF Fail fallback
+    // If the KF explodes again make sure we can see descent vel on the stream
+    const sustainer_kf_fallback = Math.abs(sustainer_vel) > 6500;
+    const booster_kf_fallback = Math.abs(booster_vel) > 6500;
+    let sustainer_kf_append = "";
+    let booster_kf_append = ""
+
+    let sustainer_vel_real = useTelemetry("@sustainer/value.kf_velocity") || 0;
+    let booster_vel_real = useTelemetry("@booster/value.kf_velocity") || 0;
+
+    if(sustainer_kf_fallback) {
+        const sus_ve_frame = time_series("@sustainer/value.barometer_altitude") || [{m: 0, b:0}, [], []];
+        sustainer_vel_real = sus_ve_frame[0].m || 0;
+        sustainer_kf_append = "(F)"
+    }
+
+    if(booster_kf_fallback) {
+        const boo_ve_frame = time_series("@booster/value.barometer_altitude") || [{m: 0, b:0}, [], []];
+        booster_vel_real = boo_ve_frame[0].m || 0;
+        booster_kf_append = "(F)"
+    }
+
+
+
 
     let fsm_state = useTelemetry("@sustainer/value.FSM_State");
     if(fsm_state == null) {
@@ -338,14 +385,14 @@ export default function OverlayController() {
                                             BOOSTER
                                         </div>
                                         <div className="overlay-row-telem-title-qty">
-                                            VELOCITY
+                                            VELOCITY {booster_kf_append}
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="overlay-v-align">
                                     <div className="overlay-row-telem-main">
-                                        {formatTelemetryDigits(booster_vel, 4)}
+                                        {formatTelemetryDigits(booster_vel_real, 4)}
                                     </div>
 
                                 </div>
@@ -397,16 +444,15 @@ export default function OverlayController() {
                                             SUSTAINER
                                         </div>
                                         <div className="overlay-row-telem-title-qty">
-                                            ALTITUDE
+                                            ALTITUDE {cur_alt_view}
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="overlay-v-align">
-                                    <div className="overlay-row-telem-main">
-                                        {formatTelemetryDigits(sustainer_alt, 6)}
+                                    <div className={`overlay-row-telem-main ${alt_text_alternate_style}`}>
+                                        {formatTelemetryDigits(real_sustainer_alt, 6)}
                                     </div>
-
                                 </div>
 
                                 <div className="overlay-v-align">
@@ -423,14 +469,14 @@ export default function OverlayController() {
                                             SUSTAINER
                                         </div>
                                         <div className="overlay-row-telem-title-qty">
-                                            VELOCITY
+                                            VELOCITY {sustainer_kf_append}
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="overlay-v-align">
                                     <div className="overlay-row-telem-main">
-                                        {formatTelemetryDigits(sustainer_vel, 4)}
+                                        {formatTelemetryDigits(sustainer_vel_real, 4)}
                                     </div>
 
                                 </div>

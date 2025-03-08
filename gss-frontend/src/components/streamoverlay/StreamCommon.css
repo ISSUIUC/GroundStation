@@ -10,6 +10,7 @@
     z-index: -2;
 }
 
+
 .big-text-warn {
     color: #f55;
     font-weight: bold;
@@ -480,4 +481,8 @@
     justify-content: center;
     display: flex;
     flex-flow: column nowrap;
+}
+
+.alt-text-no-gps-lock {
+    color: #ffb8b8;
 }
