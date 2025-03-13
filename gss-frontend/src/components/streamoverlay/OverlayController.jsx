@@ -13,6 +13,7 @@ import { FlightCountTimer } from "../spec/FlightCountTimer";
 import { OBSWebSocket } from 'obs-websocket-js';
 import { LivestreamSequencer } from "./LivestreamSequencer";
 import { time_series } from "../dataflow/derivatives";
+import IdleStreamOverlay from "./IdleOverlay";
 
 export const obs = new OBSWebSocket();
 
@@ -267,6 +268,7 @@ export default function OverlayController() {
 
     return (
         <>
+            <IdleStreamOverlay />
             <ShowPathExact path={"/stream/control"}>
                 <FlightCountTimer />
                 <ValueGroup label="Connection">

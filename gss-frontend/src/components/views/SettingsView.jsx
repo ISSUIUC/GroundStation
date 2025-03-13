@@ -18,7 +18,9 @@ export const handle_unit_translation = (set_units) => {
           clearCalculators();
           ["booster", "sustainer"].forEach((stg) => {
               addRecalculator(`@${stg}/value.barometer_altitude`, CONVERSIONS.METER_TO_FEET);
+              addRecalculator(`@${stg}/value.altitude`, CONVERSIONS.METER_TO_FEET);
               addRecalculator(`@${stg}/value.kf_velocity`, CONVERSIONS.METER_TO_FEET);
+              addRecalculator(`@${stg}/value.kf_position`, CONVERSIONS.METER_TO_FEET);
           })
           break;
       default:

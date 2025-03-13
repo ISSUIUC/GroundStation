@@ -21,11 +21,15 @@ export const SingleValue = ({ label, value, unit, hidden }) => {
     );
 };
 
-export const MultiValue = ({ label, titles, values, units, label_colors, hidden }) => {
+export const MultiValue = ({ label, titles, values, units, label_colors, data_colors, hidden }) => {
     // Meant for displaying a group of similar values, such as orientation data (pitch, roll, yaw) or GPS data (lat, long, alt)
 
     if(label_colors === undefined) {
         label_colors = Array(titles.length).fill('#cccccc');
+    }
+
+    if(data_colors === undefined) {
+        data_colors = Array(titles.length).fill('#ffffff');
     }
 
     return (
@@ -43,7 +47,7 @@ export const MultiValue = ({ label, titles, values, units, label_colors, hidden 
                                     {title}    
                                 </div>
                                 <div>
-                                    {values[index]}
+                                    <span style={{color: data_colors[index]}}>{values[index]}</span>
                                     <span className='value-card-unit'>{units[index]}</span>
                                 </div>
 

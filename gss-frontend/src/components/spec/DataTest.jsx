@@ -30,10 +30,13 @@ const generate_ref_packet = (start_t, t) => {
                 "sat_count": Math.abs(Math.sin(t/20)) * 14,
                 "is_sustainer": 0,
                 "kf_velocity": 3*t + (0.05*t**2),
-                "pyro_a": Math.abs(Math.sin(t) * 4),
-                "pyro_b": Math.abs(Math.sin(t) * 4),
-                "pyro_c": Math.abs(Math.sin(t) * 4),
-                "pyro_d": Math.abs(Math.sin(t) * 4)
+                "kf_position": t**2 + (0.1*t**3),
+                "c_valid": 0,
+                "c_on": Math.floor(Math.abs(Math.cos(t/15)) * 3),
+                "c_rec": Math.floor(Math.abs(Math.cos(t/12)) * 3),
+                "vtx_on": Math.floor(Math.abs(Math.cos(t/20) + 0.5)),
+                "vmux_stat": Math.floor(Math.abs(Math.cos(t/18) + 0.5)),
+                "cam_ack": Math.floor(Math.abs(Math.cos(t/25) + 0.5)),
             },
             "type": "data",
             "utc": "2024-06-02 12:49:54.925549+00:00",
@@ -99,14 +102,15 @@ export const DataTestButton = () => {
             let t = (cur_time - starttime) / 1000;
             
             let initial_time = dat[START_L]["metadata"]["time_published"]
-
-            // console.log(i);
-            let rt = t + initial_time
-            // console.log(rt, dat[i]["metadata"]["time_published"])
-            while(dat[i]["metadata"]["time_published"] <= rt) {
-                i++;
-                send_mqtt("FlightData-Sustainer", dat[i]);
-            }
+            
+            send_mqtt("FlightData-Sustainer", generate_ref_packet(starttime, t));
+            // // console.log(i);
+            // let rt = t + initial_time
+            // // console.log(rt, dat[i]["metadata"]["time_published"])
+            // while(dat[i]["metadata"]["time_published"] <= rt) {
+            //     i++;
+            //     send_mqtt("FlightData-Sustainer", dat[i]);
+            // }
 
         }, 10)
 

@@ -51,6 +51,21 @@ export function DistanceTracker({ rocket_lat, rocket_long }) {
 
 } 
 
+function bits2_to_TF(int2bit) {
+  // Converts a 2 bit integer into a pair of true/false
+  let s1 = false; // 1x
+  let s2 = false; // x1
+  if(int2bit == 2 || int2bit == 3) { // 10 or 11
+    s1 = true;
+  } 
+
+  if(int2bit == 1 || int2bit == 3) { // 01 or 11
+    s2 = true;
+  }
+
+  return [s1, s2];
+}
+
 export function FullTelemetryView() {
 
   // More efficient to just get all the data at once
@@ -81,6 +96,7 @@ export function FullTelemetryView() {
   const altitude_baro = useTelemetry("/value.barometer_altitude") || 0;
   const accel = [useTelemetry("/value.highG_ax") || 0, useTelemetry("/value.highG_ay") || 0, useTelemetry("/value.highG_az") || 0]
   const kf_velocity = useTelemetry("/value.kf_velocity") || 0;
+  const kf_position = useTelemetry("/value.kf_position") || 0;
 
   const sat_count_raw = useTelemetry("/value.sat_count");
 
@@ -100,6 +116,26 @@ export function FullTelemetryView() {
 
   const descent_vel_frame = time_series("/value.barometer_altitude") || [{m: 0, b:0}, [], []];
   const descent_vel = descent_vel_frame[0].m || 0;
+
+  // Translate CAM state.
+  const cam_valid = useTelemetry("/value.c_valid") == 0; // cam state is only valid if the leading bit is a 0.
+  const cams_on_raw = (useTelemetry("/value.c_on") || 0);
+  const [cam1_on, cam2_on] = bits2_to_TF(cams_on_raw);
+
+  const cams_rec_raw = (useTelemetry("/value.c_rec") || 0);
+  const [cam1_rec, cam2_rec] = bits2_to_TF(cams_rec_raw);
+
+  const vtx_on = (useTelemetry("/value.vtx_on") || 0) == 1;
+  const vmux_state = (useTelemetry("/value.vmux_stat") || 0);
+  const cam_ack = (useTelemetry("/value.cam_ack") || 0);
+
+  const cam1_text = (cam1_on ? (cam1_rec ? "CAM REC" : "CAM ON") : "CAM OFF");
+  const cam1_color = (cam1_on ? (cam1_rec ? "#00ff00" : "#ffff00") : "#ff0000");
+  const cam2_text = (cam2_on ? (cam2_rec ? "CAM REC" : "CAM ON") : "CAM OFF");
+  const cam2_color = (cam2_on ? (cam2_rec ? "#00ff00" : "#ffff00") : "#ff0000");
+  const vmux_text = vmux_state==0 ? "CAM 1" : "CAM 2";
+
+  console.log("STUFF", cam_valid, useTelemetry("/value.c_valid"))
 
   return (
     <>
@@ -146,6 +182,15 @@ export function FullTelemetryView() {
 
 
             </ValueGroup>
+
+            <ValueGroup label={"Cameras"} hidden={!cam_valid} hidden_label_text='NO VALID CAM DATA'>
+                <MultiValue label={"Camera State"} 
+                  titles={["CAM 1", "CAM 2", "VTX", "VMUX", "CAMERA ACK", "RAW"]}
+                  values={[cam1_text, cam2_text, vtx_on ? "VTX ON" : "VTX OFF", vmux_text, cam_ack, `${cams_on_raw} ${cams_rec_raw}, ${vtx_on ? "T" : "F"} ${vmux_state ? "C2" : "C1"} ${cam_ack}`]}
+                  data_colors={[cam1_color, cam2_color, vtx_on ? "#00ff00" : "#ff0000", "#ffffff", "#ffffff", "#cccccc"]}
+                  units={["","","","",""]}
+                  />
+            </ValueGroup>
           </div>
 
           <div className='gss-horizontal-group-elem-25 gss-horizontal-group-elem-restack'>
@@ -161,8 +206,8 @@ export function FullTelemetryView() {
 
                 <MultiValue
                     label={"Dynamics"}
-                    titles={["Altitude (Baro)", "Velocity", "Acceleration"]}
-                    values={[altitude_baro.toFixed(2), kf_velocity.toFixed(2), accel_magnitude.toFixed(2)]}
+                    titles={["Altitude (Baro)", "Descent Vel (DRV)", "Acceleration"]}
+                    values={[altitude_baro.toFixed(2), descent_vel.toFixed(1), accel_magnitude.toFixed(2)]}
                     units={[getUnit("distance"), getUnit("velocity"), accel_unit]}
                 />
 
@@ -205,9 +250,9 @@ export function FullTelemetryView() {
 
                 <MultiValue
                   label={""}
-                  titles={["GNSS Fix Type", "Descent V (Derived)"]}
-                  values={[fix_type_name, descent_vel.toFixed(1)]}
-                  units={["", getUnit("velocity")]}
+                  titles={["GNSS Fix Type", "KF VelX", "KF PosX"]}
+                  values={[fix_type_name, kf_velocity.toFixed(2), kf_position.toFixed(0)]}
+                  units={["", getUnit("velocity"), getUnit("distance")]}
                 />
 
                 <PositionDataProvider>

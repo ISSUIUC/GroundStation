@@ -8,6 +8,12 @@ import GSSButton from '../reusable/Button.jsx';
 import { state_int_to_state_name } from '../dataflow/midasconversion.jsx';
 import { getSetting } from '../dataflow/settings.jsx';
 
+function getUnixTimestamp(year, month, day, hours, minutes, seconds) {
+  const date = new Date(year, month - 1, day, hours, minutes, seconds);
+  const timestampInMilliseconds = date.getTime();
+  return timestampInMilliseconds;
+}
+
 
 export function CommandingView() {
   // Taken from breadcrumb.jsx to set pyro visibility in LOS/no-LOS
@@ -21,7 +27,8 @@ export function CommandingView() {
   const cont_channels = Math.round(useTelemetry("/value.pyro_a") || 0);
   const fsm_state = Math.round(useTelemetry("/value.FSM_State") || 0);
   const is_pyro_test = (fsm_state == 1)
-  
+
+  // getUnixTimestamp(2025, 3, 12, 14, 30, 0)
 
   useEffect(() => {
 
@@ -253,23 +260,42 @@ export function CommandingView() {
               Toggle Pause / Unpause
             </GSSButton>
 
-            <GSSButton onClick={() => {set_timer(10)}}>
-              Set to 0:10
+            <GSSButton onClick={() => {
+              sync_vars({"countdown_t0": Date.now(), "countdown_t0_paused": false, "countdown_t0_paused_value": Date.now()});
+            }}>
+              0:00 (NO PAUSE)
             </GSSButton>
 
             <GSSButton onClick={() => {set_timer(30)}}>
-              Set to 0:30
+              0:30
             </GSSButton>
 
             <GSSButton onClick={() => {set_timer(90)}}>
-              Set to 1:30
+              1:00
+            </GSSButton>
+
+            <GSSButton onClick={() => {set_timer(90)}}>
+              5:00
             </GSSButton>
 
             <GSSButton onClick={() => {
               let time_input = +prompt("[time input] Input countdown clock setting in SECONDS.");
               set_timer(time_input);
             }}>
-              Set CUSTOM
+              CUSTOM
+            </GSSButton>
+
+            <GSSButton onClick={() => {
+              let time_input = +prompt("[time input] Enter amount in seconds. Timer will be set to T-0, + the value entered");
+              sync_vars({"countdown_t0": getUnixTimestamp(2025, 3, 15, 8, 0, 0) + time_input*1000, "countdown_t0_paused": false, "countdown_t0_paused_value": getUnixTimestamp(2025, 3, 15, 8, 0, 0) + time_input*1000});
+            }}>
+              Set T-0 CUSTOM
+            </GSSButton>
+
+            <GSSButton onClick={() => {
+              sync_vars({"countdown_t0": getUnixTimestamp(2025, 3, 15, 8, 0, 0), "countdown_t0_paused": false, "countdown_t0_paused_value": getUnixTimestamp(2025, 3, 15, 8, 0, 0)});
+            }}>
+              Set T-0 ACTUAL
             </GSSButton>
 
           </div>

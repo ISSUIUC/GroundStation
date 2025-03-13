@@ -486,3 +486,100 @@
 .alt-text-no-gps-lock {
     color: #ffb8b8;
 }
+
+.stream-idle-title {
+    font-size: 5em;
+    font-weight: bold;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #fa0;
+    padding-top: 20px;
+}
+
+
+
+.stream-idle-timer {
+    font-size: 4em;
+    font-weight: bold;
+}
+
+.stream-idle-bg {
+    background-image: url("/idle-stream-bg.png");
+    background-size:cover;
+    width: 100%;
+    height: 100%;
+}
+
+.stream-idle-text-wrap {
+    background-color: rgba(0,0,0,0.5);
+    width: 45%;
+    backdrop-filter: blur(10px);
+    height: 100%;
+    text-align: center;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-between;
+}
+
+.stream-idle-subtext {
+    position: relative;
+    top: -20px;
+    font-size: 2em;
+}
+
+.stream-idle-footer {
+    padding-bottom: 20px;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.stream-idle-footer {
+    padding-bottom: 20px;
+}
+
+.stream-idle-footer-t {
+    font-size: 3em;
+    color: #ccc;
+    font-weight: bold;
+}
+
+.stream-idle-footer-b {
+    font-size: 1.25em;
+    color: #888;
+    font-weight: bold;
+}
+
+.stream-idle-funfact-container {
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.stream-idle-funfact-facttitle {
+    font-size: 1em;
+
+}
+
+.stream-idle-funfact-fact {
+    font-weight: normal;
+    font-size: 0.75em;
+    background-color: rgba(0, 0, 0, 0.35);
+    margin-right: 30px;
+    height: 3em;
+    margin-left: 30px;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 10px;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+}
+
+.fact-out {
+    opacity: 1;
+    animation: fadeOut 2s forwards;
+}
+
+.fact-in {
+    opacity: 0;
+    animation: fadeIn 2s forwards;
+    animation-delay: 0.1s;
+}
