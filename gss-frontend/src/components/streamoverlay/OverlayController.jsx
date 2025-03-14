@@ -13,7 +13,7 @@ import { FlightCountTimer } from "../spec/FlightCountTimer";
 import { OBSWebSocket } from 'obs-websocket-js';
 import { LivestreamSequencer } from "./LivestreamSequencer";
 import { time_series } from "../dataflow/derivatives";
-import IdleStreamOverlay from "./IdleOverlay";
+import IdleStreamOverlay, { GoodbyeStreamOverlay } from "./IdleOverlay";
 
 export const obs = new OBSWebSocket();
 
@@ -269,6 +269,7 @@ export default function OverlayController() {
     return (
         <>
             <IdleStreamOverlay />
+            <GoodbyeStreamOverlay />
             <ShowPathExact path={"/stream/control"}>
                 <FlightCountTimer />
                 <ValueGroup label="Connection">
@@ -328,11 +329,12 @@ export default function OverlayController() {
                         <div>
                             Current view: {obs_current_scene ? obs_current_scene : "UNKNOWN"}
                         </div>
-
+                        <SceneSelectorButton scene_name={"IDLE"} is_connected={has_obsws_conn} cur_scene={obs_current_scene} />
                         <SceneSelectorButton scene_name={"IPCAM_1"} is_connected={has_obsws_conn} cur_scene={obs_current_scene} />
                         <SceneSelectorButton scene_name={"IPCAM_2"} is_connected={has_obsws_conn} cur_scene={obs_current_scene} />
                         <SceneSelectorButton scene_name={"CAM_BUILTIN"} is_connected={has_obsws_conn} cur_scene={obs_current_scene} />
                         <SceneSelectorButton scene_name={"ROCKET_LIVE"} is_connected={has_obsws_conn} cur_scene={obs_current_scene} />
+                        <SceneSelectorButton scene_name={"GOODBYE"} is_connected={has_obsws_conn} cur_scene={obs_current_scene} />
 
                     </ValueGroup>
                     <ValueGroup label={"AUDIO"}>

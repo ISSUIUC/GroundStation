@@ -583,3 +583,21 @@
     animation: fadeIn 2s forwards;
     animation-delay: 0.1s;
 }
+
+.stream-idle-mediahandle-wrap {
+    padding-left: 15px;
+    padding-right: 15px;
+    font-weight: normal;
+}
+
+.stream-idle-goodbye-text {
+    font-weight: normal;
+    margin-bottom: 25px;
+    width: 100%;
+}
+
+.stream-idle-mediahandle {
+    margin-right: 15px;
+    font-weight: bold;
+    color: #ffaa00;
+}

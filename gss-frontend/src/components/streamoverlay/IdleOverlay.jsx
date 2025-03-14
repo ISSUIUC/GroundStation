@@ -86,3 +86,70 @@ export default function IdleStreamOverlay() {
         </>
     );
 }
+
+export function GoodbyeStreamOverlay() {
+    const [cur_fact, set_cur_fact] = useState(Math.floor(Math.random() * IDLE_INFO.length));
+    const [show_fact, set_show_fact] = useState(true);
+
+    useEffect(() => {
+
+        const intv = setInterval(() => {
+            // swap current info tidbit
+            set_show_fact(false);
+            setTimeout(() => {
+                set_cur_fact(Math.floor(Math.random() * IDLE_INFO.length));
+                set_show_fact(true);
+            }, 2000);
+            
+
+        }, 15000)
+        
+        return () => {
+            clearInterval(intv);
+        }
+    }, [set_cur_fact]);
+
+    const fact_style = show_fact ? "fact-in" : "fact-out"
+    return (
+        <>
+            <ShowPathExact path={"/stream/goodbye"}>
+                <div className="stream-idle-bg">
+                    <div className="stream-idle-text-wrap">
+                        <div className="stream-idle-header">
+                            <div className="stream-idle-title">Thank You!</div>
+                            <div className="stream-idle-subtext">Aether Launch</div>
+                        </div>
+
+
+                        <div className="stream-idle-funfact-container">
+                            <div>
+                                <div className="stream-idle-goodbye-text">
+                                    The team is now beginning the rocket recovery process. Stay updated by following our social media!
+                                </div>
+                            </div>
+
+                            <div className="stream-idle-mediahandle-wrap">
+                                <span className="stream-idle-mediahandle">
+                                    @illinoisspacesociety
+                                </span>
+                                    on Instagram
+                            </div>
+                            <div className="stream-idle-mediahandle-wrap">
+                                <span className="stream-idle-mediahandle">
+                                    @Illinois Space Society
+                                </span>
+                                    on Youtube
+                            </div>
+                        </div>
+
+                        <div className="stream-idle-footer">
+                            <div className="stream-idle-footer-t">Spaceshot</div>
+                            <div className="stream-idle-footer-b">Illinois Space Society</div>
+                        </div>
+                    </div>
+                </div>
+
+            </ShowPathExact>
+        </>
+    );
+}
