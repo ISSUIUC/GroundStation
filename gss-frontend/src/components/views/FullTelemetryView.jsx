@@ -82,6 +82,7 @@ export function FullTelemetryView() {
   const gps_long = data_num("longitude");
 
   const tilt_angle = data_num("tilt_angle");
+  const roll_rate = data_num("roll_rate");
   
   const pyro_cont = [data_num("pyro_a"), data_num("pyro_b"), data_num("pyro_c"), data_num("pyro_d")]
   
@@ -134,8 +135,6 @@ export function FullTelemetryView() {
   const cam2_text = (cam2_on ? (cam2_rec ? "CAM REC" : "CAM ON") : "CAM OFF");
   const cam2_color = (cam2_on ? (cam2_rec ? "#00ff00" : "#ffff00") : "#ff0000");
   const vmux_text = vmux_state==0 ? "CAM 1" : "CAM 2";
-
-  console.log("STUFF", cam_valid, useTelemetry("/value.c_valid"))
 
   return (
     <>
@@ -200,8 +199,8 @@ export function FullTelemetryView() {
                 <MultiValue
                     label={"Gyroscopic"}
                     titles={["Tilt", "Tilt @ Burnout", "Roll Rate"]}
-                    values={[tilt_angle.toFixed(1), tilt_angle.toFixed(1), "ND"]}
-                    units={["°", "°", "°/s"]}
+                    values={[tilt_angle.toFixed(1), tilt_angle.toFixed(1), roll_rate.toFixed(2)]}
+                    units={["°", "°", "rot/s"]}
                 />
 
                 <MultiValue

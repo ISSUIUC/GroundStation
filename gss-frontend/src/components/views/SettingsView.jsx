@@ -134,7 +134,7 @@ export function SettingsView() {
           }} curchoice={retain_on_reload ? "RETAIN" : "DISCARD"}/>
 
           <GSSButton onClick={() => {CLEAR_T_DATA_FUNC()}} variant={"blue"} disabled={false}>Clear Data</GSSButton>
-          <DataTestButton />
+          {/* <DataTestButton /> */}
         </ValueGroup>
 
       </div>

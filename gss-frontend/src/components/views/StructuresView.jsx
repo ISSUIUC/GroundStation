@@ -21,6 +21,7 @@ export function StructuresView() {
   const [sus_ign_time, set_sus_ign_time] = useState(0);
 
   let angle = (useTelemetry("/value.tilt_angle") || 0);
+  let roll_rate = (useTelemetry("/value.roll_rate") || 0);
   let accel_x = (useTelemetry("/value.highG_ax") || 0);
   let accel_y = (useTelemetry("/value.highG_ay") || 0);
   let accel_z = (useTelemetry("/value.highG_az") || 0);
@@ -102,8 +103,8 @@ export function StructuresView() {
             <MultiValue
                 label={"Gyroscopic"}
                 titles={["Tilt", "Tilt @ burnout", "Tilt @ ignition", "Roll Rate"]}
-                values={[angle.toFixed(2), ANGLE_BURNOUT.toFixed(2), ANGLE_IGN.toFixed(2), "ND"]}
-                units={["°", "°", "°", "°/s"]}
+                values={[angle.toFixed(2), ANGLE_BURNOUT.toFixed(2), ANGLE_IGN.toFixed(2), roll_rate.toFixed(2)]}
+                units={["°", "°", "°", "rot/s"]}
             />
 
             <MultiValue
