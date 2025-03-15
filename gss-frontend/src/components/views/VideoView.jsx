@@ -19,7 +19,8 @@ export function VideoView() {
         <FlightCountTimer />
 
         <ValueGroup label={"Live Feed"} style_override={{"flex-grow": "2"}} child_style_override={{"height": "100%"}}>
-          <iframe src="http://192.168.0.200:5002" className='live-feed-iframe' allowtransparency="true" />
+          Live video server connection is disabled.
+          {/* <iframe src="http://192.168.0.200:5002" className='live-feed-iframe' allowtransparency="true" /> */}
         </ValueGroup>
       </div>
     </>
