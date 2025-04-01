@@ -13,7 +13,9 @@ import { FlightCountTimer } from "../spec/FlightCountTimer";
 import { OBSWebSocket } from 'obs-websocket-js';
 import { LivestreamSequencer } from "./LivestreamSequencer";
 import { time_series } from "../dataflow/derivatives";
-import IdleStreamOverlay, { GoodbyeStreamOverlay } from "./IdleOverlay";
+import IdleStreamOverlay, { PreStreamOverlay, GoodbyeStreamOverlay } from "./IdleOverlay";
+import { TargetDescriptionOverlay } from "./TargetDescriptionOverlay";
+import { GenericISSStreamComingSoon, GenericISSStreamGoodbye } from "./Special";
 
 export const obs = new OBSWebSocket();
 
@@ -148,10 +150,12 @@ export default function OverlayController() {
 
     // Controller stuff
     const [obs_current_scene, set_obs_current_scene] = useState(null);
+    const [obs_scene_list, set_obs_scene_list] = useState([]);
     const [obs_shotgun1, set_obs_shotgun1] = useState(false);
     const [obs_shotgun2, set_obs_shotgun2] = useState(false);
     const [obs_radiochatter, set_obs_radiochatter] = useState(false);
     const [obs_mic_builtin, set_obs_mic_builtin] = useState(false);
+    const [obs_use_input_fallback, set_obs_use_input_fallback] = useState(false);
 
     useEffect(() => {
         addRecalculator("@sustainer/value.barometer_altitude", CONVERSIONS.METER_TO_FEET);
@@ -166,6 +170,12 @@ export default function OverlayController() {
     const spot_vis = useTelemetry("@GSS/stream_spot_overlay_visible") || false;
     const top_timer_vis = useTelemetry("@GSS/stream_top_timer_visible") || false;
     const timeline_vis = useTelemetry("@GSS/stream_timeline_visible") || false;
+    const stream_target_desc_vis = useTelemetry("@GSS/stream_target_desc_visible") || false;
+
+    const stream_target_TITLE = useTelemetry("@GSS/stream_target_desc_TITLE") || false;
+    const stream_target_SUBTITLE = useTelemetry("@GSS/stream_target_desc_SUBTITLE") || false;
+
+    const idle_reasontext = useTelemetry("@GSS/stream_idle_reason_text") || false;
 
     const has_booster_telem = useTelemetry("@booster/src") != null;
     const has_sustainer_telem = useTelemetry("@sustainer/src") != null;
@@ -221,9 +231,6 @@ export default function OverlayController() {
         booster_kf_append = "(F)"
     }
 
-
-
-
     let fsm_state = useTelemetry("@sustainer/value.FSM_State");
     if(fsm_state == null) {
         fsm_state = -1;
@@ -240,22 +247,32 @@ export default function OverlayController() {
         if(!has_obsws_conn) { return; }
 
         let itv_fast = setInterval(async () => {
-            const {currentProgramSceneName} = await obs.call('GetCurrentProgramScene');
+            const {currentProgramSceneName, scenes} = await obs.call('GetSceneList');
             set_obs_current_scene(currentProgramSceneName);
+            set_obs_scene_list(scenes);
+            console.log(scenes);
         }, 150)
 
         let itv_slow = setInterval(async () => {
-            let out = await obs.call('GetInputMute', {inputName: "SHOTGUN_MIC_1"});
-            set_obs_shotgun1(!out.inputMuted);
+            try {
+                let out = await obs.call('GetInputMute', {inputName: "SHOTGUN_MIC_1"});
+                set_obs_shotgun1(!out.inputMuted);
+    
+                out = await obs.call('GetInputMute', {inputName: "SHOTGUN_MIC_2"});
+                set_obs_shotgun2(!out.inputMuted);
+    
+                out = await obs.call('GetInputMute', {inputName: "RADIO_AUDIO"});
+                set_obs_radiochatter(!out.inputMuted);
+    
+                out = await obs.call('GetInputMute', {inputName: "MIC_BUILTIN"});
+                set_obs_mic_builtin(!out.inputMuted);
 
-            out = await obs.call('GetInputMute', {inputName: "SHOTGUN_MIC_2"});
-            set_obs_shotgun2(!out.inputMuted);
+                set_obs_use_input_fallback(false);
+            } catch {
+                console.warn("[STREAM] Error : Inputs do not match expected values! Using fallback.")
+                set_obs_use_input_fallback(true);
+            }
 
-            out = await obs.call('GetInputMute', {inputName: "RADIO_AUDIO"});
-            set_obs_radiochatter(!out.inputMuted);
-
-            out = await obs.call('GetInputMute', {inputName: "MIC_BUILTIN"});
-            set_obs_mic_builtin(!out.inputMuted);
         }, 500)
 
 
@@ -268,7 +285,14 @@ export default function OverlayController() {
 
     return (
         <>
-            <IdleStreamOverlay />
+            <ShowPathExact path={"/stream/pre_v2"}>
+                <GenericISSStreamComingSoon event_text={idle_reasontext}/>
+            </ShowPathExact>
+            <ShowPathExact path={"/stream/goodbye_v2"}>
+                <GenericISSStreamGoodbye event_text={idle_reasontext} />
+            </ShowPathExact>
+            <IdleStreamOverlay REASONTEXT={idle_reasontext} />
+            <PreStreamOverlay />
             <GoodbyeStreamOverlay />
             <ShowPathExact path={"/stream/control"}>
                 <FlightCountTimer />
@@ -324,20 +348,55 @@ export default function OverlayController() {
                     </div>
                 </ValueGroup>
 
+                <ValueGroup label="Text Control">
+                    <ValueGroup label="Target Descriptor">
+                        <GSSButton variant={stream_target_desc_vis ? "blue" : "red"} onClick={() => {
+                                sync_vars({"stream_target_desc_visible": !stream_target_desc_vis});
+                            }}>
+                                TARGET DESC: {stream_target_desc_vis ? "ON" : "OFF"}
+                        </GSSButton>
+                        <div>
+                            <div>
+                                Note: Changing these values will update the view in realtime.
+                            </div>
+                            <div>
+                                <b>Target Descriptor TITLE:</b> <input value={stream_target_TITLE ? stream_target_TITLE : ""} onChange={(e) => {
+                                    sync_vars({"stream_target_desc_TITLE": e.target.value});
+                                }}></input>
+                            </div>
+                            <div>
+                                <b>Target Descriptor SUBTITLE:</b> <input value={stream_target_SUBTITLE ? stream_target_SUBTITLE : ""} onChange={(e) => {
+                                    sync_vars({"stream_target_desc_SUBTITLE": e.target.value});
+                                }}></input>
+                            </div>
+                        </div>
+                    </ValueGroup>
+                    <ValueGroup label="Stream Idle">
+                        <div>
+                            <div>
+                                Note: Changing this values will update the view in realtime.
+                            </div>
+                            <div>
+                                <b>Stream Idle Reason:</b> <input value={idle_reasontext ? idle_reasontext : ""} onChange={(e) => {
+                                    sync_vars({"stream_idle_reason_text": e.target.value});
+                                }}></input>
+                            </div>
+                        </div>
+                    </ValueGroup>
+                </ValueGroup>
+
                 <ValueGroup label="Stream Control" hidden={!has_obsws_conn} hidden_label_text="NO OBS CONNECTION">
                     <ValueGroup label={"VIDEO"}>
                         <div>
                             Current view: {obs_current_scene ? obs_current_scene : "UNKNOWN"}
                         </div>
-                        <SceneSelectorButton scene_name={"IDLE"} is_connected={has_obsws_conn} cur_scene={obs_current_scene} />
-                        <SceneSelectorButton scene_name={"IPCAM_1"} is_connected={has_obsws_conn} cur_scene={obs_current_scene} />
-                        <SceneSelectorButton scene_name={"IPCAM_2"} is_connected={has_obsws_conn} cur_scene={obs_current_scene} />
-                        <SceneSelectorButton scene_name={"CAM_BUILTIN"} is_connected={has_obsws_conn} cur_scene={obs_current_scene} />
-                        <SceneSelectorButton scene_name={"ROCKET_LIVE"} is_connected={has_obsws_conn} cur_scene={obs_current_scene} />
-                        <SceneSelectorButton scene_name={"GOODBYE"} is_connected={has_obsws_conn} cur_scene={obs_current_scene} />
+
+                        {obs_scene_list.map(({sceneName}) => {
+                            return <SceneSelectorButton scene_name={sceneName} is_connected={has_obsws_conn} cur_scene={obs_current_scene} />
+                        })}
 
                     </ValueGroup>
-                    <ValueGroup label={"AUDIO"}>
+                    <ValueGroup label={"AUDIO"} hidden={obs_use_input_fallback} hidden_label_text={"WARN: Input fallback triggered"}>
                         <AudioToggleButton audio_name={"SHOTGUN MIC 1"} audio_input_name={"SHOTGUN_MIC_1"} is_connected={has_obsws_conn} is_on={obs_shotgun1} />
                         <AudioToggleButton audio_name={"SHOTGUN MIC 2"} audio_input_name={"SHOTGUN_MIC_2"} is_connected={has_obsws_conn} is_on={obs_shotgun2} />
                         <AudioToggleButton audio_name={"RADIO CHATTER"} audio_input_name={"RADIO_AUDIO"} is_connected={has_obsws_conn} is_on={obs_radiochatter} />
@@ -350,8 +409,9 @@ export default function OverlayController() {
 
             <ShowPathExact path={"/stream"}>
                 <div className={`spot-overlay start-hidden spot-overlay-${spot_vis ? "in" : "out"}`} />
-                <PassiveTimer progName={"Aether"} visible={top_timer_vis} />
-                <TimelineView progName={"Aether"} visible={timeline_vis} />
+                <PassiveTimer progName={"Aether II"} visible={top_timer_vis} />
+                <TimelineView progName={"Aether II"} visible={timeline_vis} />
+                <TargetDescriptionOverlay TITLE={stream_target_TITLE} SUBTITLE={stream_target_SUBTITLE} visible={stream_target_desc_vis} />
                 <div className={`overlay-position-bottom start-hidden overlay-row-${spot_vis ? "in" : "out"}`}>
                     <div className="overlay-row">
 

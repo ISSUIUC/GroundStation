@@ -270,11 +270,11 @@ export function CommandingView() {
               0:30
             </GSSButton>
 
-            <GSSButton onClick={() => {set_timer(90)}}>
+            <GSSButton onClick={() => {set_timer(60)}}>
               1:00
             </GSSButton>
 
-            <GSSButton onClick={() => {set_timer(90)}}>
+            <GSSButton onClick={() => {set_timer(300)}}>
               5:00
             </GSSButton>
 
@@ -287,13 +287,13 @@ export function CommandingView() {
 
             <GSSButton onClick={() => {
               let time_input = +prompt("[time input] Enter amount in seconds. Timer will be set to T-0, + the value entered");
-              sync_vars({"countdown_t0": getUnixTimestamp(2025, 3, 15, 8, 0, 0) + time_input*1000, "countdown_t0_paused": false, "countdown_t0_paused_value": getUnixTimestamp(2025, 3, 15, 8, 0, 0) + time_input*1000});
+              sync_vars({"countdown_t0": getUnixTimestamp(2025, 6, 21, 8, 0, 0) + time_input*1000, "countdown_t0_paused": false, "countdown_t0_paused_value": getUnixTimestamp(2025, 3, 15, 8, 0, 0) + time_input*1000});
             }}>
               Set T-0 CUSTOM
             </GSSButton>
 
             <GSSButton onClick={() => {
-              sync_vars({"countdown_t0": getUnixTimestamp(2025, 3, 15, 8, 0, 0), "countdown_t0_paused": false, "countdown_t0_paused_value": getUnixTimestamp(2025, 3, 15, 8, 0, 0)});
+              sync_vars({"countdown_t0": getUnixTimestamp(2025, 6, 21, 8, 0, 0), "countdown_t0_paused": false, "countdown_t0_paused_value": getUnixTimestamp(2025, 3, 15, 8, 0, 0)});
             }}>
               Set T-0 ACTUAL
             </GSSButton>
