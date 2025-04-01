@@ -156,6 +156,7 @@ export default function OverlayController() {
     const [obs_radiochatter, set_obs_radiochatter] = useState(false);
     const [obs_mic_builtin, set_obs_mic_builtin] = useState(false);
     const [obs_use_input_fallback, set_obs_use_input_fallback] = useState(false);
+    const [obs_server_ip, set_obs_server_ip] = useState("192.168.0.200");
 
     useEffect(() => {
         addRecalculator("@sustainer/value.barometer_altitude", CONVERSIONS.METER_TO_FEET);
@@ -298,6 +299,9 @@ export default function OverlayController() {
                 <FlightCountTimer />
                 <ValueGroup label="Connection">
                     <div>Status: <b>{stat_msg_conn}</b></div>
+                    <div>
+                        <b>Video Server IP:</b> <input value={obs_server_ip} onChange={(e) => {set_obs_server_ip(e.target.value)}} />
+                    </div>
                     <GSSButton variant={has_obsws_conn ? "green" : "red"} onClick={() => {
 
                             if(has_obsws_conn) {
@@ -307,7 +311,7 @@ export default function OverlayController() {
 
                             set_attempting_conn(true);
                             set_stat_msg("Connecting...");
-                            obs.connect("ws://127.0.0.1:4455", "issuiuc").then(() => {
+                            obs.connect(`ws://${obs_server_ip}:4455`, "issuiuc").then(() => {
                                 console.log("Connected!");
                                 set_attempting_conn(false);
                                 set_stat_msg("Connected!");
