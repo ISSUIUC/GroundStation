@@ -35,7 +35,7 @@ export function CommandingView() {
     let user_pin_pass = +prompt("[pin input] Input commanding pin");
 
     // lol.
-    if(user_pin_pass == 4455) {
+    if(user_pin_pass == 155) {
       set_has_pass(true);
     } else {
       set_has_pass(false);
@@ -57,7 +57,7 @@ export function CommandingView() {
       channel = "Control-Booster";
     }
 
-    send_mqtt(channel, {"type": "telemetry_command", "raw": raw_cmd})
+    send_mqtt(channel, {"type": "telemetry_command", "raw": raw_cmd, "ch": channel})
   }
 
   useEffect(() => {
@@ -217,7 +217,7 @@ export function CommandingView() {
                 send_telem_cmd("VMUXT");
                 requestCommandFeedback("TOGGLE VMUX");
               }}>
-                CAM OFF
+                TOGGLE VMUX
               </GSSButton>
             </div>
 
