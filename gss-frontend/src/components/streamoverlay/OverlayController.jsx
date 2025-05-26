@@ -13,9 +13,10 @@ import { FlightCountTimer } from "../spec/FlightCountTimer";
 import { OBSWebSocket } from 'obs-websocket-js';
 import { LivestreamSequencer } from "./LivestreamSequencer";
 import { time_series } from "../dataflow/derivatives";
-import IdleStreamOverlay, { PreStreamOverlay, GoodbyeStreamOverlay } from "./IdleOverlay";
+import IdleStreamOverlay, { PreStreamOverlay, GoodbyeStreamOverlay, FunFactsOnly } from "./IdleOverlay";
 import { TargetDescriptionOverlay } from "./TargetDescriptionOverlay";
 import { GenericISSStreamComingSoon, GenericISSStreamGoodbye } from "./Special";
+import { SponsorRotator } from "./Sponsors";
 
 export const obs = new OBSWebSocket();
 
@@ -286,6 +287,12 @@ export default function OverlayController() {
 
     return (
         <>
+            <ShowPathExact path={"/stream/facts"}>
+                <FunFactsOnly />
+            </ShowPathExact>
+            <ShowPathExact path={"/stream/sponsors"}>
+                <SponsorRotator />
+            </ShowPathExact>
             <ShowPathExact path={"/stream/pre_v2"}>
                 <GenericISSStreamComingSoon event_text={idle_reasontext}/>
             </ShowPathExact>

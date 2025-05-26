@@ -29,6 +29,43 @@ const IDLE_INFO = [
     "MIDAS is Aether's primary telemetry and tracking computer, having been designed by our team members. It successfully controlled a 2-stage rocket in Feb 2025."
 ]
 
+export function FunFactsOnly() {
+    const [cur_fact, set_cur_fact] = useState(Math.floor(Math.random() * IDLE_INFO.length));
+    const [show_fact, set_show_fact] = useState(true);
+
+    useEffect(() => {
+
+        const intv = setInterval(() => {
+            // swap current info tidbit
+            set_show_fact(false);
+            setTimeout(() => {
+                set_cur_fact(Math.floor(Math.random() * IDLE_INFO.length));
+                set_show_fact(true);
+            }, 2000);
+            
+
+        }, 15000)
+        
+        return () => {
+            clearInterval(intv);
+        }
+    }, [set_cur_fact]);
+
+    const fact_style = show_fact ? "fact-in" : "fact-out"
+    return (
+        <div className="stream-idle-funfact-container funfact-center">
+            <div className="stream-idle-funfact-facttitle fact-title-single-large">
+            Fun facts:
+            </div>
+            <div className={`stream-idle-funfact-fact fact-single-large`}>
+                <span className={`${fact_style}`}>
+                    {IDLE_INFO[cur_fact]}
+                </span>
+            </div>
+        </div>
+    );
+}
+
 export function PreStreamOverlay() {
     const [cur_fact, set_cur_fact] = useState(Math.floor(Math.random() * IDLE_INFO.length));
     const [show_fact, set_show_fact] = useState(true);
