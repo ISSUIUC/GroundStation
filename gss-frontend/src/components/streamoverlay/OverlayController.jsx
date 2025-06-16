@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { addRecalculator, useGlobalStateCallback, useSyncGlobalVars, useTelemetry } from "../dataflow/gssdata";
 import { ShowPathExact } from "../reusable/UtilityComponents";
 import { CountdownTimer } from "./CountdownTimer";
@@ -173,6 +173,7 @@ export default function OverlayController() {
     const top_timer_vis = useTelemetry("@GSS/stream_top_timer_visible") || false;
     const timeline_vis = useTelemetry("@GSS/stream_timeline_visible") || false;
     const stream_target_desc_vis = useTelemetry("@GSS/stream_target_desc_visible") || false;
+    const use_stream_timer = useTelemetry("@GSS/use_stream_timer") || false;
 
     const stream_target_TITLE = useTelemetry("@GSS/stream_target_desc_TITLE") || false;
     const stream_target_SUBTITLE = useTelemetry("@GSS/stream_target_desc_SUBTITLE") || false;
@@ -236,6 +237,25 @@ export default function OverlayController() {
     let fsm_state = useTelemetry("@sustainer/value.FSM_State");
     if(fsm_state == null) {
         fsm_state = -1;
+    }
+
+
+    let has_launched = (fsm_state > 2)
+    let timer_div = <><div className="overlay-spot-timer-above-label">
+            {has_launched ? (state_int_to_state_name(fsm_state).replaceAll("_", " ")) : (fsm_state > 1 ? "AWAITING LAUNCH" : "AWAITING ARMING")}
+        </div>
+        <div className="overlay-spot-timer-main">
+            {has_launched ? (<>T<CountdownTimer digitmode={3} /></>) : (fsm_state > 1 ? "ARMED" : "STANDBY")}
+        </div></>
+
+    if(use_stream_timer) {
+        // If the stream timer is enabled, we will use the timer from the FSM state.
+        timer_div = <><div className="overlay-spot-timer-above-label">
+            {timer_paused ? "HOLD" : state_int_to_state_name(fsm_state).replaceAll("_", " ")}
+        </div>
+        <div className="overlay-spot-timer-main">
+            T<CountdownTimer digitmode={3} />
+        </div></>
     }
 
     useEffect(() => {
@@ -355,6 +375,13 @@ export default function OverlayController() {
                                 sync_vars({"stream_timeline_visible": !timeline_vis});
                             }}>
                                 TIMELINE OVERLAY: {timeline_vis ? "ON" : "OFF"}
+                        </GSSButton>
+                    </div>
+                    <div>
+                        <GSSButton variant={use_stream_timer ? "blue" : "red"} onClick={() => {
+                                sync_vars({"use_stream_timer": !use_stream_timer});
+                            }}>
+                                USE STREAM TIMER: {use_stream_timer ? "YES" : "NO"}
                         </GSSButton>
                     </div>
                 </ValueGroup>
@@ -491,12 +518,7 @@ export default function OverlayController() {
                         </div>
 
                         <div className="overlay-row-element">
-                            <div className="overlay-spot-timer-above-label">
-                                {timer_paused ? "HOLD" : state_int_to_state_name(fsm_state).replaceAll("_", " ")}
-                            </div>
-                            <div className="overlay-spot-timer-main">
-                                T<CountdownTimer digitmode={3} />
-                            </div>
+                            { timer_div }
                         </div>
 
                         <div className={`overlay-row-group ${has_sustainer_telem ? "" : "overlay-row-group-disabled"}`}>

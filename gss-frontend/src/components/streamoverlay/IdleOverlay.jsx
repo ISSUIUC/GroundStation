@@ -4,29 +4,29 @@ import { CountdownTimer } from "./CountdownTimer";
 import "./StreamCommon.css"
 
 const IDLE_INFO = [
-    "We have 12 seperate video sources looking at this rocket! 5 of them are active on the livestream.",
-    "Aether was originally called 'Kairos III'! Dodged a bullet with that one.",
+    "We have 14 seperate video sources looking at this rocket! 7 of them are active on the livestream.",
     "60% of our leadership team members are sophomores! (20% seniors, 20% juniors)",
     "Aether has 31.07 pounds of propellant! That's 41.7% of the total vehicle mass!",
-    "Aether is flying a high-altitude reefing system designed in-house. Its components are named after landmarks and fauna found in the Alps.",
-    "Aether's in-house developed recovery system is 100% 3D printed!",
-    "Aether will be flying supersonic for over a minute! (61.5 seconds, to be exact)",
-    "Aether pulls 25Gs at liftoff! That's 25x the amount of acceleration you're being pulled down by the earth!",
+    "Aether 2 is flying a high-altitude reefing system designed in-house. Its components are named after landmarks and fauna found in the Alps.",
+    "Aether 2's in-house developed recovery system is 100% 3D printed!",
+    "Aether 2 will be flying supersonic for 47.6 seconds!",
+    "Aether 2 pulls 24Gs at liftoff! That's 24x the amount of acceleration you're being pulled down by the earth!",
     "Our team formed 4 years ago! We started our roots at IREC, but moved to high altitude launches last year.",
-    "Aether breaks the sound barrier after just 1.56 seconds of flight!",
+    "Aether 2 breaks the sound barrier after just 1.65 seconds of flight!",
     "To avoid damaging the rocket on landing, our rocket uses a reefing system to descend at a nice, gentle 25.6 ft/s!",
-    "This is our first ever stream! Say hi in the chat if you see this message!",
-    "Aether has a nominal time-to-apogee (time until it reaches the highest point) of just 92.6 seconds! The number is 27.65 seconds for the booster.",
-    "This is our first rocket with a transition in it -- all of our other staged rocket attempts have had constant diameters across their lengths!",
+    "This is our second streamed launch! Our first was Aether 1, which launched in March of this year.",
+    "Aether 2 has a nominal time-to-apogee (time until it reaches the highest point) of just 77.7 seconds! The number is 27.25 seconds for the booster.",
+    "This (Aether) is our first rocket design with a transition in it -- all of our other staged rocket attempts have had constant diameters across their lengths!",
     "All of our camera communication is happening through an in-house designed flight computer (MIDAS) and camera control board.",
     "Aether's telemetry systems are fully student-designed end-to-end! From sensor collection to telemetry operators (or stream viewers)!",
-    "Aether's full stack height is 175.5\" tall (4.45m)!",
+    "Aether's full stack height is 178.5\" tall (4.53m)!",
     "Our rocket's booster parachute is over 5 feet wide, but weighs only 6.3 oz!",
     "Our team slack has over 1,500,000 messages sent.",
-    "Michael had way too much fun writing these.",
-    "March 15 is the ides of march -- the same day Julius Ceasar was assassinated in 44 BCE.",
-    "Aether has 2 launch windows, opening March 15th at 8:00AM PST and March 16th at the same time.",
-    "MIDAS is Aether's primary telemetry and tracking computer, having been designed by our team members. It successfully controlled a 2-stage rocket in Feb 2025."
+    "Michael had a bit less fun writing these than last time, but he still had fun!",
+    "Aether 2's maximum speed is Mach 2.6, or 2.6x the speed of sound! That's 30% faster than the Concorde's max speed!",
+    "Aether 2, like Aether 1, has 2 launch windows, opening June 21st at 8:00AM PST and June 22nd at the same time.",
+    "MIDAS is Aether's primary telemetry and tracking computer, having been designed by our team members. It successfully controlled a 2-stage rocket in Feb 2025.",
+    "Congratulations to Ashley, our new technical manager! We're sad to see the Spaceshot seniors go, but excited to see what the future holds for them"
 ]
 
 export function FunFactsOnly() {

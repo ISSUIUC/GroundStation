@@ -17,7 +17,6 @@ export const __SEQUENCER_UPDATE_EVENTS = (snapshot) => {
             console.log(SEQUENCER_EVENTS[key])
 
             SEQUENCER_EVENTS[key].callbacks.forEach((cb) => {
-                console.log("FIRING CALLBACK!")
                 cb();
             })
         }
@@ -59,6 +58,11 @@ export const SequencerSetupElement = () => {
         add_sequencer_event("sustainer_ignition", (snapshot) => {
             const fsm_state = useTelemetrySnapshot(snapshot, "@sustainer/value.FSM_State");
             return fsm_state == 12;
+        })
+
+        add_sequencer_event("launch", (snapshot) => {
+            const fsm_state = useTelemetrySnapshot(snapshot, "@sustainer/value.FSM_State");
+            return fsm_state == 3;
         })
     }, []);
 

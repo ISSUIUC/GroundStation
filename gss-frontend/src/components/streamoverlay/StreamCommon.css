@@ -158,6 +158,7 @@
 .overlay-spot-timer-main {
     font-weight: bold;
     font-size: 2.25em;
+    text-align: center;
 }
 
 .overlay-spot-timer-paused {

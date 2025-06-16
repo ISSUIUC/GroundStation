@@ -7,6 +7,7 @@ import { FlightCountTimer } from '../spec/FlightCountTimer.jsx';
 import GSSButton from '../reusable/Button.jsx';
 import { state_int_to_state_name } from '../dataflow/midasconversion.jsx';
 import { getSetting } from '../dataflow/settings.jsx';
+import { add_event_listener } from '../dataflow/sequencer.jsx';
 
 function getUnixTimestamp(year, month, day, hours, minutes, seconds) {
   const date = new Date(year, month - 1, day, hours, minutes, seconds);
@@ -296,6 +297,16 @@ export function CommandingView() {
               sync_vars({"countdown_t0": getUnixTimestamp(2025, 6, 21, 8, 0, 0), "countdown_t0_paused": false, "countdown_t0_paused_value": getUnixTimestamp(2025, 3, 15, 8, 0, 0)});
             }}>
               Set T-0 ACTUAL
+            </GSSButton>
+
+            <GSSButton variant={"red"} onClick={() => {
+              add_event_listener("launch", () => {
+                  sync_vars({"countdown_t0": Date.now(), "countdown_t0_paused": false, "countdown_t0_paused_value": Date.now()});
+                  console.log("Launch event detected, setting T-0 to current time.");
+              })
+              alert("Launch event listener added. This will set the timer to T-0 when the launch event is detected. You can remove this listener by refreshing the page.");
+            }}>
+              Set T-0 on Launch Event
             </GSSButton>
 
           </div>

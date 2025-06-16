@@ -28,7 +28,7 @@ const GPS_FIX_TYPES = [
 ]
 
 export const SUSTAINER_TILT_LOCKOUT = 30 // degrees
-export const SUSTAINER_COAST_TIME = 7.5 // seconds
+export const SUSTAINER_COAST_TIME = 6 // seconds
 
 export function fix_type_int_to_fix_type_name(fix_type) {
     if(fix_type >= GPS_FIX_TYPES.length) {
