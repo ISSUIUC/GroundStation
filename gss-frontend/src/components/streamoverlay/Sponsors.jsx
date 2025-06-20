@@ -4,28 +4,28 @@ import "./StreamCommon.css"
 export function SponsorRotator() {
   const logoFiles = ['ARRL.png', 'Blue Origin.png', 'Collins Aerospace.png',
     'CUA.png', 'Decibullz.png', 'Engineering Design Council.png', 'Engineering Council.png', 
-    'Fibreglast.png', 'Iron Box.jpg', 'JLCPCB.png', 'mgchemicalslg.png', 'MJG Technologies.png',
-    'Molex.png', 'Northrop Grumman.png', 'PCBWay.png', 'SEDS.png', 'Spherachutes.png', 'SSC.png',
+    'Fibreglast.png', 'Iron Box.jpg', 'JLCPCB.png', 'MG Chemicals.png', 'MJG Technologies.png',
+    'Molex.png', 'Northrop Grumman.png', 'PCBWay.png', 'SEDS.png', 'Spherachutes.png', 'UIUC SSC.png',
     'Starfield.png', 'The Damage Company.png', 'UIUC Aerospace Engineering.png', 'UIUC Dads Association.jpg',
-    'uiucece.png', 'uiuc.png', 'Xbox.png'
+    'UIUC ECE.png', 'University of Illinois.png', 'Xbox.png'
   ];
   const logos = logoFiles.map((file) => `/sponsor_list/${file}`);
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [fadeClass, setFadeClass] = useState('generic-fade-in');
+  const [fadeClass, setFadeClass] = useState('bar-slide-out');
   const timeoutRef = useRef(null);
   const intervalRef = useRef(null);
 
   useEffect(() => {
     // Start rotation with fade
     intervalRef.current = setInterval(() => {
-      setFadeClass('generic-fade-out');
+      setCurrentIndex((prev) => (prev + 1) % logos.length);
+      setFadeClass('bar-slide-in');
       // wait for fade-out animation to finish (e.g. 500ms)
       timeoutRef.current = setTimeout(() => {
-        setCurrentIndex((prev) => (prev + 1) % logos.length);
-        setFadeClass('generic-fade-in');
-      }, 1000);
-    }, 6000);
+        setFadeClass('bar-slide-out');
+      }, 8000);
+    }, 60000 * 10);
 
     return () => {
       clearInterval(intervalRef.current);
@@ -34,16 +34,16 @@ export function SponsorRotator() {
   }, [logos.length]);
 
   return (
-    <div className="sponsor-rotator">
+    <div className={`sponsor-rotator start-out ${fadeClass}`}>
       <h3 className="sponsor-header">Thank you to our sponsors:</h3>
       <div className="sponsor-box">
         <img
           src={logos[currentIndex]}
-          alt={`Sponsor logo ${currentIndex + 1}`}
-          className={`start-hidden ${fadeClass}`}
+          alt={`Sponsor logo ${currentIndex + 1}/${logoFiles[currentIndex]}`}
           onError={(e) => console.error('Failed to load sponsor logo:', logos[currentIndex])}
         />
       </div>
+      {/* <h3 className="sponsor-n">{logoFiles[currentIndex].split(".")[0]}</h3> */}
     </div>
   );
 }

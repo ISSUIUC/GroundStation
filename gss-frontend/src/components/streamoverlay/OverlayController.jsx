@@ -20,16 +20,25 @@ import { SponsorRotator } from "./Sponsors";
 
 export const obs = new OBSWebSocket();
 
-function PassiveTimer({ progName, visible }) {
+function PassiveTimer({ progName, visible, has_launched }) {
     const timer_paused = useTelemetry("@GSS/countdown_t0_paused");
+    const use_stream_timer = useTelemetry("@GSS/use_stream_timer") || false;
     const fade_classname = visible ? "generic-fade-in" : "generic-fade-out"
     const grow_classname = visible ? "stream-passive-timer-sep-in" : "stream-passive-timer-sep-out"
+
+    let t_text = <></>;
+    if(use_stream_timer || has_launched) {
+        t_text = <><span className="stream-passive-timer-m-text">T</span>
+                    <CountdownTimer digitmode={4} anim={false} /></>
+    }
+    else {
+        t_text = <span className="stream-passive-timer-m-text">STANDBY</span>
+    }
     return (
         <div className="stream-passive-timer-wrapper">
             <div className="stream-passive-timer">
                 <div className={`stream-passive-timer-main start-hidden ${fade_classname}`}>
-                    <span className="stream-passive-timer-m-text">T</span>
-                    <CountdownTimer digitmode={4} anim={false} />
+                    {t_text}
                 </div>
                 <div className={`stream-passive-timer-sep ${grow_classname}`} />
                 <div className={`stream-passive-timer-name start-hidden ${fade_classname}`}>
@@ -447,7 +456,7 @@ export default function OverlayController() {
 
             <ShowPathExact path={"/stream"}>
                 <div className={`spot-overlay start-hidden spot-overlay-${spot_vis ? "in" : "out"}`} />
-                <PassiveTimer progName={"Aether II"} visible={top_timer_vis} />
+                <PassiveTimer progName={"Aether II"} visible={top_timer_vis} has_launched={has_launched} />
                 <TimelineView progName={"Aether II"} visible={timeline_vis} />
                 <TargetDescriptionOverlay TITLE={stream_target_TITLE} SUBTITLE={stream_target_SUBTITLE} visible={stream_target_desc_vis} />
                 <div className={`overlay-position-bottom start-hidden overlay-row-${spot_vis ? "in" : "out"}`}>

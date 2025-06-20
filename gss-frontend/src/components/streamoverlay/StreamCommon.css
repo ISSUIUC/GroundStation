@@ -21,6 +21,10 @@
     opacity: 0;
 }
 
+.start-out {
+    top: -250px;
+}
+
 .spot-overlay-out {
     opacity: 1;
     animation: fadeOut 1s forwards;
@@ -48,6 +52,17 @@
 .generic-fade-out {
     opacity: 1;
     animation: fadeOut 1s forwards;
+}
+
+
+.bar-slide-in {
+    top: -250px;
+    animation: slideIn 1s forwards;
+}
+
+.bar-slide-out {
+    top: 0px;
+    animation: slideOut 1s forwards;
 }
 
 .target-title-fade-in {
@@ -113,6 +128,18 @@
 @keyframes fadeOut {
     to {
         opacity: 0;
+    }
+}
+
+@keyframes slideIn {
+    to {
+        top: 0px;
+    }
+}
+
+@keyframes slideOut {
+    to {
+        top: -250px;
     }
 }
 
@@ -638,17 +665,37 @@
 
 .sponsor-rotator {
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  justify-content: center;
   gap: 1rem;
-  margin-top: 10px;
+  position:relative;
+  width:100%;
+  background-color: #777;
 }
 
 
 .sponsor-header {
-  font-size: 2rem;
+  font-size: 3.5rem;
   font-weight: 600;
   margin: 0;
+  display: flex;
+  margin-right: 20px;
+  flex-flow: column nowrap;
+  justify-content: center;
+  font-family: 'Roboto', sans-serif;
+}
+
+.sponsor-n {
+    font-size: 2rem;
+    font-weight: lighter;
+    color: #ddd;
+    margin: 0;
+    display: flex;
+    margin-left: 20px;
+    flex-flow: column nowrap;
+    justify-content: center;
+    font-family: 'Roboto', sans-serif;
+    font-style: italic;
 }
 
 .funfact-center {
@@ -656,13 +703,11 @@
 }
 
 .sponsor-box {
-  width: 500px;
-  height: 250px;
+  width: 400px;
+  height: 150px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #444;
-  border-radius: 16px;
   overflow: hidden;
   padding: 15px;
 }
