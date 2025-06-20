@@ -146,6 +146,7 @@ export function GSSDataProvider({ children, default_stream }) {
                 setValue(prevData => {
                     let new_state = {...prevData};
                     new_state[channel] = json_data;
+                    new_state["META_LOCAL"] = {triggered_update: channel, timestamp: Date.now()};
 
                     // Update history if it's a telemetry packet
                     if(json_data["metadata"]["type"] === "telemetry") {
@@ -378,14 +379,28 @@ export function useTelemetryHistory(telem_code=undefined, metadata=false, defaul
     if(telem_code === undefined) {
         return React.useContext(GSSTelemetryHistory); // But why
     }
-
+    let channel = telem_code.split("/")[0];
     if(telem_code[0] === "/") {
         const gss_default_channel = React.useContext(GSSChannel);
+        channel = gss_default_channel;
         telem_code = "@" + gss_default_channel + telem_code;
     }
 
     const h_data = React.useContext(GSSTelemetryHistory);
-    return h_data.map((telemetry_snapshot) => {
+
+    // Make sure only the data triggered by the current stage makes it in.
+    const h_data_filtered = h_data.filter((telemetry_snapshot) => {
+        if(!telemetry_snapshot["META_LOCAL"]) {
+            // No metadata, so we assume this is a telemetry packet that was not triggered by an update
+            return false;
+        }
+        if(telemetry_snapshot["META_LOCAL"]["triggered_update"] == channel) {
+            return true;
+        }
+        return false;
+    });
+
+    return h_data_filtered.map((telemetry_snapshot) => {
         if(telemetry_calculator_hooks[telem_code]) {
             // This telemetry data is translated
             const [target_code, translator_func] = telemetry_calculator_hooks[telem_code]
