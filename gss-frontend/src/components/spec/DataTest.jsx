@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import GSSButton from '../reusable/Button';
 import { useGSSMQTTRaw } from '../dataflow/gssdata';
 
-import in_telem from '../../assets/midas-sustainer-telem.txt'
+import in_telem from '../../assets/t_log.txt'
 import in_telem2 from '../../assets/midas-booster-telem.txt'
 
 const generate_ref_packet = (start_t, t) => {
@@ -61,6 +61,8 @@ export const DataTestButton = () => {
          console.log("Decoding data...");
          let intstuff = text.split("\n").map((line) => {
             if(line.length > 5) {
+                // let ln = line.slice(6);
+                // console.log(ln)
                 return JSON.parse(line);
             }
             return ""
@@ -71,21 +73,21 @@ export const DataTestButton = () => {
          console.log("decoded!")
        });
 
-       fetch(in_telem2)
-       .then(r => r.text())
-       .then(text => {
-        console.log("Decoding data...");
-        let intstuff = text.split("\n").map((line) => {
-           if(line.length > 5) {
-               return JSON.parse(line);
-           }
-           return ""
-        });
+    //    fetch(in_telem2)
+    //    .then(r => r.text())
+    //    .then(text => {
+    //     console.log("Decoding data...");
+    //     let intstuff = text.split("\n").map((line) => {
+    //        if(line.length > 5) {
+    //            return JSON.parse(line.slice(6));
+    //        }
+    //        return ""
+    //     });
         
-        setdata2(intstuff);
+    //     setdata2(intstuff);
         
-        console.log("decoded!")
-      });
+    //     console.log("decoded!")
+    //   });
     }, [])
 
 
@@ -94,23 +96,23 @@ export const DataTestButton = () => {
             return;
         }
 
-        let START_L = 2635
+        let START_L = 2528 - 30
         let START_L2 = 2663
         let i = START_L;
         const intv = setInterval(() => {
             let cur_time = Date.now()
             let t = (cur_time - starttime) / 1000;
-            
+            // console.log("Current time: ", t, "s");
             let initial_time = dat[START_L]["metadata"]["time_published"]
             
-            send_mqtt("FlightData-Sustainer", generate_ref_packet(starttime, t));
-            // // console.log(i);
-            // let rt = t + initial_time
-            // // console.log(rt, dat[i]["metadata"]["time_published"])
-            // while(dat[i]["metadata"]["time_published"] <= rt) {
-            //     i++;
-            //     send_mqtt("FlightData-Sustainer", dat[i]);
-            // }
+            // send_mqtt("FlightData-Sustainer", generate_ref_packet(starttime, t));
+            // console.log(i);
+            let rt = t + initial_time
+            // console.log(rt, dat[i]["metadata"]["time_published"])
+            while(dat[i]["metadata"]["time_published"] <= rt) {
+                i++;
+                send_mqtt("FlightData-Sustainer", dat[i]);
+            }
 
         }, 10)
 

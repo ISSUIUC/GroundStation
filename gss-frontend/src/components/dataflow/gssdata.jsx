@@ -374,6 +374,24 @@ export function useTelemetrySnapshot(snapshot, telem_code=undefined, metadata=fa
     return getTelemetryRaw(snapshot, telem_code, metadata, defaultvalue);
 }
 
+export function get_channel_from_telem_code(telem_code) {
+    /** * Returns the channel from a telemetry code, or the default channel if no channel is specified.
+     * If the telemetry code starts with a '/', it will use the default channel from the GSSChannel context.
+    */
+
+    if(telem_code[0] === "/") {
+        const gss_default_channel = React.useContext(GSSChannel);
+        telem_code = "@" + gss_default_channel + telem_code;
+    }
+
+    const channel_regex = /^@(.*)\//; // This matches the @.../ pattern, and returns the inner part (...) as a capture group
+    const channel_match = telem_code.match(channel_regex);
+    if(channel_match === null) {
+        return "NOCHAN"; // No channel specified
+    }
+    return [channel_match[1], telem_code.split("/")[1]] // Return the channel name and the rest of the telemetry code
+}
+
 /** Functionally equivalent to useTelemetry, but instead returns historical values arranged from earliest to oldest. */
 export function useTelemetryHistory(telem_code=undefined, metadata=false, defaultvalue=null) {
     if(telem_code === undefined) {

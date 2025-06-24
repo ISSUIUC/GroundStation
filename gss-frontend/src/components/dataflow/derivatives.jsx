@@ -1,4 +1,4 @@
-import { useTelemetryHistory } from "./gssdata";
+import { get_channel_from_telem_code, useTelemetryHistory } from "./gssdata";
 
 const linear_approx_coefficients = (x, y) => {
     const x_offset = x[0]
@@ -27,8 +27,11 @@ const linear_approx_coefficients = (x, y) => {
 }
 
 export const time_series = (telem_key, num_keys=15) => {
-    let time_values = useTelemetryHistory("/time_republished", true, 0).slice(-num_keys);
-    let yvals = useTelemetryHistory(telem_key, false, 0).slice(-num_keys);
+    let [cur_channel, cur_code] = get_channel_from_telem_code(telem_key)
+    let time_values = useTelemetryHistory(`@${cur_channel}/time_republished`, true, 0).slice(-num_keys);
+    let yvals = useTelemetryHistory(`@${cur_channel}/${cur_code}`, false, 0).slice(-num_keys);
+
+    console.log(time_values.length, yvals.length, time_values, yvals);
 
     return [linear_approx_coefficients(time_values, yvals), time_values, yvals];
 }

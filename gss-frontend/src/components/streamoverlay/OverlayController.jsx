@@ -232,7 +232,9 @@ export default function OverlayController() {
     let booster_vel_real = useTelemetry("@booster/value.kf_velocity") || 0;
 
     if(sustainer_kf_fallback) {
+        console.log("eeorp?")
         const sus_ve_frame = time_series("@sustainer/value.barometer_altitude") || [{m: 0, b:0}, [], []];
+        console.log("AOPSDOIASIDA")
         sustainer_vel_real = sus_ve_frame[0].m || 0;
         sustainer_kf_append = "(F)"
     }
