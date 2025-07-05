@@ -17,13 +17,14 @@ import { getSetting } from './components/dataflow/settings.jsx';
 import { MapView } from './components/views/MapView.jsx';
 import { SequencerSetupElement } from './components/dataflow/sequencer.jsx';
 import { CommandFeedback } from './components/spec/CommandFeedback.jsx';
+import FlightDataReplay from './components/streamoverlay/ReplayControllerView.jsx';
 
 export function App() {
   const [currentStream, setCurrentStream] = useState("sustainer");
   const [currentTab, setCurrentTab] = useState("default");
 
   const use_light_mode = getSetting("display_type") == "LIGHT"
-  console.log(getSetting("display_type"))
+  console.log("Setting theme --> ", getSetting("display_type"))
 
   useEffect(() => {
     handle_unit_translation(getSetting("unit_system"));
@@ -76,6 +77,10 @@ export function App() {
 
         <ShowPath path={"/stream"}>
           <OverlayController />
+        </ShowPath>
+
+        <ShowPath path={"/replay"}>
+          <FlightDataReplay />
         </ShowPath>
       </GSSDataProvider>
     </div>

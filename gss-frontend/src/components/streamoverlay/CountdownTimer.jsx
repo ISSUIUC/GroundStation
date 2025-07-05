@@ -20,8 +20,10 @@ export const BaseTimer = ({ mode, targetTime, paused, set_callback, digitMode=1 
         return 0;
     } 
 
+    console.log("time", targetTime)
+
     useEffect(() => {
-        if(paused && mode === "set") {
+        if(paused || mode === "set") {
             setCurrentTime(targetTime);
             return;
         }
@@ -48,7 +50,7 @@ export const BaseTimer = ({ mode, targetTime, paused, set_callback, digitMode=1 
         const mins_alt = (Math.floor((absMilliseconds % (60000 * 60)) / 60000) + (60*hrcount)).toString().padStart(2, '0');
         const mins = Math.floor((absMilliseconds % (60000 * 60)) / 60000).toString().padStart(2, '0');
         const secs = Math.floor((absMilliseconds % 60000) / 1000).toString().padStart(2, '0');
-        const millis = (absMilliseconds % 1000).toString().padStart(3, '0');
+        const millis = (absMilliseconds % 1000).toFixed(0).padStart(3, '0');
 
         switch (digitMode) {
             case 1:
