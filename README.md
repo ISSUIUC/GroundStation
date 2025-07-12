@@ -1,17 +1,25 @@
 # GSS 2.1
 
-the musings of an unhinged man:
+## Startup
+To get started, first install [Docker Desktop](https://www.docker.com/products/docker-desktop/) to install both Docker and Docker-compose. (Alternatively you can system install them independently.)
 
-base level architecture:
+To run the entire groundstation, run the following command:
 
-telem "frontend" (feathers) <- serial -> combiner (now run as part of gss) <- ws -> GSS Display (react)
-                                        (also published to mqtt)
+```bash
+docker-compose -f compose.yml up --build
+```
+
+This will build and deploy the groundstation locally. Once all containers are built you can check the status on your [Local host](http://localhost/)
+
+This command can also be deployed with `./run.sh`.
 
 
-magic:
-`docker-compose -f compose.yml up --build`
+## Documentation
+The [GSS v2.1 handbook and reference](https://docs.google.com/document/d/1eRebK1CFbggOo4eJAiKjgc4_sMrgrA7l35v7i22xEpk/edit?tab=t.0#heading=h.3fbfvvgovwol) (unfinished) contains documentation for the entire system.
 
-or `./run.sh`
+
+
+## Undocumented components, here temporarily:
 
 ### mqtt weirdness
 using non-standard port 1884 because 1883 conflicts with existing installs of like emqx and mosquitto
