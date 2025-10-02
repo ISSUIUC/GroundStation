@@ -17,6 +17,7 @@ import { getSetting } from './components/dataflow/settings.jsx';
 import { MapView } from './components/views/MapView.jsx';
 import { SequencerSetupElement } from './components/dataflow/sequencer.jsx';
 import { CommandFeedback } from './components/spec/CommandFeedback.jsx';
+import { GNCView } from './components/views/GNCView.jsx';
 
 export function App() {
   const [currentStream, setCurrentStream] = useState("sustainer");
@@ -40,6 +41,10 @@ export function App() {
           <div className='main-content'>
             <ShowIf condition={currentTab === "default"}>
               <FullTelemetryView />
+            </ShowIf>
+
+            <ShowIf condition={currentTab === "gnc"}>
+              <GNCView />
             </ShowIf>
 
             <ShowIf condition={currentTab === "commanding"}>

@@ -104,7 +104,7 @@ export function FullTelemetryView() {
   const fix_type = (sat_count_raw==null) ? -1 : sat_count_raw;
   const fix_type_name = fix_type_int_to_fix_type_name(fix_type);
 
-  const accel_magnitude = Math.sqrt(accel[0]*accel[0] + accel[1]*accel[1] + accel[2]*accel[2])
+  const accel_magnitude = Math.sqrt(accel[0]*accel[0] + accel[1]*accel[1] + accel[2]*accel[2] );
 
   // Atmosphere calcs
   const altitude_baro_raw = useTelemetryRaw("/value.barometer_altitude") || 0;

@@ -331,7 +331,7 @@ function getTelemetryRaw(snapshot=null, telem_code=undefined, metadata=false, de
     // Get prefix
     const channel_regex = /^@(.*)\// // This matches the @.../ pattern, and returns the inner part (...) as a capture group
     const channel_match = telem_code.match(channel_regex)
-    if(channel_regex === null) {
+    if(channel_match === null) {
         return "NOCHAN"
     }
 
