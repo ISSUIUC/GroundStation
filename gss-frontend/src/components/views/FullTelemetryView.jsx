@@ -250,7 +250,7 @@ export function FullTelemetryView() {
                 <MultiValue
                   label={""}
                   titles={["GNSS Fix Type", "KF VelX", "KF PosX"]}
-                  values={[fix_type_name, kf_velocity.toFixed(2), kf_position.toFixed(0)]}
+                  values={[fix_type_name, kf_velocity.toFixed(2), kf_position.toFixed(2)]}
                   units={["", getUnit("velocity"), getUnit("distance")]}
                 />
 
