@@ -99,9 +99,10 @@ export function FullTelemetryView() {
   const kf_velocity = useTelemetry("/value.kf_velocity") || 0;
   const kf_position = useTelemetry("/value.kf_position") || 0;
 
-  const sat_count_raw = useTelemetry("/value.sat_count");
+  const sat_count = useTelemetry("/value.sat_count") || 0;
+  const fix_type_raw = useTelemetry("/value.gps_fixtype");
 
-  const fix_type = (sat_count_raw==null) ? -1 : sat_count_raw;
+  const fix_type = (fix_type_raw==null) ? -1 : fix_type_raw;
   const fix_type_name = fix_type_int_to_fix_type_name(fix_type);
 
   const accel_magnitude = Math.sqrt(accel[0]*accel[0] + accel[1]*accel[1] + accel[2]*accel[2])
@@ -249,9 +250,9 @@ export function FullTelemetryView() {
 
                 <MultiValue
                   label={""}
-                  titles={["GNSS Fix Type", "KF VelX", "KF PosX"]}
-                  values={[fix_type_name, kf_velocity.toFixed(2), kf_position.toFixed(2)]}
-                  units={["", getUnit("velocity"), getUnit("distance")]}
+                  titles={["GNSS Fix Type", "SIV", "KF VelX", "KF PosX"]}
+                  values={[fix_type_name, sat_count, kf_velocity.toFixed(2), kf_position.toFixed(2)]}
+                  units={["", "", getUnit("velocity"), getUnit("distance")]}
                 />
 
                 <PositionDataProvider>
