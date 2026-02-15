@@ -90,6 +90,7 @@ export function FullTelemetryView() {
   const freq = data_num("frequency")
   const is_sus = data_num("is_sustainer")
 
+  const dist_unit = getUnit("distance")
   const accel_unit = getUnit("acceleration")
 
   // Translated units need to be gotten directly :(, this is a limitation of the telemetry hook system :(
@@ -97,7 +98,7 @@ export function FullTelemetryView() {
   const altitude_baro = useTelemetry("/value.barometer_altitude") || 0;
   const accel = [useTelemetry("/value.highG_ax") || 0, useTelemetry("/value.highG_ay") || 0, useTelemetry("/value.highG_az") || 0]
   const kf_velocity = useTelemetry("/value.kf_velocity") || 0;
-  const kf_position = useTelemetry("/value.kf_position") || 0;
+  const kf_position = [useTelemetry("/value.kf_positionX") || 0, useTelemetry("/value.kf_positionY") || 0, useTelemetry("/value.kf_positionZ") || 0];
 
   const sat_count = useTelemetry("/value.sat_count") || 0;
   const fix_type_raw = useTelemetry("/value.gps_fixtype");
@@ -254,14 +255,18 @@ export function FullTelemetryView() {
 
                 <MultiValue
                   label={""}
-                  titles={["GNSS Fix Type", "SIV", "KF VelX", "KF PosX"]}
-                  values={[fix_type_name, sat_count, kf_velocity.toFixed(2), kf_position.toFixed(2)]}
-                  units={["", "", getUnit("velocity"), getUnit("distance")]}
+                  titles={["GNSS Fix Type", "SIV", "KF VelX"]}
+                  values={[fix_type_name, sat_count, kf_velocity.toFixed(2)]}
+                  units={["", "", getUnit("velocity")]}
                 />
 
-                <PositionDataProvider>
-                  <DistanceTracker rocket_lat={gps_lat} rocket_long={gps_long} />
-                </PositionDataProvider>
+                <MultiValue
+                    label={"KF Position"}
+                    titles={["X", "Y", "Z"]}
+                    values={[kf_position[0].toFixed(2), kf_position[1].toFixed(2), kf_position[2].toFixed(2)]}
+                    label_colors={["#ff0000", "#00ff00", "#0000ff"]}
+                    units={[dist_unit, dist_unit, dist_unit]}
+                />
 
             </ValueGroup>
           </div>

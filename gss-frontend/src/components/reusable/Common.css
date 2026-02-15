@@ -64,7 +64,7 @@
     border: 2px solid var(--border);
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    font-family: 'Digital-7 Mono', monospace; /* Recommend a digital font */
+    font-family: monospace; /* Recommend a digital font */
     color: var(--foreground);
     transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
