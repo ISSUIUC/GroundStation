@@ -237,12 +237,11 @@ export function FullTelemetryView() {
                     units={[getUnit("power"), "MHz", ""]}
                 />
 
-                {/* Lol. Only have this for SG1.4 fr */}
                 <MultiValue
-                    label={"Pyro"}
-                    titles={["Channels", "Abs Current", "Exp Current", "BUSV"]}
-                    values={[Math.round(pyro_cont[0]).toFixed(0), pyro_cont[1].toFixed(3), pyro_cont[2].toFixed(3), pyro_cont[3].toFixed(2)]}
-                    units={["", "A", "A", "V"]}
+                    label={"Pyro Continuity"}
+                    titles={["A", "B", "C", "D"]}
+                    values={[pyro_cont[0].toFixed(2), pyro_cont[1].toFixed(2), pyro_cont[2].toFixed(2), pyro_cont[3].toFixed(2)]}
+                    units={["V", "V", "V", "V"]}
                 />
 
                 <MultiValue
