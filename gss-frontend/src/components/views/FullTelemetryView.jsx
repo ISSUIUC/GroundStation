@@ -138,7 +138,7 @@ export function FullTelemetryView() {
   const cam1_color = (cam1_on ? (cam1_rec ? "#00ff00" : "#ffff00") : "#ff0000");
   const cam2_text = (cam2_on ? (cam2_rec ? "CAM REC" : "CAM ON") : "CAM OFF");
   const cam2_color = (cam2_on ? (cam2_rec ? "#00ff00" : "#ffff00") : "#ff0000");
-  const vmux_text = vmux_state==0 ? "CAM 1" : "CAM 2";
+  const vmux_text = vmux_state==0 ? "EVEN" : "ODD";
 
   console.log(useTelemetry("/value.c_valid"))
 
@@ -190,8 +190,8 @@ export function FullTelemetryView() {
 
             <ValueGroup label={"Cameras"} hidden={!cam_valid} hidden_label_text='NO VALID CAM DATA'>
                 <MultiValue label={"Camera State"} 
-                  titles={["CAM 1", "CAM 2", "VTX", "VMUX", "CAMERA ACK", "VBATT", "RAW"]}
-                  values={[cam1_text, cam2_text, vtx_on ? "VTX ON" : "VTX OFF", vmux_text, cam_ack, cam_batt_volt.toFixed(2), `${cams_on_raw} ${cams_rec_raw}, ${vtx_on ? "T" : "F"} ${vmux_state ? "C2" : "C1"} ${cam_ack}`]}
+                  titles={["CAM 1", "CAM 2", "IMG PHASE", "FRAME PARITY", "CAMERA ACK", "VBATT", "RAW"]}
+                  values={[cam1_text, cam2_text, vtx_on ? "LOCKED" : "NOLOCK", vmux_text, cam_ack, cam_batt_volt.toFixed(2), `${cams_on_raw} ${cams_rec_raw}, ${vtx_on ? "T" : "F"} ${vmux_state ? "C2" : "C1"} ${cam_ack}`]}
                   data_colors={[cam1_color, cam2_color, vtx_on ? "#00ff00" : "#ff0000", "#ffffff", "#ffffff", "#ffffff", "#cccccc"]}
                   units={["","","","","", "V", ""]}
                   />
