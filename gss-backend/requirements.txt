@@ -1,4 +1,5 @@
 flask
 flask-mqtt
+paho-mqtt<2.0.0
 flask-socketio
 flask-cors

@@ -90,6 +90,7 @@ export function FullTelemetryView() {
   const freq = data_num("frequency")
   const is_sus = data_num("is_sustainer")
 
+  const dist_unit = getUnit("distance")
   const accel_unit = getUnit("acceleration")
 
   // Translated units need to be gotten directly :(, this is a limitation of the telemetry hook system :(
@@ -97,11 +98,12 @@ export function FullTelemetryView() {
   const altitude_baro = useTelemetry("/value.barometer_altitude") || 0;
   const accel = [useTelemetry("/value.highG_ax") || 0, useTelemetry("/value.highG_ay") || 0, useTelemetry("/value.highG_az") || 0]
   const kf_velocity = useTelemetry("/value.kf_velocity") || 0;
-  const kf_position = useTelemetry("/value.kf_position") || 0;
+  const kf_position = [useTelemetry("/value.kf_positionX") || 0, useTelemetry("/value.kf_positionY") || 0, useTelemetry("/value.kf_positionZ") || 0];
 
-  const sat_count_raw = useTelemetry("/value.sat_count");
+  const sat_count = useTelemetry("/value.sat_count") || 0;
+  const fix_type_raw = useTelemetry("/value.gps_fixtype");
 
-  const fix_type = (sat_count_raw==null) ? -1 : sat_count_raw;
+  const fix_type = (fix_type_raw==null) ? -1 : fix_type_raw;
   const fix_type_name = fix_type_int_to_fix_type_name(fix_type);
 
   const accel_magnitude = Math.sqrt(accel[0]*accel[0] + accel[1]*accel[1] + accel[2]*accel[2] );
@@ -130,11 +132,15 @@ export function FullTelemetryView() {
   const vmux_state = (useTelemetry("/value.vmux_stat") || 0);
   const cam_ack = (useTelemetry("/value.cam_ack") || 0);
 
+  const cam_batt_volt = useTelemetry("/value.cam_battery_voltage") || 0;
+
   const cam1_text = (cam1_on ? (cam1_rec ? "CAM REC" : "CAM ON") : "CAM OFF");
   const cam1_color = (cam1_on ? (cam1_rec ? "#00ff00" : "#ffff00") : "#ff0000");
   const cam2_text = (cam2_on ? (cam2_rec ? "CAM REC" : "CAM ON") : "CAM OFF");
   const cam2_color = (cam2_on ? (cam2_rec ? "#00ff00" : "#ffff00") : "#ff0000");
-  const vmux_text = vmux_state==0 ? "CAM 1" : "CAM 2";
+  const vmux_text = vmux_state==0 ? "EVEN" : "ODD";
+
+  console.log(useTelemetry("/value.c_valid"))
 
   return (
     <>
@@ -184,10 +190,10 @@ export function FullTelemetryView() {
 
             <ValueGroup label={"Cameras"} hidden={!cam_valid} hidden_label_text='NO VALID CAM DATA'>
                 <MultiValue label={"Camera State"} 
-                  titles={["CAM 1", "CAM 2", "VTX", "VMUX", "CAMERA ACK", "RAW"]}
-                  values={[cam1_text, cam2_text, vtx_on ? "VTX ON" : "VTX OFF", vmux_text, cam_ack, `${cams_on_raw} ${cams_rec_raw}, ${vtx_on ? "T" : "F"} ${vmux_state ? "C2" : "C1"} ${cam_ack}`]}
-                  data_colors={[cam1_color, cam2_color, vtx_on ? "#00ff00" : "#ff0000", "#ffffff", "#ffffff", "#cccccc"]}
-                  units={["","","","",""]}
+                  titles={["CAM 1", "CAM 2", "IMG PHASE", "FRAME PARITY", "CAMERA ACK", "VBATT", "RAW"]}
+                  values={[cam1_text, cam2_text, vtx_on ? "LOCKED" : "NOLOCK", vmux_text, cam_ack, cam_batt_volt.toFixed(2), `${cams_on_raw} ${cams_rec_raw}, ${vtx_on ? "T" : "F"} ${vmux_state ? "C2" : "C1"} ${cam_ack}`]}
+                  data_colors={[cam1_color, cam2_color, vtx_on ? "#00ff00" : "#ff0000", "#ffffff", "#ffffff", "#ffffff", "#cccccc"]}
+                  units={["","","","","", "V", ""]}
                   />
             </ValueGroup>
           </div>
@@ -232,12 +238,11 @@ export function FullTelemetryView() {
                     units={[getUnit("power"), "MHz", ""]}
                 />
 
-                {/* Lol. Only have this for SG1.4 fr */}
                 <MultiValue
-                    label={"Pyro"}
-                    titles={["Channels", "Abs Current", "Exp Current", "BUSV"]}
-                    values={[Math.round(pyro_cont[0]).toFixed(0), pyro_cont[1].toFixed(3), pyro_cont[2].toFixed(3), pyro_cont[3].toFixed(2)]}
-                    units={["", "A", "A", "V"]}
+                    label={"Pyro Continuity"}
+                    titles={["A", "B", "C", "D"]}
+                    values={[pyro_cont[0].toFixed(2), pyro_cont[1].toFixed(2), pyro_cont[2].toFixed(2), pyro_cont[3].toFixed(2)]}
+                    units={["V", "V", "V", "V"]}
                 />
 
                 <MultiValue
@@ -249,14 +254,18 @@ export function FullTelemetryView() {
 
                 <MultiValue
                   label={""}
-                  titles={["GNSS Fix Type", "KF VelX", "KF PosX"]}
-                  values={[fix_type_name, kf_velocity.toFixed(2), kf_position.toFixed(0)]}
-                  units={["", getUnit("velocity"), getUnit("distance")]}
+                  titles={["GNSS Fix Type", "SIV", "KF VelX"]}
+                  values={[fix_type_name, sat_count, kf_velocity.toFixed(2)]}
+                  units={["", "", getUnit("velocity")]}
                 />
 
-                <PositionDataProvider>
-                  <DistanceTracker rocket_lat={gps_lat} rocket_long={gps_long} />
-                </PositionDataProvider>
+                <MultiValue
+                    label={"KF Position"}
+                    titles={["X", "Y", "Z"]}
+                    values={[kf_position[0].toFixed(2), kf_position[1].toFixed(2), kf_position[2].toFixed(2)]}
+                    label_colors={["#ff0000", "#00ff00", "#0000ff"]}
+                    units={[dist_unit, dist_unit, dist_unit]}
+                />
 
             </ValueGroup>
           </div>
