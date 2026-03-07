@@ -34,7 +34,7 @@ def update_gss_globals(incoming):
 
 class RelayMqtt:
     def __init__(self, app):
-        mqtt = Mqtt(app)
+        mqtt = Mqtt()
         socketio = SocketIO(app, cors_allowed_origins="*")
         self.__gss_globals = {}
 
@@ -196,7 +196,5 @@ class RelayMqtt:
     def run(self, app):
         assert self._MQTT is not None, "MQTT not initialized"
         assert self._SOCKETIO is not None, "SocketIO not initialized"
-        print("Initializing mqtt relay")
-        self._MQTT.init_app(app)
         print("Running server...")
         self._SOCKETIO.run(app, host='0.0.0.0', port=5001, debug=False, allow_unsafe_werkzeug=True)

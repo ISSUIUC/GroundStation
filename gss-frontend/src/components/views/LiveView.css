@@ -1,0 +1,163 @@
+.live-view-container {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  font-family: monospace;
+}
+
+.live-view-cesium-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.live-view-controls {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 6px 8px;
+  color: white;
+  z-index: 100;
+  font-size: 12px;
+}
+
+.live-view-track-buttons {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 6px 8px;
+  border-radius: 4px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.live-view-track-buttons button {
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+.live-view-gps-overlay {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 6px 8px;
+  border-radius: 4px;
+  z-index: 100;
+  font-size: 12px;
+}
+
+.live-view-stage {
+  margin-bottom: 3px;
+  display: flex;
+  gap: 6px;
+}
+
+.live-view-stage:last-child {
+  margin-bottom: 0;
+}
+
+.live-view-stage-name {
+  font-weight: bold;
+  margin-right: 4px;
+  min-width: 72px;
+  font-size: 11px;
+}
+
+.live-view-stage-data {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.live-view-last-updated {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.live-view-kf-line {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.live-view-source-toggles {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.live-view-source-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.live-view-source-row:last-child {
+  margin-bottom: 0;
+}
+
+.live-view-source-label {
+  font-size: 11px;
+  font-weight: bold;
+  min-width: 62px;
+}
+
+.live-view-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.live-view-checkbox-label input {
+  cursor: pointer;
+}
+
+.live-view-mode-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.live-view-mode-label {
+  font-size: 11px;
+  margin-right: 2px;
+}
+
+.live-view-mode-toggle button {
+  padding: 2px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  border-radius: 3px;
+}
+
+.live-view-mode-toggle button:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.live-view-mode-toggle button.live-view-mode-active {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.live-view-hint {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 3px;
+}

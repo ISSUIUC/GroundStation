@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "cesium": "^1.119",
     "chart.js": "^4.4.7",
     "chartjs-plugin-zoom": "^2.2.0",
     "config-ini-parser": "^1.6.1",
@@ -22,7 +23,8 @@
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.9.3",
-    "vite": "^6.0.5"
+    "vite": "^6.0.5",
+    "vite-plugin-cesium": "^1.2.23"
   },
   "proxy": "http://backend:5001"
 }

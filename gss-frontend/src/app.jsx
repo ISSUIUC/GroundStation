@@ -18,6 +18,7 @@ import { MapView } from './components/views/MapView.jsx';
 import { SequencerSetupElement } from './components/dataflow/sequencer.jsx';
 import { CommandFeedback } from './components/spec/CommandFeedback.jsx';
 import { GNCView } from './components/views/GNCView.jsx';
+import { LiveView } from './components/views/LiveView.jsx';
 
 export function App() {
   const [currentStream, setCurrentStream] = useState("sustainer");
@@ -45,6 +46,10 @@ export function App() {
 
             <ShowIf condition={currentTab === "gnc"}>
               <GNCView />
+            </ShowIf>
+
+            <ShowIf condition={currentTab === "live_view"}>
+              <LiveView />
             </ShowIf>
 
             <ShowIf condition={currentTab === "commanding"}>
