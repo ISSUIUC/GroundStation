@@ -7,7 +7,6 @@ import { Navbar } from './components/reusable/Navbar.jsx';
 import { FullTelemetryView } from './components/views/FullTelemetryView.jsx';
 import { SystemHealthView } from './components/views/SystemHealthView.jsx';
 import { CommandingView } from './components/views/CommandingView.jsx';
-import { RecoveryView } from './components/views/RecoveryView.jsx';
 import OverlayController from './components/streamoverlay/OverlayController.jsx';
 import { ShowIf, ShowPath, ShowPathExact } from './components/reusable/UtilityComponents.jsx';
 import { handle_unit_translation, SettingsView } from './components/views/SettingsView.jsx';
@@ -50,8 +49,8 @@ export function App() {
               <StructuresView />
             </ShowIf>
 
-            <ShowIf condition={currentTab === "recovery"}>
-              <RecoveryView />
+            <ShowIf condition={currentTab === "map"}>
+              <MapView />
             </ShowIf>
 
             <ShowIf condition={currentTab === "video"}>

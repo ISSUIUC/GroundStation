@@ -33,7 +33,9 @@
   flex-flow: column nowrap;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .read-the-docs {
