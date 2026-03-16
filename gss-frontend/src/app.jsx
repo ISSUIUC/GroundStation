@@ -17,7 +17,6 @@ import { getSetting } from './components/dataflow/settings.jsx';
 import { MapView } from './components/views/MapView.jsx';
 import { SequencerSetupElement } from './components/dataflow/sequencer.jsx';
 import { CommandFeedback } from './components/spec/CommandFeedback.jsx';
-import { GNCView } from './components/views/GNCView.jsx';
 import { LiveView } from './components/views/LiveView.jsx';
 
 export function App() {
@@ -42,10 +41,6 @@ export function App() {
           <div className='main-content'>
             <ShowIf condition={currentTab === "default"}>
               <FullTelemetryView />
-            </ShowIf>
-
-            <ShowIf condition={currentTab === "gnc"}>
-              <GNCView />
             </ShowIf>
 
             <ShowIf condition={currentTab === "live_view"}>
