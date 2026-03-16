@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as Cesium from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
-import { useTelemetry, useTelemetryRaw } from '../dataflow/gssdata.jsx';
+import { useTelemetry, useTelemetryRaw, useTelemetryHistory } from '../dataflow/gssdata.jsx';
 import { getUnit, getSetting, CONVERSIONS } from '../dataflow/settings.jsx';
+import { state_int_to_state_name } from '../dataflow/midasconversion.jsx';
 import './LiveView.css';
 
 const TRAIL_UPDATE_MS = 250;
@@ -29,12 +30,16 @@ function fmt(num, decimals, width) {
   return width ? s.padStart(width) : s;
 }
 
-function fmtGPS(lat, lon, alt, distanceUnit = 'm') {
-  return `GPS: ${fmt(lat, 6, 10)} ${fmt(lon, 6, 10)} ${fmt(alt, 0, 7)} ${distanceUnit}`;
+function fmtGPS(lat, lon, alt, distanceUnit = 'm', apogee = null) {
+  const apo =
+    apogee != null ? ` (Ap: ${fmt(apogee, 0, 0)} ${distanceUnit})` : '';
+  return `GPS: ${fmt(lat, 6, 10)} ${fmt(lon, 6, 10)} ${fmt(alt, 0, 7)} ${distanceUnit}${apo}`;
 }
 
-function fmtKF(lat, lon, alt, distanceUnit = 'm') {
-  return `KF:  ${fmt(lat, 6, 10)} ${fmt(lon, 6, 10)} ${fmt(alt, 0, 7)} ${distanceUnit}`;
+function fmtKF(lat, lon, alt, distanceUnit = 'm', apogee = null) {
+  const apo =
+    apogee != null ? ` (Ap: ${fmt(apogee, 0, 0)} ${distanceUnit})` : '';
+  return `KF:  ${fmt(lat, 6, 10)} ${fmt(lon, 6, 10)} ${fmt(alt, 0, 7)} ${distanceUnit}${apo}`;
 }
 
 function formatLastUpdated(timestampUnixSec) {
@@ -52,23 +57,57 @@ export function LiveView() {
   const stagesRef = useRef(null);
   const trackedStageRef = useRef(null);
 
-  const [headingValue, setHeadingValue] = useState(0);
-  const [pitchValue, setPitchValue] = useState(-30);
-  const [controlsVisible, setControlsVisible] = useState(true);
-  const [sceneMode3D, setSceneMode3D] = useState(true);
-  const [showBoosterGps, setShowBoosterGps] = useState(true);
-  const [showBoosterKalman, setShowBoosterKalman] = useState(false);
-  const [showSustainerGps, setShowSustainerGps] = useState(true);
-  const [showSustainerKalman, setShowSustainerKalman] = useState(false);
+  // Load persisted UI state (if any) from localStorage
+  const savedSettings =
+    typeof window !== 'undefined'
+      ? (() => {
+          try {
+            return JSON.parse(localStorage.getItem('gss_live_view_settings') || '{}') || {};
+          } catch {
+            return {};
+          }
+        })()
+      : {};
+
+  const [headingValue, setHeadingValue] = useState(
+    () => (savedSettings.headingValue !== undefined ? savedSettings.headingValue : 0)
+  );
+  const [pitchValue, setPitchValue] = useState(
+    () => (savedSettings.pitchValue !== undefined ? savedSettings.pitchValue : -30)
+  );
+  const [controlsVisible, setControlsVisible] = useState(
+    () => (savedSettings.controlsVisible !== undefined ? savedSettings.controlsVisible : true)
+  );
+  const [sceneMode3D, setSceneMode3D] = useState(
+    () => (savedSettings.sceneMode3D !== undefined ? savedSettings.sceneMode3D : true)
+  );
+  const [showBoosterGps, setShowBoosterGps] = useState(
+    () => (savedSettings.showBoosterGps !== undefined ? savedSettings.showBoosterGps : true)
+  );
+  const [showBoosterKalman, setShowBoosterKalman] = useState(
+    () => (savedSettings.showBoosterKalman !== undefined ? savedSettings.showBoosterKalman : false)
+  );
+  const [showSustainerGps, setShowSustainerGps] = useState(
+    () => (savedSettings.showSustainerGps !== undefined ? savedSettings.showSustainerGps : true)
+  );
+  const [showSustainerKalman, setShowSustainerKalman] = useState(
+    () => (savedSettings.showSustainerKalman !== undefined ? savedSettings.showSustainerKalman : false)
+  );
   const [gpsBooster, setGpsBooster] = useState('Waiting...');
   const [gpsSustainer, setGpsSustainer] = useState('Waiting...');
   const [kfBooster, setKfBooster] = useState('Waiting...');
   const [kfSustainer, setKfSustainer] = useState('Waiting...');
 
   // Kalman origin (lat, lon, alt) — set via "Set origin from current GPS" button
-  const [originLat, setOriginLat] = useState(DEFAULT_LAT);
-  const [originLon, setOriginLon] = useState(DEFAULT_LON);
-  const [originAlt, setOriginAlt] = useState(DEFAULT_ALT);
+  const [originLat, setOriginLat] = useState(
+    () => (savedSettings.originLat !== undefined ? savedSettings.originLat : DEFAULT_LAT)
+  );
+  const [originLon, setOriginLon] = useState(
+    () => (savedSettings.originLon !== undefined ? savedSettings.originLon : DEFAULT_LON)
+  );
+  const [originAlt, setOriginAlt] = useState(
+    () => (savedSettings.originAlt !== undefined ? savedSettings.originAlt : DEFAULT_ALT)
+  );
 
   const boosterLat = useTelemetry('@booster/value.latitude');
   const boosterLon = useTelemetry('@booster/value.longitude');
@@ -76,9 +115,9 @@ export function LiveView() {
   const boosterFsm = useTelemetry('@booster/value.FSM_State');
   const boosterLastUpdate = useTelemetry('@booster/time_published', true);
   const boosterGpsAltRaw = useTelemetryRaw('@booster/value.altitude');
-  const boosterKfPx = useTelemetry('@booster/value.kf_px');
-  const boosterKfPy = useTelemetry('@booster/value.kf_py');
-  const boosterKfPz = useTelemetry('@booster/value.kf_pz');
+  const boosterKfPx = useTelemetry('@booster/value.kf_positionX');
+  const boosterKfPy = useTelemetry('@booster/value.kf_positionY');
+  const boosterKfPz = useTelemetry('@booster/value.kf_positionZ');
 
   const sustainerLat = useTelemetry('@sustainer/value.latitude');
   const sustainerLon = useTelemetry('@sustainer/value.longitude');
@@ -86,16 +125,52 @@ export function LiveView() {
   const sustainerFsm = useTelemetry('@sustainer/value.FSM_State');
   const sustainerLastUpdate = useTelemetry('@sustainer/time_published', true);
   const sustainerGpsAltRaw = useTelemetryRaw('@sustainer/value.altitude');
-  const sustainerKfPx = useTelemetry('@sustainer/value.kf_px');
-  const sustainerKfPy = useTelemetry('@sustainer/value.kf_py');
-  const sustainerKfPz = useTelemetry('@sustainer/value.kf_pz');
+  const sustainerKfPx = useTelemetry('@sustainer/value.kf_positionX');
+  const sustainerKfPy = useTelemetry('@sustainer/value.kf_positionY');
+  const sustainerKfPz = useTelemetry('@sustainer/value.kf_positionZ');
 
   const boosterKfVelocity = useTelemetry('@booster/value.kf_velocity');
   const sustainerKfVelocity = useTelemetry('@sustainer/value.kf_velocity');
+  const boosterKfVelocityRaw = useTelemetryRaw('@booster/value.kf_velocity');
+  const sustainerKfVelocityRaw = useTelemetryRaw('@sustainer/value.kf_velocity');
+  const boosterTilt = useTelemetry('@booster/value.tilt_angle');
+  const sustainerTilt = useTelemetry('@sustainer/value.tilt_angle');
   const velocityUnit = getUnit('velocity');
   const distanceUnit = getUnit('distance');
 
-  const [showBooster, setShowBooster] = useState(true);
+  const [showBooster, setShowBooster] = useState(
+    () => (savedSettings.showBooster !== undefined ? savedSettings.showBooster : true)
+  );
+  const [persistTrails, setPersistTrails] = useState(
+    () => (savedSettings.persistTrails !== undefined ? savedSettings.persistTrails : false)
+  );
+
+  // Track whether we've already rebuilt trails from history to avoid duplicate work
+  const trailsInitializedRef = useRef({
+    boosterGps: false,
+    sustainerGps: false,
+    boosterKf: false,
+    sustainerKf: false,
+  });
+
+  // Historical telemetry for rebuilding trails when enabled
+  const boosterLatHist = useTelemetryHistory('@booster/value.latitude');
+  const boosterLonHist = useTelemetryHistory('@booster/value.longitude');
+  const boosterAltHist = useTelemetryHistory('@booster/value.altitude');
+  const boosterFsmHist = useTelemetryHistory('@booster/value.FSM_State');
+
+  const sustainerLatHist = useTelemetryHistory('@sustainer/value.latitude');
+  const sustainerLonHist = useTelemetryHistory('@sustainer/value.longitude');
+  const sustainerAltHist = useTelemetryHistory('@sustainer/value.altitude');
+  const sustainerFsmHist = useTelemetryHistory('@sustainer/value.FSM_State');
+
+  const boosterKfPxHist = useTelemetryHistory('@booster/value.kf_positionX');
+  const boosterKfPyHist = useTelemetryHistory('@booster/value.kf_positionY');
+  const boosterKfPzHist = useTelemetryHistory('@booster/value.kf_positionZ');
+
+  const sustainerKfPxHist = useTelemetryHistory('@sustainer/value.kf_positionX');
+  const sustainerKfPyHist = useTelemetryHistory('@sustainer/value.kf_positionY');
+  const sustainerKfPzHist = useTelemetryHistory('@sustainer/value.kf_positionZ');
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -171,6 +246,8 @@ export function LiveView() {
         kfFired: false,
         kfPositions: [],
         kfLastUpdate: 0,
+        gpsApogee: null,
+        kfApogee: null,
       };
     });
 
@@ -202,7 +279,13 @@ export function LiveView() {
       const normAlt = stage.gpsNormAlt ?? 0;
       const pos = Cesium.Cartesian3.fromDegrees(lon, lat, altVal - normAlt);
       stage.gpsEntity.position = pos;
-      setGps(fmtGPS(lat, lon, altVal, distanceUnit));
+      // Update GPS apogee (max altitude) in display units
+      if (stage.gpsApogee == null) {
+        stage.gpsApogee = altVal;
+      } else {
+        stage.gpsApogee = Math.max(stage.gpsApogee, altVal);
+      }
+      setGps(fmtGPS(lat, lon, altVal, distanceUnit, stage.gpsApogee));
       const timestamp = Date.now();
       if (stage.gpsFired && fsmVal > 2 && (timestamp - stage.gpsLastUpdate > TRAIL_UPDATE_MS || stage.gpsPositions.length === 0)) {
         stage.gpsPositions.push(pos);
@@ -220,7 +303,13 @@ export function LiveView() {
       const pos = Cesium.Cartesian3.fromDegrees(gps.lon, gps.lat, gps.alt);
       stage.kfPositionProperty.setValue(pos);
       const altDisplay = getSetting('unit_system') === 'IMPERIAL' ? CONVERSIONS.METER_TO_FEET(gps.alt) : gps.alt;
-      setKf(fmtKF(gps.lat, gps.lon, altDisplay, distanceUnit));
+      // Update KF apogee (max altitude) in display units
+      if (stage.kfApogee == null) {
+        stage.kfApogee = altDisplay;
+      } else {
+        stage.kfApogee = Math.max(stage.kfApogee, altDisplay);
+      }
+      setKf(fmtKF(gps.lat, gps.lon, altDisplay, distanceUnit, stage.kfApogee));
       const timestamp = Date.now();
       if (stage.kfFired && fsmVal > 2 && (timestamp - stage.kfLastUpdate > TRAIL_UPDATE_MS || stage.kfPositions.length === 0)) {
         stage.kfPositions.push(pos.clone());
@@ -264,6 +353,163 @@ export function LiveView() {
     distanceUnit,
   ]);
 
+  // Optionally rebuild trails from historical telemetry on mount/refresh
+  useEffect(() => {
+    if (!persistTrails) return;
+    const viewer = viewerRef.current;
+    const stages = stagesRef.current;
+    if (!viewer || !stages) return;
+
+    const rebuildGpsTrail = (stageIndex, latHist, lonHist, altHist, fsmHist, key) => {
+      if (trailsInitializedRef.current[key]) return;
+      if (!latHist || !lonHist || !altHist || !fsmHist) return;
+      const n = Math.min(latHist.length, lonHist.length, altHist.length, fsmHist.length);
+      if (n === 0) return;
+
+      const stage = stages[stageIndex];
+      if (!stage) return;
+
+      const positions = [];
+      let normAlt = null;
+      let gpsFired = false;
+
+      for (let i = 0; i < n; i++) {
+        const lat = latHist[i];
+        const lon = lonHist[i];
+        const alt = altHist[i];
+        const fsm = fsmHist[i] != null ? fsmHist[i] : 0;
+        if (lat == null || lon == null || alt == null) continue;
+
+        if (normAlt == null) {
+          normAlt = alt;
+        }
+        const pos = Cesium.Cartesian3.fromDegrees(lon, lat, alt - normAlt);
+        if (!gpsFired && fsm > 2) {
+          gpsFired = true;
+        }
+        if (gpsFired && fsm > 2) {
+          positions.push(pos);
+        }
+      }
+
+      if (positions.length > 0) {
+        stage.gpsNormAlt = normAlt;
+        stage.gpsFired = gpsFired;
+        stage.gpsPositions = positions;
+        stage.gpsTrail.polyline.positions = positions;
+        trailsInitializedRef.current[key] = true;
+      }
+    };
+
+    const rebuildKfTrail = (stageIndex, pxHist, pyHist, pzHist, fsmHist, key) => {
+      if (trailsInitializedRef.current[key]) return;
+      if (!pxHist || !pyHist || !pzHist || !fsmHist) return;
+      const n = Math.min(pxHist.length, pyHist.length, pzHist.length, fsmHist.length);
+      if (n === 0) return;
+
+      const stage = stages[stageIndex];
+      if (!stage) return;
+
+      const positions = [];
+      let kfFired = false;
+
+      for (let i = 0; i < n; i++) {
+        const px = pxHist[i];
+        const py = pyHist[i];
+        const pz = pzHist[i];
+        const fsm = fsmHist[i] != null ? fsmHist[i] : 0;
+        const gps = convertLocalToGPS(originLat, originLon, originAlt, px, py, pz);
+        if (!gps) continue;
+
+        const pos = Cesium.Cartesian3.fromDegrees(gps.lon, gps.lat, gps.alt);
+        if (!kfFired && fsm > 2) {
+          kfFired = true;
+        }
+        if (kfFired && fsm > 2) {
+          positions.push(pos);
+        }
+      }
+
+      if (positions.length > 0) {
+        stage.kfFired = kfFired;
+        stage.kfPositions = positions;
+        stage.kfTrail.polyline.positions = positions;
+        trailsInitializedRef.current[key] = true;
+      }
+    };
+
+    // Booster GPS
+    if (showBooster) {
+      rebuildGpsTrail(0, boosterLatHist, boosterLonHist, boosterAltHist, boosterFsmHist, 'boosterGps');
+      rebuildKfTrail(0, boosterKfPxHist, boosterKfPyHist, boosterKfPzHist, boosterFsmHist, 'boosterKf');
+    }
+
+    // Sustainer GPS and KF
+    rebuildGpsTrail(1, sustainerLatHist, sustainerLonHist, sustainerAltHist, sustainerFsmHist, 'sustainerGps');
+    rebuildKfTrail(1, sustainerKfPxHist, sustainerKfPyHist, sustainerKfPzHist, sustainerFsmHist, 'sustainerKf');
+
+    viewer.scene.requestRender();
+  }, [
+    persistTrails,
+    showBooster,
+    boosterLatHist,
+    boosterLonHist,
+    boosterAltHist,
+    boosterFsmHist,
+    sustainerLatHist,
+    sustainerLonHist,
+    sustainerAltHist,
+    sustainerFsmHist,
+    boosterKfPxHist,
+    boosterKfPyHist,
+    boosterKfPzHist,
+    sustainerKfPxHist,
+    sustainerKfPyHist,
+    sustainerKfPzHist,
+    originLat,
+    originLon,
+    originAlt,
+  ]);
+
+  // Persist UI settings so Live View survives refreshes
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const settingsToSave = {
+      headingValue,
+      pitchValue,
+      controlsVisible,
+      sceneMode3D,
+      showBoosterGps,
+      showBoosterKalman,
+      showSustainerGps,
+      showSustainerKalman,
+      originLat,
+      originLon,
+      originAlt,
+      showBooster,
+      persistTrails,
+    };
+    try {
+      localStorage.setItem('gss_live_view_settings', JSON.stringify(settingsToSave));
+    } catch {
+      // Ignore persistence errors (e.g. quota or private mode)
+    }
+  }, [
+    headingValue,
+    pitchValue,
+    controlsVisible,
+    sceneMode3D,
+    showBoosterGps,
+    showBoosterKalman,
+    showSustainerGps,
+    showSustainerKalman,
+    originLat,
+    originLon,
+    originAlt,
+    showBooster,
+    persistTrails,
+  ]);
+
   useEffect(() => {
     const stages = stagesRef.current;
     if (!stages || !stages[0] || !stages[1]) return;
@@ -281,7 +527,7 @@ export function LiveView() {
   useEffect(() => {
     if (!showBooster && viewerRef.current && trackedStageRef.current) {
       const stages = stagesRef.current;
-      if (stages && (trackedStageRef.current === stages[0].gpsEntity || trackedStageRef.current === stages[0].kfEntity)) {
+      if (stages && trackedStageRef.current === stages[0]) {
         viewerRef.current.trackedEntity = null;
         trackedStageRef.current = null;
         setControlsVisible(true);
@@ -338,13 +584,11 @@ export function LiveView() {
     }
   };
 
-  const handleTrack = (stageIndex) => {
+  const handleTrack = (stageIndex, source) => {
     const stages = stagesRef.current;
     if (!viewerRef.current || !stages || !stages[stageIndex]) return;
     const stage = stages[stageIndex];
-    const entity = (stageIndex === 0 && showBoosterGps) || (stageIndex === 1 && showSustainerGps)
-      ? stage.gpsEntity
-      : ((stageIndex === 0 && showBoosterKalman) || (stageIndex === 1 && showSustainerKalman) ? stage.kfEntity : stage.gpsEntity);
+    const entity = source === 'gps' ? stage.gpsEntity : stage.kfEntity;
     trackedStageRef.current = stage;
     viewerRef.current.trackedEntity = entity;
     setControlsVisible(false);
@@ -410,44 +654,50 @@ export function LiveView() {
         </div>
       )}
 
-      {(boosterKfVelocity != null || sustainerKfVelocity != null) && (
-        <div id="live-view-kf-velocity" className="live-view-kf-velocity-panel">
-          <div className="live-view-kf-velocity-title">KF VelX</div>
-          {boosterKfVelocity != null && (
-            <div className="live-view-kf-velocity-row">
-              <span className="live-view-kf-velocity-label">Booster:</span>
-              <span className="live-view-kf-velocity-value">
-                {Number(boosterKfVelocity).toFixed(2)} {velocityUnit}
-              </span>
-            </div>
-          )}
-          {sustainerKfVelocity != null && (
-            <div className="live-view-kf-velocity-row">
-              <span className="live-view-kf-velocity-label">Sustainer:</span>
-              <span className="live-view-kf-velocity-value">
-                {Number(sustainerKfVelocity).toFixed(2)} {velocityUnit}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-
       <div className="live-view-track-buttons">
         <button type="button" onClick={handleStopTracking}>
           Stop Tracking
         </button>
-        {showBooster && (
-          <button type="button" onClick={() => handleTrack(0)} data-stage="0">
-            Track Booster
-          </button>
+        {showBooster && (showBoosterGps || showBoosterKalman) && (
+          <div className="live-view-track-row">
+            {showBoosterGps && (
+              <button type="button" onClick={() => handleTrack(0, 'gps')} data-stage="0" data-source="gps">
+                BOOSTER_GPS
+              </button>
+            )}
+            {showBoosterKalman && (
+              <button type="button" onClick={() => handleTrack(0, 'kf')} data-stage="0" data-source="kf">
+                BOOSTER_KF
+              </button>
+            )}
+          </div>
         )}
-        <button type="button" onClick={() => handleTrack(1)} data-stage="1">
-          Track Sustainer
-        </button>
+        {(showSustainerGps || showSustainerKalman) && (
+          <div className="live-view-track-row">
+            {showSustainerGps && (
+              <button type="button" onClick={() => handleTrack(1, 'gps')} data-stage="1" data-source="gps">
+                SUSTAINER_GPS
+              </button>
+            )}
+            {showSustainerKalman && (
+              <button type="button" onClick={() => handleTrack(1, 'kf')} data-stage="1" data-source="kf">
+                SUSTAINER_KF
+              </button>
+            )}
+          </div>
+        )}
         <div className="live-view-booster-toggle">
           <label className="live-view-checkbox-label">
             <input type="checkbox" checked={showBooster} onChange={(e) => setShowBooster(e.target.checked)} />
             Show booster
+          </label>
+          <label className="live-view-checkbox-label">
+            <input
+              type="checkbox"
+              checked={persistTrails}
+              onChange={(e) => setPersistTrails(e.target.checked)}
+            />
+            Data Retention
           </label>
         </div>
         <div className="live-view-mode-toggle">
@@ -511,24 +761,55 @@ export function LiveView() {
       </div>
 
       <div id="live-view-gps-overlay" className="live-view-gps-overlay">
+        {/*
+          FSM labels use MIDAS state names for readability
+        */}
+        {/*
+          Sustainer block (shown first when both are visible)
+        */}
+        <div className="live-view-stage">
+          <span className="live-view-stage-name">Sustainer:</span>
+          <div className="live-view-stage-data">
+            {showSustainerGps && <span id="live-view-stage2-gps">{gpsSustainer}</span>}
+            {showSustainerKalman && <span className="live-view-kf-line">{kfSustainer}</span>}
+            <span className="live-view-kf-line">
+              KF VelX:{' '}
+              {sustainerKfVelocityRaw != null
+                ? `${Number(sustainerKfVelocity).toFixed(2)} ${velocityUnit}`
+                : 'Waiting...'}{' '}
+              · Tilt:{' '}
+              {sustainerTilt != null ? `${Number(sustainerTilt).toFixed(1)} °` : 'Waiting...'}
+            </span>
+            <span className="live-view-last-updated">
+              {formatLastUpdated(sustainerLastUpdate)} · FSM:{' '}
+              {sustainerFsm != null ? state_int_to_state_name(sustainerFsm) : 'NO_DATA'}
+            </span>
+          </div>
+        </div>
+        {/*
+          Booster block (shown below sustainer when both are visible)
+        */}
         {showBooster && (
           <div className="live-view-stage">
             <span className="live-view-stage-name">Booster:</span>
             <div className="live-view-stage-data">
               {showBoosterGps && <span id="live-view-stage1-gps">{gpsBooster}</span>}
               {showBoosterKalman && <span className="live-view-kf-line">{kfBooster}</span>}
-              <span className="live-view-last-updated">{formatLastUpdated(boosterLastUpdate)}</span>
+              <span className="live-view-kf-line">
+                KF VelX:{' '}
+                {boosterKfVelocityRaw != null
+                  ? `${Number(boosterKfVelocity).toFixed(2)} ${velocityUnit}`
+                  : 'Waiting...'}{' '}
+                · Tilt:{' '}
+                {boosterTilt != null ? `${Number(boosterTilt).toFixed(1)} °` : 'Waiting...'}
+              </span>
+              <span className="live-view-last-updated">
+                {formatLastUpdated(boosterLastUpdate)} · FSM:{' '}
+                {boosterFsm != null ? state_int_to_state_name(boosterFsm) : 'NO_DATA'}
+              </span>
             </div>
           </div>
         )}
-        <div className="live-view-stage">
-          <span className="live-view-stage-name">Sustainer:</span>
-          <div className="live-view-stage-data">
-            {showSustainerGps && <span id="live-view-stage2-gps">{gpsSustainer}</span>}
-            {showSustainerKalman && <span className="live-view-kf-line">{kfSustainer}</span>}
-            <span className="live-view-last-updated">{formatLastUpdated(sustainerLastUpdate)}</span>
-          </div>
-        </div>
       </div>
     </div>
   );

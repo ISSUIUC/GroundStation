@@ -26,44 +26,6 @@
   font-size: 12px;
 }
 
-.live-view-kf-velocity-panel {
-  position: absolute;
-  bottom: 120px;
-  right: 10px;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 6px 8px;
-  border-radius: 4px;
-  z-index: 100;
-  font-size: 11px;
-  font-family: monospace;
-}
-
-.live-view-kf-velocity-title {
-  font-weight: bold;
-  margin-bottom: 4px;
-  font-size: 11px;
-}
-
-.live-view-kf-velocity-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 2px;
-}
-
-.live-view-kf-velocity-row:last-child {
-  margin-bottom: 0;
-}
-
-.live-view-kf-velocity-label {
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.live-view-kf-velocity-value {
-  color: rgba(255, 255, 255, 1);
-}
-
 .live-view-booster-toggle {
   margin-top: 4px;
   padding-top: 4px;
@@ -81,6 +43,17 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.live-view-track-row {
+  display: flex;
+  width: 100%;
+  gap: 4px;
+}
+
+.live-view-track-row button {
+  flex: 1;
+  min-width: 0;
 }
 
 .live-view-track-buttons button {
