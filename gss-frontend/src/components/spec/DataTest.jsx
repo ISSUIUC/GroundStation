@@ -96,7 +96,7 @@ export const DataTestButton = () => {
             return;
         }
 
-        let START_L = 2528 - 30
+        let START_L = 1734-30
         let START_L2 = 2663
         let i = START_L;
         const intv = setInterval(() => {

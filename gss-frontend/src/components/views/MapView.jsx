@@ -34,7 +34,7 @@ function formatCompact(stage) {
   return `${fmt(lat, 4)}  ${fmt(lon, 4)}  ${fmt(alt, 0)}m`;
 }
 
-export default function LivePlotter({ overlay = false, trackIndex = null, orbitSpeed = 0.0006, pitch = -45, distance = 10000 }) {
+export default function LivePlotter({ overlay = false, trackIndex = null, orbitSpeed = 0.0006, pitch = -45, distance = 10000, labelOverrides = {} }) {
   const containerRef = useRef(null);
   const viewerRef = useRef(null);
 
@@ -96,17 +96,20 @@ export default function LivePlotter({ overlay = false, trackIndex = null, orbitS
     const stages = stageStateRef.current;
 
     STAGE_CHANNELS.forEach((cfg, index) => {
+      const ovr = labelOverrides[index] || {};
+      const labelName = ovr.name || cfg.name;
+      const pointColor = ovr.color ? Cesium.Color.fromCssColorString(ovr.color) : cfg.color;
       const pointEntity = viewer.entities.add({
-        name: cfg.name,
+        name: labelName,
         position: Cesium.Cartesian3.fromDegrees(-87.51416, 40.388527, 0),
         point: {
           pixelSize: 10,
-          color: cfg.color,
+          color: pointColor,
         },
         label: {
-          text: cfg.name,
+          text: labelName,
           font: "28px monospace",
-          scale: 0.5,
+          scale: 0.65,
           pixelOffset: new Cesium.Cartesian2(0, -20),
           fillColor: Cesium.Color.WHITE,
           outlineColor: Cesium.Color.BLACK,
@@ -119,14 +122,14 @@ export default function LivePlotter({ overlay = false, trackIndex = null, orbitS
         polyline: {
           positions: [],
           width: 2,
-          material: cfg.color.withAlpha(0.85),
+          material: pointColor.withAlpha(0.85),
           clampToGround: false,
         },
       });
 
       let pulseEntity = null;
       if (overlay) {
-        const discImage = createDiscTexture(cfg.color.toCssColorString());
+        const discImage = createDiscTexture(pointColor.toCssColorString());
         pulseEntity = viewer.entities.add({
           position: Cesium.Cartesian3.fromDegrees(-87.51416, 40.388527, 0),
           billboard: {
@@ -137,7 +140,7 @@ export default function LivePlotter({ overlay = false, trackIndex = null, orbitS
             }, false),
             color: new Cesium.CallbackProperty(() => {
               const t = (Date.now() % PULSE_CYCLE_MS) / PULSE_CYCLE_MS;
-              return cfg.color.withAlpha(0.5 * (1 - t));
+              return pointColor.withAlpha(0.5 * (1 - t));
             }, false),
             disableDepthTestDistance: Number.POSITIVE_INFINITY,
             eyeOffset: new Cesium.Cartesian3(0, 0, 1),
@@ -316,7 +319,17 @@ export function StreamMapOverlay() {
   const orbitSpeed = parseFloat(params.get("orbitspeed")) || 0.0006;
   const pitch = parseFloat(params.get("pitch")) || -45;
   const distance = parseFloat(params.get("distance")) || 10000;
-  return <LivePlotter overlay trackIndex={trackIndex} orbitSpeed={orbitSpeed} pitch={pitch} distance={distance} />;
+
+  const labelOverrides = {};
+  const labelName = params.get("labelname");
+  const labelColor = params.get("labelcolor");
+  if (trackIndex != null && (labelName || labelColor)) {
+    labelOverrides[trackIndex] = {};
+    if (labelName) labelOverrides[trackIndex].name = labelName;
+    if (labelColor) labelOverrides[trackIndex].color = labelColor.startsWith("#") ? labelColor : `#${labelColor}`;
+  }
+
+  return <LivePlotter overlay trackIndex={trackIndex} orbitSpeed={orbitSpeed} pitch={pitch} distance={distance} labelOverrides={labelOverrides} />;
 }
 
 export function MapView() {

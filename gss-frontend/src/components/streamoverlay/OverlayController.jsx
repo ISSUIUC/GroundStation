@@ -1,25 +1,24 @@
-import { use, useEffect, useState } from "react";
-import { addRecalculator, useGlobalStateCallback, useSyncGlobalVars, useTelemetry } from "../dataflow/gssdata";
+import { useEffect } from "react";
+import { addRecalculator, useTelemetry, useTelemetryRaw } from "../dataflow/gssdata";
 import { ShowPathExact } from "../reusable/UtilityComponents";
 import { CountdownTimer } from "./CountdownTimer";
 import "./StreamCommon.css"
-import { ValueGroup } from "../reusable/ValueDisplay";
 import { BoosterSVG, SustainerSVG } from "./OverlayVis";
 import { CONVERSIONS } from "../dataflow/settings";
 import { state_int_to_state_name } from "../dataflow/midasconversion";
-import GSSButton from "../reusable/Button";
 import { FlightCountTimer } from "../spec/FlightCountTimer";
+import standardAtmosphere from "standard-atmosphere";
 
-import { OBSWebSocket } from 'obs-websocket-js';
-import { LivestreamSequencer } from "./LivestreamSequencer";
 import { time_series } from "../dataflow/derivatives";
 import IdleStreamOverlay, { PreStreamOverlay, GoodbyeStreamOverlay, FunFactsOnly } from "./IdleOverlay";
 import { TargetDescriptionOverlay } from "./TargetDescriptionOverlay";
 import { GenericISSStreamComingSoon, GenericISSStreamGoodbye } from "./Special";
 import { SponsorRotator } from "./Sponsors";
 import { StreamMapOverlay } from "../views/MapView";
+import StreamControlPanel from "../streamcontrol/StreamControlPanel";
 
-export const obs = new OBSWebSocket();
+// Re-export obs from service for backward compatibility with LivestreamSequencer
+export { obs } from "../../services/obsService";
 
 function PassiveTimer({ progName, visible, has_launched }) {
     const timer_paused = useTelemetry("@GSS/countdown_t0_paused");
@@ -97,16 +96,13 @@ function TimelineView({ progName, visible }) {
 }
 
 function formatTelemetryDigits(value, num_digits) {
-    // Formats telemetry in the overlay view format, I.E: Altitude 00 000FT, velocity 0 000ft
-    // Will cap at maximum value if value is greater than precision offered by num_digits.
-
     let max_value_abs = Number("9".repeat(num_digits))
     let value_abs = Math.round(Math.abs(value))
 
     if(value_abs > max_value_abs) {
         value_abs = max_value_abs;
     }
-    
+
     const real_digits = value_abs.toString().padStart(num_digits, "0")
 
     let value_digits = real_digits.split("").reverse().slice(-num_digits)
@@ -121,53 +117,7 @@ function formatTelemetryDigits(value, num_digits) {
     return `${value < 0 ? "-" : " "}${out.reverse().join("")}`;
 }
 
-const SceneSelectorButton = ({ scene_name, is_connected, cur_scene }) => {
-    return (
-        <div>
-            <GSSButton variant={cur_scene===scene_name ? "blue" : "red"} onClick={async () => {
-                if(!is_connected) { return; }
-                await obs.call('SetCurrentProgramScene', {sceneName: scene_name});
-            }}>
-                SWITCH VIEW TO <b>{scene_name}</b>
-            </GSSButton>
-        </div>
-    )
-}
-
-const AudioToggleButton = ({ audio_name, audio_input_name, is_connected, is_on }) => {
-    return (
-    <div>
-        <GSSButton variant={is_on ? "blue" : "red"} onClick={async () => {
-            if(!is_connected) {return;}
-            await obs.call('SetInputMute', {inputName: audio_input_name, inputMuted: is_on});
-        }}>
-            {audio_name}: <b>{is_on ? "ON" : "OFF"}</b>
-        </GSSButton>
-    </div>
-    )
-}
-
-
-
 export default function OverlayController() {
-
-    /** The stream uses imperial units, irregardless of the current selected unit system.
-     * As such we need specific sources for this telemetry that effectively translate from meters to feet.
-     */
-
-    const [has_obsws_conn, set_has_obsws_conn] = useState(false);
-    const [attempting_conn, set_attempting_conn] = useState(false);
-    const [stat_msg_conn, set_stat_msg] = useState("Awaiting connection event");
-
-    // Controller stuff
-    const [obs_current_scene, set_obs_current_scene] = useState(null);
-    const [obs_scene_list, set_obs_scene_list] = useState([]);
-    const [obs_shotgun1, set_obs_shotgun1] = useState(false);
-    const [obs_shotgun2, set_obs_shotgun2] = useState(false);
-    const [obs_radiochatter, set_obs_radiochatter] = useState(false);
-    const [obs_mic_builtin, set_obs_mic_builtin] = useState(false);
-    const [obs_use_input_fallback, set_obs_use_input_fallback] = useState(false);
-    const [obs_server_ip, set_obs_server_ip] = useState("192.168.0.200");
 
     useEffect(() => {
         addRecalculator("@sustainer/value.barometer_altitude", CONVERSIONS.METER_TO_FEET);
@@ -177,13 +127,13 @@ export default function OverlayController() {
         addRecalculator("@booster/value.kf_velocity", CONVERSIONS.METER_TO_FEET);
     })
 
-
     const timer_paused = useTelemetry("@GSS/countdown_t0_paused");
     const spot_vis = useTelemetry("@GSS/stream_spot_overlay_visible") || false;
     const top_timer_vis = useTelemetry("@GSS/stream_top_timer_visible") || false;
     const timeline_vis = useTelemetry("@GSS/stream_timeline_visible") || false;
     const stream_target_desc_vis = useTelemetry("@GSS/stream_target_desc_visible") || false;
     const use_stream_timer = useTelemetry("@GSS/use_stream_timer") || false;
+    const single_stage_mode = useTelemetry("@GSS/stream_single_stage_mode") || false;
 
     const stream_target_TITLE = useTelemetry("@GSS/stream_target_desc_TITLE") || false;
     const stream_target_SUBTITLE = useTelemetry("@GSS/stream_target_desc_SUBTITLE") || false;
@@ -192,8 +142,6 @@ export default function OverlayController() {
 
     const has_booster_telem = useTelemetry("@booster/src") != null;
     const has_sustainer_telem = useTelemetry("@sustainer/src") != null;
-
-    const sync_vars = useSyncGlobalVars();
 
     const sus_angle = useTelemetry("@sustainer/value.tilt_angle") || 0;
     const boo_angle = useTelemetry("@booster/value.tilt_angle") || 0;
@@ -212,7 +160,6 @@ export default function OverlayController() {
     let alt_text_alternate_style = ""
 
     if(sustainer_has_gps_lock && (sustainer_gps_alt > 80000 || sustainer_alt > 80000)) {
-        // If the sustainer is detected above 80kft and we have lock, switch the sustainer altitude to GPS mode.
         real_sustainer_alt = sustainer_gps_alt;
         cur_alt_view = "(GPS)"
     } else {
@@ -223,7 +170,6 @@ export default function OverlayController() {
     }
 
     // KF Fail fallback
-    // If the KF explodes again make sure we can see descent vel on the stream
     const sustainer_kf_fallback = Math.abs(sustainer_vel) > 6500;
     const booster_kf_fallback = Math.abs(booster_vel) > 6500;
     let sustainer_kf_append = "";
@@ -233,9 +179,7 @@ export default function OverlayController() {
     let booster_vel_real = useTelemetry("@booster/value.kf_velocity") || 0;
 
     if(sustainer_kf_fallback) {
-        console.log("eeorp?")
         const sus_ve_frame = time_series("@sustainer/value.barometer_altitude") || [{m: 0, b:0}, [], []];
-        console.log("AOPSDOIASIDA")
         sustainer_vel_real = sus_ve_frame[0].m || 0;
         sustainer_kf_append = "(F)"
     }
@@ -246,11 +190,21 @@ export default function OverlayController() {
         booster_kf_append = "(F)"
     }
 
+    // Single-stage telemetry: acceleration (raw Gs) & mach
+    const sus_accel_x = useTelemetryRaw("@sustainer/value.highG_ax") || 0;
+    const sus_accel_y = useTelemetryRaw("@sustainer/value.highG_ay") || 0;
+    const sus_accel_z = useTelemetryRaw("@sustainer/value.highG_az") || 0;
+    const sus_accel_gs = Math.sqrt(sus_accel_x**2 + sus_accel_y**2 + sus_accel_z**2);
+
+    const sus_alt_baro_raw = useTelemetryRaw("@sustainer/value.barometer_altitude") || 0;
+    const sus_vel_raw = useTelemetryRaw("@sustainer/value.kf_velocity") || 0;
+    const { ssound: sus_ssound } = standardAtmosphere(sus_alt_baro_raw, true);
+    const sus_mach = sus_ssound > 0 ? Math.abs(sus_vel_raw) / sus_ssound : 0;
+
     let fsm_state = useTelemetry("@sustainer/value.FSM_State");
     if(fsm_state == null) {
         fsm_state = -1;
     }
-
 
     let has_launched = (fsm_state > 2)
     let timer_div = <><div className="overlay-spot-timer-above-label">
@@ -261,7 +215,6 @@ export default function OverlayController() {
         </div></>
 
     if(use_stream_timer) {
-        // If the stream timer is enabled, we will use the timer from the FSM state.
         timer_div = <><div className="overlay-spot-timer-above-label">
             {timer_paused ? "HOLD" : state_int_to_state_name(fsm_state).replaceAll("_", " ")}
         </div>
@@ -269,53 +222,6 @@ export default function OverlayController() {
             T<CountdownTimer digitmode={3} />
         </div></>
     }
-
-    useEffect(() => {
-        obs.on("ConnectionClosed", () => {
-            set_has_obsws_conn(false);
-            set_stat_msg("Connection has been closed");
-        })
-    }, [])
-
-    useEffect(() => {
-        if(!has_obsws_conn) { return; }
-
-        let itv_fast = setInterval(async () => {
-            const {currentProgramSceneName, scenes} = await obs.call('GetSceneList');
-            set_obs_current_scene(currentProgramSceneName);
-            set_obs_scene_list(scenes);
-            console.log(scenes);
-        }, 150)
-
-        let itv_slow = setInterval(async () => {
-            try {
-                let out = await obs.call('GetInputMute', {inputName: "SHOTGUN_MIC_1"});
-                set_obs_shotgun1(!out.inputMuted);
-    
-                out = await obs.call('GetInputMute', {inputName: "SHOTGUN_MIC_2"});
-                set_obs_shotgun2(!out.inputMuted);
-    
-                out = await obs.call('GetInputMute', {inputName: "RADIO_AUDIO"});
-                set_obs_radiochatter(!out.inputMuted);
-    
-                out = await obs.call('GetInputMute', {inputName: "MIC_BUILTIN"});
-                set_obs_mic_builtin(!out.inputMuted);
-
-                set_obs_use_input_fallback(false);
-            } catch {
-                console.warn("[STREAM] Error : Inputs do not match expected values! Using fallback.")
-                set_obs_use_input_fallback(true);
-            }
-
-        }, 500)
-
-
-        return () => {
-            clearInterval(itv_fast);
-            clearInterval(itv_slow);
-        }
-
-    }, [has_obsws_conn])
 
     return (
         <>
@@ -339,125 +245,7 @@ export default function OverlayController() {
             </ShowPathExact>
             <ShowPathExact path={"/stream/control"}>
                 <FlightCountTimer />
-                <ValueGroup label="Connection">
-                    <div>Status: <b>{stat_msg_conn}</b></div>
-                    <div>
-                        <b>Video Server IP:</b> <input value={obs_server_ip} onChange={(e) => {set_obs_server_ip(e.target.value)}} />
-                    </div>
-                    <GSSButton variant={has_obsws_conn ? "green" : "red"} onClick={() => {
-
-                            if(has_obsws_conn) {
-                                obs.disconnect();
-                                return;
-                            }
-
-                            set_attempting_conn(true);
-                            set_stat_msg("Connecting...");
-                            obs.connect(`ws://${obs_server_ip}:4455`, "issuiuc").then(() => {
-                                console.log("Connected!");
-                                set_attempting_conn(false);
-                                set_stat_msg("Connected!");
-                                set_has_obsws_conn(true);
-                            }).catch(() => {
-                                console.log("Failed to connect");
-                                set_stat_msg("Failed to connect");
-                                set_attempting_conn(false);
-                            })
-                            
-                        }}>
-                            {has_obsws_conn ? "CONNECTED TO STREAM (Click to Disconnect)" : (attempting_conn ? "CONNECTING..." : "CONNECT TO STREAM")}
-                    </GSSButton>
-                </ValueGroup>
-
-                <ValueGroup label="Visibility">
-                    <div>
-
-                        <GSSButton variant={spot_vis ? "blue" : "red"} onClick={() => {
-                            sync_vars({"stream_spot_overlay_visible": !spot_vis});
-                        }}>
-                            BOTTOM OVERLAY: {spot_vis ? "ON" : "OFF"}
-                        </GSSButton>
-                    </div>
-                    <div>
-                        <GSSButton variant={top_timer_vis ? "blue" : "red"} onClick={() => {
-                                sync_vars({"stream_top_timer_visible": !top_timer_vis});
-                            }}>
-                                TIMER OVERLAY: {top_timer_vis ? "ON" : "OFF"}
-                        </GSSButton>
-                    </div>
-                    <div>
-                        <GSSButton variant={timeline_vis ? "blue" : "red"} onClick={() => {
-                                sync_vars({"stream_timeline_visible": !timeline_vis});
-                            }}>
-                                TIMELINE OVERLAY: {timeline_vis ? "ON" : "OFF"}
-                        </GSSButton>
-                    </div>
-                    <div>
-                        <GSSButton variant={use_stream_timer ? "blue" : "red"} onClick={() => {
-                                sync_vars({"use_stream_timer": !use_stream_timer});
-                            }}>
-                                USE STREAM TIMER: {use_stream_timer ? "YES" : "NO"}
-                        </GSSButton>
-                    </div>
-                </ValueGroup>
-
-                <ValueGroup label="Text Control">
-                    <ValueGroup label="Target Descriptor">
-                        <GSSButton variant={stream_target_desc_vis ? "blue" : "red"} onClick={() => {
-                                sync_vars({"stream_target_desc_visible": !stream_target_desc_vis});
-                            }}>
-                                TARGET DESC: {stream_target_desc_vis ? "ON" : "OFF"}
-                        </GSSButton>
-                        <div>
-                            <div>
-                                Note: Changing these values will update the view in realtime.
-                            </div>
-                            <div>
-                                <b>Target Descriptor TITLE:</b> <input value={stream_target_TITLE ? stream_target_TITLE : ""} onChange={(e) => {
-                                    sync_vars({"stream_target_desc_TITLE": e.target.value});
-                                }}></input>
-                            </div>
-                            <div>
-                                <b>Target Descriptor SUBTITLE:</b> <input value={stream_target_SUBTITLE ? stream_target_SUBTITLE : ""} onChange={(e) => {
-                                    sync_vars({"stream_target_desc_SUBTITLE": e.target.value});
-                                }}></input>
-                            </div>
-                        </div>
-                    </ValueGroup>
-                    <ValueGroup label="Stream Idle">
-                        <div>
-                            <div>
-                                Note: Changing this values will update the view in realtime.
-                            </div>
-                            <div>
-                                <b>Stream Idle Reason:</b> <input value={idle_reasontext ? idle_reasontext : ""} onChange={(e) => {
-                                    sync_vars({"stream_idle_reason_text": e.target.value});
-                                }}></input>
-                            </div>
-                        </div>
-                    </ValueGroup>
-                </ValueGroup>
-
-                <ValueGroup label="Stream Control" hidden={!has_obsws_conn} hidden_label_text="NO OBS CONNECTION">
-                    <ValueGroup label={"VIDEO"}>
-                        <div>
-                            Current view: {obs_current_scene ? obs_current_scene : "UNKNOWN"}
-                        </div>
-
-                        {obs_scene_list.map(({sceneName}) => {
-                            return <SceneSelectorButton scene_name={sceneName} is_connected={has_obsws_conn} cur_scene={obs_current_scene} />
-                        })}
-
-                    </ValueGroup>
-                    <ValueGroup label={"AUDIO"} hidden={obs_use_input_fallback} hidden_label_text={"WARN: Input fallback triggered"}>
-                        <AudioToggleButton audio_name={"SHOTGUN MIC 1"} audio_input_name={"SHOTGUN_MIC_1"} is_connected={has_obsws_conn} is_on={obs_shotgun1} />
-                        <AudioToggleButton audio_name={"SHOTGUN MIC 2"} audio_input_name={"SHOTGUN_MIC_2"} is_connected={has_obsws_conn} is_on={obs_shotgun2} />
-                        <AudioToggleButton audio_name={"RADIO CHATTER"} audio_input_name={"RADIO_AUDIO"} is_connected={has_obsws_conn} is_on={obs_radiochatter} />
-                        <AudioToggleButton audio_name={"BUILT IN MIC / AUX"} audio_input_name={"MIC_BUILTIN"} is_connected={has_obsws_conn} is_on={obs_mic_builtin} />
-                    </ValueGroup>
-                </ValueGroup>
-
-                <LivestreamSequencer connected={has_obsws_conn} />
+                <StreamControlPanel />
             </ShowPathExact>
 
             <ShowPathExact path={"/stream"}>
@@ -466,142 +254,194 @@ export default function OverlayController() {
                 <TimelineView progName={"Aether II"} visible={timeline_vis} />
                 <TargetDescriptionOverlay TITLE={stream_target_TITLE} SUBTITLE={stream_target_SUBTITLE} visible={stream_target_desc_vis} />
                 <div className={`overlay-position-bottom start-hidden overlay-row-${spot_vis ? "in" : "out"}`}>
-                    <div className="overlay-row">
-
-                        <div className={`overlay-row-group ${has_booster_telem ? "" : "overlay-row-group-disabled"}`}>
-                            <div className="overlay-row-telem-group">
-                                <div className="overlay-v-align">
-                                    <div className="overlay-row-telem-title">
-                                        <div className="overlay-row-telem-title-name">
-                                            BOOSTER
+                    {single_stage_mode ? (
+                        /* ---- Single-stage: [spacer, alt, vel] | timer | [tilt, accel, mach] ---- */
+                        <div className="overlay-row">
+                            <div className={`overlay-row-group ${has_sustainer_telem ? "" : "overlay-row-group-disabled"}`}>
+                                <div className="overlay-row-telem-group">
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-title">
+                                            <div className="overlay-row-telem-title-name">ALTITUDE</div>
+                                            <div className="overlay-row-telem-title-qty">{cur_alt_view || "BAROMETRIC"}</div>
                                         </div>
-                                        <div className="overlay-row-telem-title-qty">
-                                            ALTITUDE
+                                    </div>
+                                    <div className="overlay-v-align">
+                                        <div className={`overlay-row-telem-main ${alt_text_alternate_style}`}>
+                                            {formatTelemetryDigits(real_sustainer_alt, 6)}
                                         </div>
+                                    </div>
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-unit">FT</div>
                                     </div>
                                 </div>
 
-                                <div className="overlay-v-align">
-                                    <div className="overlay-row-telem-main">
-                                        {formatTelemetryDigits(booster_alt, 6)}
+                                <div className="overlay-row-telem-group">
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-title">
+                                            <div className="overlay-row-telem-title-name">VELOCITY</div>
+                                            <div className="overlay-row-telem-title-qty">{sustainer_kf_append || "KALMAN"}</div>
+                                        </div>
                                     </div>
-
-                                </div>
-
-                                <div className="overlay-v-align">
-                                    <div className="overlay-row-telem-unit">
-                                        FT
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-main">
+                                            {formatTelemetryDigits(sustainer_vel_real, 4)}
+                                        </div>
+                                    </div>
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-unit">FT/S</div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="overlay-row-telem-group">
-                                <div className="overlay-v-align">
-                                    <div className="overlay-row-telem-title">
-                                        <div className="overlay-row-telem-title-name">
-                                            BOOSTER
-                                        </div>
-                                        <div className="overlay-row-telem-title-qty">
-                                            VELOCITY {booster_kf_append}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="overlay-v-align">
-                                    <div className="overlay-row-telem-main">
-                                        {formatTelemetryDigits(booster_vel_real, 4)}
-                                    </div>
-
-                                </div>
-
-                                <div className="overlay-v-align">
-                                    <div className="overlay-row-telem-unit">
-                                        FT/S
-                                    </div>
-                                </div>
+                            <div className="overlay-row-element">
+                                { timer_div }
                             </div>
 
-                            <div className="overlay-row-telem-group">
-                                <div className="overlay-v-align">
+                            <div className={`overlay-row-group ${has_sustainer_telem ? "" : "overlay-row-group-disabled"}`}>
+                                <div className="overlay-row-telem-group">
+                                    <div className="overlay-v-align">
                                         <div className="overlay-tilt-wrapper">
-                                        <div className={`overlay-tilt-hind ${spot_vis ? "tilt-hind-in" : "tilt-hind-out"}`} />
-                                        <div className={`overlay-tilt-vind ${spot_vis ? "tilt-vind-in" : "tilt-vind-out"}`} />
-                                        <BoosterSVG visible={spot_vis && has_booster_telem} angle={boo_angle} has_telem={has_booster_telem} />
+                                            <div className={`overlay-tilt-hind ${spot_vis ? "tilt-hind-in" : "tilt-hind-out"}`} />
+                                            <div className={`overlay-tilt-vind ${spot_vis ? "tilt-vind-in" : "tilt-vind-out"}`} />
+                                            <SustainerSVG visible={spot_vis && has_sustainer_telem} angle={sus_angle} has_telem={has_sustainer_telem} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="overlay-row-telem-group">
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-title">
+                                            <div className="overlay-row-telem-title-name">ACCEL</div>
+                                            <div className="overlay-row-telem-title-qty">FORCE</div>
+                                        </div>
+                                    </div>
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-main">
+                                            {sus_accel_gs.toFixed(1)}
+                                        </div>
+                                    </div>
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-unit">G</div>
+                                    </div>
+                                </div>
+
+                                <div className="overlay-row-telem-group">
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-title">
+                                            <div className="overlay-row-telem-title-name">MACH</div>
+                                            <div className="overlay-row-telem-title-qty">NUMBER</div>
+                                        </div>
+                                    </div>
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-main">
+                                            {sus_mach.toFixed(2)}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    ) : (
+                        /* ---- Multi-stage overlay: booster + sustainer ---- */
+                        <div className="overlay-row">
 
-                        <div className="overlay-row-element">
-                            { timer_div }
+                            <div className={`overlay-row-group ${has_booster_telem ? "" : "overlay-row-group-disabled"}`}>
+                                <div className="overlay-row-telem-group">
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-title">
+                                            <div className="overlay-row-telem-title-name">BOOSTER</div>
+                                            <div className="overlay-row-telem-title-qty">ALTITUDE</div>
+                                        </div>
+                                    </div>
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-main">
+                                            {formatTelemetryDigits(booster_alt, 6)}
+                                        </div>
+                                    </div>
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-unit">FT</div>
+                                    </div>
+                                </div>
+
+                                <div className="overlay-row-telem-group">
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-title">
+                                            <div className="overlay-row-telem-title-name">BOOSTER</div>
+                                            <div className="overlay-row-telem-title-qty">VELOCITY {booster_kf_append}</div>
+                                        </div>
+                                    </div>
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-main">
+                                            {formatTelemetryDigits(booster_vel_real, 4)}
+                                        </div>
+                                    </div>
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-unit">FT/S</div>
+                                    </div>
+                                </div>
+
+                                <div className="overlay-row-telem-group">
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-tilt-wrapper">
+                                            <div className={`overlay-tilt-hind ${spot_vis ? "tilt-hind-in" : "tilt-hind-out"}`} />
+                                            <div className={`overlay-tilt-vind ${spot_vis ? "tilt-vind-in" : "tilt-vind-out"}`} />
+                                            <BoosterSVG visible={spot_vis && has_booster_telem} angle={boo_angle} has_telem={has_booster_telem} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="overlay-row-element">
+                                { timer_div }
+                            </div>
+
+                            <div className={`overlay-row-group ${has_sustainer_telem ? "" : "overlay-row-group-disabled"}`}>
+                                <div className="overlay-row-telem-group">
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-tilt-wrapper">
+                                            <div className={`overlay-tilt-hind ${spot_vis ? "tilt-hind-in" : "tilt-hind-out"}`} />
+                                            <div className={`overlay-tilt-vind ${spot_vis ? "tilt-vind-in" : "tilt-vind-out"}`} />
+                                            <SustainerSVG visible={spot_vis && has_sustainer_telem} angle={sus_angle} has_telem={has_sustainer_telem} />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="overlay-row-telem-group">
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-title">
+                                            <div className="overlay-row-telem-title-name">SUSTAINER</div>
+                                            <div className="overlay-row-telem-title-qty">ALTITUDE {cur_alt_view}</div>
+                                        </div>
+                                    </div>
+                                    <div className="overlay-v-align">
+                                        <div className={`overlay-row-telem-main ${alt_text_alternate_style}`}>
+                                            {formatTelemetryDigits(real_sustainer_alt, 6)}
+                                        </div>
+                                    </div>
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-unit">FT</div>
+                                    </div>
+                                </div>
+
+                                <div className="overlay-row-telem-group">
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-title">
+                                            <div className="overlay-row-telem-title-name">SUSTAINER</div>
+                                            <div className="overlay-row-telem-title-qty">VELOCITY {sustainer_kf_append}</div>
+                                        </div>
+                                    </div>
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-main">
+                                            {formatTelemetryDigits(sustainer_vel_real, 4)}
+                                        </div>
+                                    </div>
+                                    <div className="overlay-v-align">
+                                        <div className="overlay-row-telem-unit">FT/S</div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
-
-                        <div className={`overlay-row-group ${has_sustainer_telem ? "" : "overlay-row-group-disabled"}`}>
-
-                            <div className="overlay-row-telem-group">
-                                <div className="overlay-v-align">
-                                    <div className="overlay-tilt-wrapper">
-                                        <div className={`overlay-tilt-hind ${spot_vis ? "tilt-hind-in" : "tilt-hind-out"}`} />
-                                        <div className={`overlay-tilt-vind ${spot_vis ? "tilt-vind-in" : "tilt-vind-out"}`} />
-                                        <SustainerSVG visible={spot_vis && has_sustainer_telem} angle={sus_angle} has_telem={has_sustainer_telem} />
-                                    </div>
-                    
-                                </div>
-                            </div>
-
-                            <div className="overlay-row-telem-group">
-                                <div className="overlay-v-align">
-                                    <div className="overlay-row-telem-title">
-                                        <div className="overlay-row-telem-title-name">
-                                            SUSTAINER
-                                        </div>
-                                        <div className="overlay-row-telem-title-qty">
-                                            ALTITUDE {cur_alt_view}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="overlay-v-align">
-                                    <div className={`overlay-row-telem-main ${alt_text_alternate_style}`}>
-                                        {formatTelemetryDigits(real_sustainer_alt, 6)}
-                                    </div>
-                                </div>
-
-                                <div className="overlay-v-align">
-                                    <div className="overlay-row-telem-unit">
-                                        FT
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="overlay-row-telem-group">
-                                <div className="overlay-v-align">
-                                    <div className="overlay-row-telem-title">
-                                        <div className="overlay-row-telem-title-name">
-                                            SUSTAINER
-                                        </div>
-                                        <div className="overlay-row-telem-title-qty">
-                                            VELOCITY {sustainer_kf_append}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="overlay-v-align">
-                                    <div className="overlay-row-telem-main">
-                                        {formatTelemetryDigits(sustainer_vel_real, 4)}
-                                    </div>
-
-                                </div>
-
-                                <div className="overlay-v-align">
-                                    <div className="overlay-row-telem-unit">
-                                        FT/S
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
+                    )}
                 </div>
 
             </ShowPathExact>

@@ -1,0 +1,113 @@
+.seq-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin: 8px 0;
+}
+
+.seq-segment {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    gap: 12px;
+    border: 1px solid transparent;
+}
+
+.seq-segment:hover {
+    border-color: #555;
+}
+
+.seq-segment-upcoming {
+    background-color: #2a2a2a;
+}
+
+.seq-segment-completed {
+    background-color: #1e1e1e;
+    opacity: 0.5;
+}
+
+.seq-segment-active {
+    background-color: #3a3520;
+    border-color: #665500 !important;
+}
+
+.seq-segment-index {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #444;
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.85em;
+    flex-shrink: 0;
+}
+
+.seq-segment-active .seq-segment-index {
+    background-color: #887700;
+    color: #fff;
+}
+
+.seq-segment-completed .seq-segment-index {
+    background-color: #333;
+    color: #666;
+}
+
+.seq-segment-info {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.seq-segment-name {
+    font-weight: bold;
+    color: #ddd;
+    font-size: 0.95em;
+}
+
+.seq-segment-active .seq-segment-name {
+    color: #ffffaa;
+}
+
+.seq-segment-meta {
+    display: flex;
+    gap: 10px;
+    font-size: 0.8em;
+    color: #888;
+    margin-top: 2px;
+}
+
+.seq-segment-scene {
+    color: #7799bb;
+}
+
+.seq-segment-audio {
+    color: #99bb77;
+}
+
+.seq-segment-time {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+    font-family: monospace;
+    font-size: 0.85em;
+}
+
+.seq-elapsed {
+    color: #ffffaa;
+    font-weight: bold;
+}
+
+.seq-duration {
+    color: #666;
+}
+
+.seq-segment-active .seq-duration {
+    color: #888;
+}
