@@ -21,9 +21,10 @@ export function Navbar({ tabCallback, currentTab, streamCallback, currentStream 
     const navbar_tabs = {
         "default": "All Telemetry",
         "commanding": "Commanding",
-        "structures": "Structures",
-        "recovery": "Recovery",
-        "video": "Video System",
+        // "structures": "Structures",
+        // "recovery": "Recovery"
+        "map": "Map",
+        // "video": "Video System",
         "sys_diag": "System",
         "settings": "Settings"
     }

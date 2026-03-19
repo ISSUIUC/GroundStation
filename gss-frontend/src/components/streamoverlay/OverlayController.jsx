@@ -17,6 +17,7 @@ import IdleStreamOverlay, { PreStreamOverlay, GoodbyeStreamOverlay, FunFactsOnly
 import { TargetDescriptionOverlay } from "./TargetDescriptionOverlay";
 import { GenericISSStreamComingSoon, GenericISSStreamGoodbye } from "./Special";
 import { SponsorRotator } from "./Sponsors";
+import { StreamMapOverlay } from "../views/MapView";
 
 export const obs = new OBSWebSocket();
 
@@ -333,6 +334,9 @@ export default function OverlayController() {
             <IdleStreamOverlay REASONTEXT={idle_reasontext} />
             <PreStreamOverlay />
             <GoodbyeStreamOverlay />
+            <ShowPathExact path={"/stream/map"}>
+                <StreamMapOverlay />
+            </ShowPathExact>
             <ShowPathExact path={"/stream/control"}>
                 <FlightCountTimer />
                 <ValueGroup label="Connection">
