@@ -1,0 +1,499 @@
+/* Stream Control Panel */
+.sc-panel {
+    padding: 10px;
+    font-family: monospace;
+    color: #ddd;
+}
+
+/* Horizontal split: main tabs left, sidebar right */
+.sc-layout {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 12px;
+}
+
+.sc-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.sc-tab-body {
+    min-height: 200px;
+}
+
+/* Visibility quick toggles */
+.sc-visibility-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.sc-vis-label {
+    color: #666;
+    font-size: 0.75em;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-right: 4px;
+}
+
+.sc-vis-toggle {
+    background-color: #3a3a3a;
+    color: #888;
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 4px 10px;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 0.8em;
+    font-weight: bold;
+    transition: all 0.15s;
+}
+
+.sc-vis-toggle:hover {
+    background-color: #444;
+}
+
+.sc-vis-on {
+    background-color: #445500;
+    color: #ffffaa;
+    border-color: #667700;
+}
+
+.sc-vis-sep {
+    width: 1px;
+    height: 20px;
+    background-color: #555;
+    margin: 0 4px;
+}
+
+.sc-vis-action {
+    color: #aaa;
+    border-style: dashed;
+}
+
+.sc-vis-action:hover {
+    color: #ddd;
+    border-style: solid;
+}
+
+.sc-vis-panic {
+    background-color: #550000;
+    color: #ff6666;
+    border: 2px solid #880000;
+    border-style: solid;
+}
+
+.sc-vis-panic:hover {
+    background-color: #770000;
+    color: #ffaaaa;
+}
+
+/* Tab bar */
+.sc-tab-bar {
+    display: flex;
+    gap: 2px;
+    border-bottom: 2px solid #a6a6a6;
+    margin-bottom: 10px;
+}
+
+.sc-tab {
+    padding: 8px 16px;
+    cursor: pointer;
+    color: #a6a6a6;
+    font-weight: bold;
+    font-size: 0.9em;
+    border-radius: 6px 6px 0 0;
+    background-color: #2a2a2a;
+    transition: all 0.15s;
+    user-select: none;
+}
+
+.sc-tab:hover {
+    color: #ddd;
+    background-color: #333;
+}
+
+.sc-tab-active {
+    color: #ffffaa;
+    background-color: #373737;
+    border-bottom: 2px solid #ffffaa;
+    margin-bottom: -2px;
+}
+
+/* Tab content */
+.sc-tab-content {
+    min-height: 200px;
+}
+
+/* ---- Sidebar ---- */
+.sc-sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sc-sidebar-section {
+    background-color: #252525;
+    border: 1px solid #444;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.sc-sidebar-heading {
+    color: #ffffaa;
+    font-weight: bold;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #444;
+}
+
+.sc-sidebar-row {
+    margin: 6px 0;
+}
+
+.sc-sidebar-row label {
+    display: block;
+    color: #888;
+    font-size: 0.8em;
+    margin-bottom: 2px;
+}
+
+.sc-sidebar-status {
+    color: #666;
+    font-size: 0.8em;
+    margin-top: 4px;
+}
+
+.sc-sidebar-help {
+    color: #888;
+    font-size: 0.8em;
+    line-height: 1.6;
+}
+
+.sc-sidebar-status-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    font-size: 0.85em;
+}
+
+.sc-sidebar-status-label { color: #888; }
+.sc-sidebar-status-value { color: #ddd; font-weight: bold; }
+
+.sc-sidebar .gss-button {
+    margin-left: 0;
+    margin-right: 0;
+    font-size: 0.85em;
+    padding: 8px;
+}
+
+/* ---- Overview ---- */
+.sc-overview-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+/* Key-value table used in overview */
+.sc-kv-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.sc-kv-table td {
+    padding: 2px 0;
+}
+
+.sc-kv-key {
+    color: #888;
+    width: 80px;
+    font-size: 0.85em;
+}
+
+.sc-kv-val {
+    color: #ddd;
+    font-weight: bold;
+}
+
+.sc-text-live { color: #ff4444; }
+.sc-text-rec { color: #cc4444; }
+.sc-text-scene { color: #7799bb; }
+.sc-text-audio { color: #99bb77; }
+
+/* Form fields */
+.sc-field {
+    display: flex;
+    align-items: center;
+    margin: 4px 0;
+}
+
+.sc-field label {
+    color: #888;
+    min-width: 60px;
+    font-size: 0.85em;
+    flex-shrink: 0;
+}
+
+.sc-hint {
+    color: #555;
+    font-size: 0.75em;
+    margin-top: 4px;
+}
+
+/* Timer buttons */
+.sc-timer-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+}
+
+/* ---- Inputs ---- */
+.sc-input {
+    background-color: #2a2a2a;
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: #ddd;
+    padding: 6px 10px;
+    font-family: monospace;
+    font-size: 0.9em;
+    margin-left: 6px;
+    min-width: 120px;
+}
+
+.sc-input:focus {
+    outline: none;
+    border-color: #ffffaa;
+}
+
+.sc-input-grow {
+    flex: 1;
+}
+
+.sc-input-full {
+    width: 100%;
+    min-width: 0;
+    margin-left: 0;
+    box-sizing: border-box;
+}
+
+.sc-select {
+    background-color: #2a2a2a;
+    border: 1px solid #555;
+    border-radius: 4px;
+    color: #ddd;
+    padding: 6px 10px;
+    font-family: monospace;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+
+.sc-select:focus {
+    outline: none;
+    border-color: #ffffaa;
+}
+
+/* ---- Presets ---- */
+.sc-presets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.sc-preset-card {
+    background-color: #2a2a2a;
+    border: 2px solid #444;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.sc-preset-card:hover {
+    border-color: #666;
+    background-color: #333;
+}
+
+.sc-preset-active {
+    border-color: #887700;
+    background-color: #332e10;
+}
+
+.sc-preset-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.sc-preset-name {
+    font-weight: bold;
+    color: #ddd;
+}
+
+.sc-preset-active .sc-preset-name {
+    color: #ffffaa;
+}
+
+.sc-preset-cycle-badge {
+    background-color: #3a3a5a;
+    color: #aaaadd;
+    font-size: 0.7em;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.sc-preset-active .sc-preset-cycle-badge {
+    background-color: #4a4a2a;
+    color: #ffffaa;
+}
+
+.sc-preset-cycle-active {
+    background-color: #2a4a2a;
+    color: #88ff88;
+    animation: pulse-cycle 1s infinite;
+}
+
+@keyframes pulse-cycle {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.sc-preset-desc {
+    color: #888;
+    font-size: 0.8em;
+    margin-bottom: 6px;
+}
+
+/* Scene tags */
+.sc-preset-scenes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.sc-preset-scene-tag {
+    background-color: #333;
+    color: #999;
+    font-size: 0.7em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid #444;
+}
+
+.sc-preset-scene-missing {
+    border-color: #773333;
+    color: #cc4444;
+}
+
+.sc-preset-scene-current {
+    border-color: #887700;
+    color: #ffffaa;
+    background-color: #3a3520;
+}
+
+.sc-preset-warn {
+    border-color: #774400;
+}
+
+.sc-preset-warnings {
+    margin-top: 6px;
+    padding-top: 4px;
+    border-top: 1px solid #443300;
+}
+
+.sc-preset-warning-line {
+    color: #cc8800;
+    font-size: 0.75em;
+}
+
+/* Apply error banner */
+.sc-preset-errors {
+    background-color: #3a2020;
+    border: 1px solid #773333;
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+}
+
+.sc-preset-error {
+    color: #ff8888;
+    font-size: 0.85em;
+}
+
+/* Preset overlay indicators */
+.sc-preset-overlays {
+    display: flex;
+    gap: 3px;
+    margin-top: 6px;
+}
+
+.sc-preset-overlay-tag {
+    font-size: 0.65em;
+    font-weight: bold;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background-color: #2a2a2a;
+    color: #555;
+    border: 1px solid #3a3a3a;
+}
+
+.sc-preset-overlay-on {
+    background-color: #2a3a2a;
+    color: #88bb88;
+    border-color: #446644;
+}
+
+/* Format selector */
+.sc-format-selector {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* ---- Scene grid ---- */
+.sc-scene-current {
+    margin-bottom: 8px;
+    color: #888;
+}
+
+.sc-scene-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 6px;
+}
+
+.sc-scene-card {
+    background-color: #2a2a2a;
+    border: 2px solid #444;
+    border-radius: 6px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #aaa;
+    text-align: center;
+    transition: all 0.15s;
+    font-size: 0.85em;
+}
+
+.sc-scene-card:hover {
+    border-color: #666;
+    background-color: #333;
+    color: #ddd;
+}
+
+.sc-scene-active {
+    border-color: #606dbc;
+    background-color: #252540;
+    color: #aabbee;
+}

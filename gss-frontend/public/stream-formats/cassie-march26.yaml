@@ -1,0 +1,124 @@
+name: "Aether II - March 2026 Launch"
+version: 2
+
+scenes:
+  prestream_broll:
+    obs_scene: "PRESTREAM_BROLL"
+    description: "B-Roll footage before show starts"
+  generic_host:
+    obs_scene: "GENERIC_HOST"
+    description: "Host camera (solo)"
+  host_interviewee:
+    obs_scene: "HOST_INTERVIEWEE"
+    description: "Split host + interviewee"
+  mission_overview:
+    obs_scene: "MISSION_OVERVIEW"
+    description: "Mission overview graphics"
+  team_photo:
+    obs_scene: "TEAM_PHOTO_BROLL"
+    description: "Team photo B-Roll"
+  camera_host_pad:
+    obs_scene: "CAM_HOST_PAD"
+    description: "Camera + Host for pad ops"
+  launch_scene:
+    obs_scene: "ROCKET_LIVE"
+    description: "Launch camera"
+  ipcam_1:
+    obs_scene: "IPCAM_1"
+    description: "Ground Station Camera"
+  ipcam_2:
+    obs_scene: "IPCAM_2"
+    description: "Pad Camera"
+  thank_you:
+    obs_scene: "THANK_YOU"
+    description: "Thank you / static"
+
+presets:
+  - id: broll_cycle
+    name: "B-Roll Cycle"
+    description: "Auto-rotate between cameras"
+    scenes:
+      - prestream_broll
+      - ipcam_1
+      - ipcam_2
+    cycle_interval: 20
+    overlay_state:
+      spot_overlay: false
+      top_timer: true
+      timeline: false
+      target_desc: false
+
+  - id: host_solo
+    name: "Host Solo"
+    description: "Host camera"
+    scene: generic_host
+    overlay_state:
+      spot_overlay: false
+      top_timer: true
+      target_desc: true
+    target_desc:
+      title: "HOST NAME"
+      subtitle: "Stream Host"
+
+  - id: interview
+    name: "Interview"
+    description: "Split host + interviewee"
+    scene: host_interviewee
+    overlay_state:
+      spot_overlay: false
+      top_timer: true
+      target_desc: true
+    target_desc:
+      title: "INTERVIEWEE"
+      subtitle: "Team Lead"
+
+  - id: mission_overview
+    name: "Mission Overview"
+    description: "Graphics with host narration"
+    scene: mission_overview
+    overlay_state:
+      spot_overlay: false
+      top_timer: false
+      target_desc: false
+
+  - id: team_photo
+    name: "Team Photo B-Roll"
+    description: "Team photo footage"
+    scene: team_photo
+    overlay_state:
+      spot_overlay: false
+      top_timer: true
+      target_desc: false
+
+  - id: pad_ops
+    name: "Pad Ops"
+    description: "Camera + host for pad operations"
+    scenes:
+      - camera_host_pad
+      - ipcam_2
+    cycle_interval: 30
+    overlay_state:
+      spot_overlay: false
+      top_timer: true
+      timeline: true
+      target_desc: false
+
+  - id: launch
+    name: "Launch"
+    description: "Launch camera with telemetry overlay"
+    scene: launch_scene
+    overlay_state:
+      spot_overlay: true
+      top_timer: false
+      timeline: true
+      target_desc: false
+
+  - id: thank_you
+    name: "Thank You / End"
+    description: "Static thank-you screen"
+    scene: thank_you
+    overlay_state:
+      spot_overlay: false
+      top_timer: false
+      timeline: false
+      target_desc: false

@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
 import GSSButton from "../reusable/Button";
 import { ValueGroup } from "../reusable/ValueDisplay";
-import { obs } from "./OverlayController";
+import obsService from "../../services/obsService";
 import { useSyncGlobalVars, useTelemetry } from "../dataflow/gssdata";
 import "./StreamCommon.css"
 
 const set_scene = async (scene_name) => {
-    // Precondition: OBS is connected!
-    await obs.call('SetCurrentProgramScene', {sceneName: scene_name});
+    await obsService.setScene(scene_name);
 }
 
 const set_input_status = async (input, is_on) => {
-    // Precondition: OBS is connected!
-    await obs.call('SetInputMute', {inputName: input, inputMuted: !is_on});
+    await obsService.setInputMute(input, !is_on);
 }
 
 export const LivestreamSequencer = ({ connected }) => {
@@ -56,7 +54,7 @@ export const LivestreamSequencer = ({ connected }) => {
             set_sequencer_time(sqcr_time);
 
             // Check sequencer states
-            if(!connected || !sqcr_enabled) { return; } // Ignore if we're not connected 
+            if(!connected || !sqcr_enabled) { return; } // Ignore if we're not connected
             if(next_sqcr_state >= LIVESTREAM_SEQUENCER_STATES.length) { return; } // we're done
 
             let NEXT_STATE = LIVESTREAM_SEQUENCER_STATES[next_sqcr_state];
@@ -64,7 +62,7 @@ export const LivestreamSequencer = ({ connected }) => {
                 NEXT_STATE.func(); // invoke state func
                 set_next_sqcr_state(next_sqcr_state + 1);
             }
-            
+
         }, 20)
 
         return () => {
@@ -79,7 +77,7 @@ export const LivestreamSequencer = ({ connected }) => {
                 <div className="row-nowrap-ls">
                     <div className="livestream-sequencer-title">{first_elem.title}</div>
                     <div className="livestream-sequencer-desc">{first_elem.desc}</div>
-                    
+
                 </div>
                 <div>
                     <div className="livestream-sequencer-time">T {first_elem.t.toFixed(2)}</div>
@@ -103,7 +101,7 @@ export const LivestreamSequencer = ({ connected }) => {
     }
 
     return (
-        <ValueGroup label="Sequencer" hidden={!connected} hidden_label_text="NO OBS CONNECTION">
+        <ValueGroup label="Legacy Sequencer (Timer-based)" hidden={!connected} hidden_label_text="NO OBS CONNECTION">
                 <div>
                     <div>The button below controls the livestream sequencer.</div>
                     <div className="big-text-warn">This state is not synced across the network. Ensure this screen is focused for proper sequencer control!</div>
