@@ -1,25 +1,31 @@
-name: "Aether II - March 2026 Launch"
+name: "Cassie - March 2026 Launch"
 version: 2
 
 scenes:
-  prestream_broll:
-    obs_scene: "PRESTREAM_BROLL"
-    description: "B-Roll footage before show starts"
+  starting:
+    obs_scene: "STARTING"
+    description: "Starting before B-Roll starts"
   generic_host:
     obs_scene: "GENERIC_HOST"
     description: "Host camera (solo)"
-  host_interviewee:
-    obs_scene: "HOST_INTERVIEWEE"
-    description: "Split host + interviewee"
   mission_overview:
     obs_scene: "MISSION_OVERVIEW"
     description: "Mission overview graphics"
+  host_interviewee:
+    obs_scene: "HOST_INTERVIEWEE"
+    description: "Split host + interviewee"
+  slides1:
+    obs_scene: "SLIDES1"
+    description: "Split host + interviewee + slides"
   team_photo:
     obs_scene: "TEAM_PHOTO_BROLL"
     description: "Team photo B-Roll"
-  camera_host_pad:
-    obs_scene: "CAM_HOST_PAD"
-    description: "Camera + Host for pad ops"
+  camera_host_pad1:
+    obs_scene: "CAM_HOST_PAD1"
+    description: "IPCAM + Host"
+  camera_host_pad2:
+    obs_scene: "CAM_HOST_PAD2"
+    description: "Host + IPCAM"
   launch_scene:
     obs_scene: "ROCKET_LIVE"
     description: "Launch camera"
@@ -34,11 +40,20 @@ scenes:
     description: "Thank you / static"
 
 presets:
+  - id: starting
+    name: "Stream starting soon landing page"
+    description: "Prestream"
+    scene: starting
+    overlay_state:
+      spot_overlay: false
+      top_timer: false
+      timeline: false
+      target_desc: false
+
   - id: broll_cycle
     name: "B-Roll Cycle"
     description: "Auto-rotate between cameras"
     scenes:
-      - prestream_broll
       - ipcam_1
       - ipcam_2
     cycle_interval: 20
@@ -55,10 +70,21 @@ presets:
     overlay_state:
       spot_overlay: false
       top_timer: true
+      timeline: false
       target_desc: true
     target_desc:
       title: "HOST NAME"
       subtitle: "Stream Host"
+
+  - id: mission_overview
+    name: "Mission Overview"
+    description: "Graphics with host narration"
+    scene: mission_overview
+    overlay_state:
+      spot_overlay: false
+      top_timer: true
+      target_desc: false
+      timeline: false
 
   - id: interview
     name: "Interview"
@@ -68,18 +94,23 @@ presets:
       spot_overlay: false
       top_timer: true
       target_desc: true
+      timeline: false
     target_desc:
       title: "INTERVIEWEE"
       subtitle: "Team Lead"
 
-  - id: mission_overview
-    name: "Mission Overview"
-    description: "Graphics with host narration"
-    scene: mission_overview
+  - id: slides1
+    name: "XYS's Slides"
+    description: "Split host + interviewee + slides"
+    scene: slides1
     overlay_state:
       spot_overlay: false
-      top_timer: false
-      target_desc: false
+      top_timer: true
+      target_desc: true
+      timeline: false
+    target_desc:
+      title: "INTERVIEWEE"
+      subtitle: "Team Lead"
 
   - id: team_photo
     name: "Team Photo B-Roll"
@@ -89,29 +120,40 @@ presets:
       spot_overlay: false
       top_timer: true
       target_desc: false
+      timeline: true
 
-  - id: pad_ops
-    name: "Pad Ops"
+  - id: prelaunch_IP
+    name: "Prelaunch IPcam focus"
     description: "Camera + host for pad operations"
-    scenes:
-      - camera_host_pad
-      - ipcam_2
-    cycle_interval: 30
+    scene: camera_host_pad1
     overlay_state:
       spot_overlay: false
       top_timer: true
-      timeline: true
+      timeline: false
       target_desc: false
+      telemetry: true
+
+  - id: prelaunch_Webcam
+    name: "Prelaunch Webcam focus"
+    description: "Camera + host for pad operations"
+    scene: camera_host_pad2
+    overlay_state:
+      spot_overlay: false
+      top_timer: true
+      timeline: false
+      target_desc: false
+      telemetry: true
 
   - id: launch
-    name: "Launch"
-    description: "Launch camera with telemetry overlay"
+    name: "OpenStreetView Telemetry"
+    description: "OpenStreetView visualization"
     scene: launch_scene
     overlay_state:
       spot_overlay: true
       top_timer: false
-      timeline: true
+      timeline: false
       target_desc: false
+      telemetry: true
 
   - id: thank_you
     name: "Thank You / End"
