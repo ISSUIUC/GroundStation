@@ -509,17 +509,16 @@
     display: flex;
     flex-flow: column nowrap;
     background-color: #113;
-    border-radius: 10px;
-    padding-top: 10px;
+    border-radius: 12px;
+    padding: 14px;
 }
 
 .stream-timeline-footer {
-    font-size: 0.7em;
+    font-size: 0.8em;
     font-style: italic;
-    background-color: #112;
     text-align: center;
-    padding:5px;
-    border-radius: 0px 0px 10px 10px;
+    padding: 10px 14px;
+    margin-top: 8px;
 }
 
 .stream-timeline {
@@ -529,20 +528,25 @@
 
 .stream-timeline-title {
     text-align: center;
+    padding: 0 10px;
+    margin-bottom: 6px;
 }
 
 .stream-timeline-title-t {
-    font-size: 0.8em;
+    font-size: 1em;
 }
 
 .stream-timeline-title-b {
-    font-size: 1.35em;
+    font-size: 1.6em;
     font-weight: bold;
+    margin-bottom: 4px;
 }
 
 .stream-timeline-holder {
     display: flex;
     flex-flow: column nowrap;
+    overflow: hidden;
+    border-radius: 4px;
 }
 
 .stream-timeline-elem {
@@ -552,24 +556,24 @@
 }
 
 .stream-timeline-elem-T {
-    padding-left: 10px;
+    padding-left: 14px;
     background-color: #337;
-    padding-right: 10px;
+    padding-right: 14px;
     font-weight: bold;
-    font-size: 0.9em;
+    font-size: 1.15em;
     justify-content: center;
     display: flex;
     flex-flow: column nowrap;
-    padding-top: 3px;
-    padding-bottom: 3px;
+    padding-top: 6px;
+    padding-bottom: 6px;
 }
 
 .stream-timeline-elem-desc {
-    padding-right: 10px;
-    padding-left: 10px;
-    font-size: 0.9em;
-    padding-top: 3px;
-    padding-bottom: 3px;
+    padding-right: 14px;
+    padding-left: 14px;
+    font-size: 1.1em;
+    padding-top: 6px;
+    padding-bottom: 6px;
     justify-content: center;
     display: flex;
     flex-flow: column nowrap;
@@ -597,7 +601,7 @@
     font-size: 5em;
     font-weight: bold;
     font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #fa0;
+    color: #7c0;
     padding-top: 20px;
 }
 

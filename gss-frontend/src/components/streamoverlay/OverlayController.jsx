@@ -56,15 +56,12 @@ function PassiveTimer({ progName, visible, has_launched }) {
 }
 
 const LAUNCH_TIMELINE = [
-    {t: "8:00:00", desc: "INTEGRATION STARTS"},
-    {t: "2:00:00", desc: "BEGIN PAD LOAD"},
-    {t: "1:30:00", desc: "GROUND SYSTEMS SETUP"},
-    {t: "1:00:00", desc: "VEHICLE VERTICAL"},
-    {t: "0:30:00", desc: "VEHICLE POWER-ON"},
-    {t: "0:10:00", desc: "GO / HALT"},
-    {t: "0:05:00", desc: "ELECTRONICS PRIMED"},
-    {t: "0:01:00", desc: "FINAL CHECKOUTS"},
-    {t: "0:00:20", desc: "TERMINAL COUNT"},
+    {t: "5:30:00", desc: "INTEGRATION STARTS"},
+    {t: "3:30:00", desc: "RECOVERY HANDS OFF"},
+    {t: "2:30:00", desc: "AVIONICS HANDS OFF"},
+    {t: "1:00:00", desc: "TEAM PHOTO"},
+    {t: "0:30:00", desc: "VEHICLE ON PAD"},
+    {t: "0:05:00", desc: "VEHICLE POWER ON"},
     {t: "0:00:00", desc: "LAUNCH"},
 ]
 
@@ -191,15 +188,15 @@ export default function OverlayController() {
     }
 
     // Single-stage telemetry: acceleration (raw Gs) & mach
-    const sus_accel_x = useTelemetryRaw("@sustainer/value.highG_ax") || 0;
-    const sus_accel_y = useTelemetryRaw("@sustainer/value.highG_ay") || 0;
-    const sus_accel_z = useTelemetryRaw("@sustainer/value.highG_az") || 0;
-    const sus_accel_gs = Math.sqrt(sus_accel_x**2 + sus_accel_y**2 + sus_accel_z**2);
+    const boo_accel_x = useTelemetryRaw("@booster/value.highG_ax") || 0;
+    const boo_accel_y = useTelemetryRaw("@booster/value.highG_ay") || 0;
+    const boo_accel_z = useTelemetryRaw("@booster/value.highG_az") || 0;
+    const boo_accel_gs = Math.sqrt(boo_accel_x**2 + boo_accel_y**2 + boo_accel_z**2);
 
-    const sus_alt_baro_raw = useTelemetryRaw("@sustainer/value.barometer_altitude") || 0;
-    const sus_vel_raw = useTelemetryRaw("@sustainer/value.kf_velocity") || 0;
-    const { ssound: sus_ssound } = standardAtmosphere(sus_alt_baro_raw, true);
-    const sus_mach = sus_ssound > 0 ? Math.abs(sus_vel_raw) / sus_ssound : 0;
+    const boo_alt_baro_raw = useTelemetryRaw("@booster/value.barometer_altitude") || 0;
+    const boo_vel_raw = useTelemetryRaw("@booster/value.kf_velocity") || 0;
+    const { ssound: boo_ssound } = standardAtmosphere(boo_alt_baro_raw, true);
+    const boo_mach = boo_ssound > 0 ? Math.abs(boo_vel_raw) / boo_ssound : 0;
 
     let fsm_state = useTelemetry("@sustainer/value.FSM_State");
     if(fsm_state == null) {
@@ -250,24 +247,24 @@ export default function OverlayController() {
 
             <ShowPathExact path={"/stream"}>
                 <div className={`spot-overlay start-hidden spot-overlay-${spot_vis ? "in" : "out"}`} />
-                <PassiveTimer progName={"Aether II"} visible={top_timer_vis} has_launched={has_launched} />
-                <TimelineView progName={"Aether II"} visible={timeline_vis} />
+                <PassiveTimer progName={"Cassie"} visible={top_timer_vis} has_launched={has_launched} />
+                <TimelineView progName={"Cassie"} visible={timeline_vis} />
                 <TargetDescriptionOverlay TITLE={stream_target_TITLE} SUBTITLE={stream_target_SUBTITLE} visible={stream_target_desc_vis} />
                 <div className={`overlay-position-bottom start-hidden overlay-row-${spot_vis ? "in" : "out"}`}>
                     {single_stage_mode ? (
                         /* ---- Single-stage: [spacer, alt, vel] | timer | [tilt, accel, mach] ---- */
                         <div className="overlay-row">
-                            <div className={`overlay-row-group ${has_sustainer_telem ? "" : "overlay-row-group-disabled"}`}>
+                            <div className={`overlay-row-group ${has_booster_telem ? "" : "overlay-row-group-disabled"}`}>
                                 <div className="overlay-row-telem-group">
                                     <div className="overlay-v-align">
                                         <div className="overlay-row-telem-title">
                                             <div className="overlay-row-telem-title-name">ALTITUDE</div>
-                                            <div className="overlay-row-telem-title-qty">{cur_alt_view || "BAROMETRIC"}</div>
+                                            <div className="overlay-row-telem-title-qty">BAROMETRIC</div>
                                         </div>
                                     </div>
                                     <div className="overlay-v-align">
-                                        <div className={`overlay-row-telem-main ${alt_text_alternate_style}`}>
-                                            {formatTelemetryDigits(real_sustainer_alt, 6)}
+                                        <div className="overlay-row-telem-main">
+                                            {formatTelemetryDigits(booster_alt, 6)}
                                         </div>
                                     </div>
                                     <div className="overlay-v-align">
@@ -279,12 +276,12 @@ export default function OverlayController() {
                                     <div className="overlay-v-align">
                                         <div className="overlay-row-telem-title">
                                             <div className="overlay-row-telem-title-name">VELOCITY</div>
-                                            <div className="overlay-row-telem-title-qty">{sustainer_kf_append || "KALMAN"}</div>
+                                            <div className="overlay-row-telem-title-qty">{booster_kf_append || "KALMAN"}</div>
                                         </div>
                                     </div>
                                     <div className="overlay-v-align">
                                         <div className="overlay-row-telem-main">
-                                            {formatTelemetryDigits(sustainer_vel_real, 4)}
+                                            {formatTelemetryDigits(booster_vel_real, 4)}
                                         </div>
                                     </div>
                                     <div className="overlay-v-align">
@@ -297,13 +294,13 @@ export default function OverlayController() {
                                 { timer_div }
                             </div>
 
-                            <div className={`overlay-row-group ${has_sustainer_telem ? "" : "overlay-row-group-disabled"}`}>
+                            <div className={`overlay-row-group ${has_booster_telem ? "" : "overlay-row-group-disabled"}`}>
                                 <div className="overlay-row-telem-group">
                                     <div className="overlay-v-align">
                                         <div className="overlay-tilt-wrapper">
                                             <div className={`overlay-tilt-hind ${spot_vis ? "tilt-hind-in" : "tilt-hind-out"}`} />
                                             <div className={`overlay-tilt-vind ${spot_vis ? "tilt-vind-in" : "tilt-vind-out"}`} />
-                                            <SustainerSVG visible={spot_vis && has_sustainer_telem} angle={sus_angle} has_telem={has_sustainer_telem} />
+                                            <BoosterSVG visible={spot_vis && has_booster_telem} angle={boo_angle} has_telem={has_booster_telem} />
                                         </div>
                                     </div>
                                 </div>
@@ -317,7 +314,7 @@ export default function OverlayController() {
                                     </div>
                                     <div className="overlay-v-align">
                                         <div className="overlay-row-telem-main">
-                                            {sus_accel_gs.toFixed(1)}
+                                            {boo_accel_gs.toFixed(1)}
                                         </div>
                                     </div>
                                     <div className="overlay-v-align">
@@ -334,7 +331,7 @@ export default function OverlayController() {
                                     </div>
                                     <div className="overlay-v-align">
                                         <div className="overlay-row-telem-main">
-                                            {sus_mach.toFixed(2)}
+                                            {boo_mach.toFixed(2)}
                                         </div>
                                     </div>
                                 </div>
