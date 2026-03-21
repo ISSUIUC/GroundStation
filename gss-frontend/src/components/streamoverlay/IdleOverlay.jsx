@@ -4,29 +4,24 @@ import { CountdownTimer } from "./CountdownTimer";
 import "./StreamCommon.css"
 
 const IDLE_INFO = [
-    "We have 14 seperate video sources looking at this rocket! 7 of them are active on the livestream.",
-    "60% of our leadership team members are sophomores! (20% seniors, 20% juniors)",
-    "Aether has 31.07 pounds of propellant! That's 41.7% of the total vehicle mass!",
-    "Aether 2 is flying a high-altitude reefing system designed in-house. Its components are named after landmarks and fauna found in the Alps.",
-    "Aether 2's in-house developed recovery system is 100% 3D printed!",
-    "Aether 2 will be flying supersonic for 47.6 seconds!",
-    "Aether 2 pulls 24Gs at liftoff! That's 24x the amount of acceleration you're being pulled down by the earth!",
+    "Cassie is a shortening of Cassiopeia, the team's summer launch rocket",
+    "Cassie is flying a high-altitude reefing system designed in-house. Its components are named after landmarks and fauna found in the Alps.",
+    "We have 9 seperate video sources looking at this rocket! We're trying to make sure we capture Cassie's beauty!",
+    "Cassie has the highest dynamic pressure (Max Q) value of any vehicle we have designed!",
+    "Cassie's in-house developed recovery system is 100% 3D printed!",
+    "Cassie pulls 32Gs at liftoff! That's 32x the amount of acceleration you're being pulled down by the earth!",
     "Our team formed 4 years ago! We started our roots at IREC, but moved to high altitude launches last year.",
-    "Aether 2 breaks the sound barrier after just 1.65 seconds of flight!",
-    "To avoid damaging the rocket on landing, our rocket uses a reefing system to descend at a nice, gentle 25.6 ft/s!",
-    "This is our second streamed launch! Our first was Aether 1, which launched in March of this year.",
-    "Aether 2 has a nominal time-to-apogee (time until it reaches the highest point) of just 77.7 seconds! The number is 27.25 seconds for the booster.",
-    "This (Aether) is our first rocket design with a transition in it -- all of our other staged rocket attempts have had constant diameters across their lengths!",
+    "Cassie breaks the sound barrier in under two seconds of flight!",
+    "To avoid damaging the rocket on landing, our rocket uses a reefing system to descend at a nice, gentle 25 ft/s!",
+    "This is our third streamed launch! Our first was Aether 1, which launched in March of 2025.",
+    "Cassie is our first single staged vehicle launched since IREC 2023!",
     "All of our camera communication is happening through an in-house designed flight computer (MIDAS) and camera control board.",
-    "Aether's telemetry systems are fully student-designed end-to-end! From sensor collection to telemetry operators (or stream viewers)!",
-    "Aether's full stack height is 178.5\" tall (4.53m)!",
-    "Our rocket's booster parachute is over 5 feet wide, but weighs only 6.3 oz!",
-    "Our team slack has over 1,500,000 messages sent.",
+    "We have a fully SRAD video system on board, meant to transmit images back to ground from the edge of space!",
+    "Cassie's telemetry systems are fully student-designed end-to-end! From sensor collection to telemetry operators (or stream viewers)!",
+    "Our team slack has over 2,000,000 messages sent.",
     "Michael had a bit less fun writing these than last time, but he still had fun!",
-    "Aether 2's maximum speed is Mach 2.6, or 2.6x the speed of sound! That's 30% faster than the Concorde's max speed!",
-    "Aether 2, like Aether 1, has 2 launch windows, opening June 21st at 8:00AM PST and June 22nd at the same time.",
-    "MIDAS is Aether's primary telemetry and tracking computer, having been designed by our team members. It successfully controlled a 2-stage rocket in Feb 2025.",
-    "Congratulations to Ashley, our new technical manager! We're sad to see the Spaceshot seniors go, but excited to see what the future holds for them"
+    "Cassie's maximum speed is Mach 2.2, or 2.2x the speed of sound! That's faster than the Concorde!",
+    "Cassie is Aether's primary telemetry and tracking computer, having been designed by our team members. It successfully controlled a 2-stage rocket in Feb 2025.",
 ]
 
 export function FunFactsOnly() {
@@ -97,7 +92,7 @@ export function PreStreamOverlay() {
                         <div className="stream-idle-header">
                             <div className="stream-idle-title">Starting soon!</div>
                             <div className="stream-idle-timer">T<CountdownTimer digitmode={4} anim={false} /></div>
-                            <div className="stream-idle-subtext">Aether II Launch</div>
+                            <div className="stream-idle-subtext">Cassie Launch</div>
                         </div>
 
 
@@ -155,7 +150,7 @@ export default function IdleStreamOverlay({ REASONTEXT }) {
                         <div className="stream-idle-header">
                             <div className="stream-idle-title">We'll be back soon!</div>
                             <div className="stream-idle-timer">T<CountdownTimer digitmode={4} anim={false} /></div>
-                            <div className="stream-idle-subtext">Aether II Launch</div>
+                            <div className="stream-idle-subtext">Cassie Launch</div>
                         </div>
 
 
@@ -214,7 +209,7 @@ export function GoodbyeStreamOverlay() {
                     <div className="stream-idle-text-wrap">
                         <div className="stream-idle-header">
                             <div className="stream-idle-title">Thank You!</div>
-                            <div className="stream-idle-subtext">Aether II Launch</div>
+                            <div className="stream-idle-subtext">Cassie Launch</div>
                         </div>
 
 
