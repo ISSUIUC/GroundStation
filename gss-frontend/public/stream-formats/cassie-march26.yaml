@@ -14,9 +14,9 @@ scenes:
   host_interviewee:
     obs_scene: "HOST_INTERVIEWEE"
     description: "Split host + interviewee"
-  slides1:
-    obs_scene: "SLIDES1"
-    description: "Split host + interviewee + slides"
+  host_video:
+    obs_scene: "HOST_VIDEO"
+    description: "initalVideo"
   team_photo:
     obs_scene: "TEAM_PHOTO_BROLL"
     description: "Team photo B-Roll"
@@ -63,6 +63,19 @@ presets:
       timeline: false
       target_desc: false
 
+  - id: host_video
+    name: "Inital Video"
+    description: "Inital video for hosted segment"
+    scene: host_video
+    overlay_state:
+      spot_overlay: false
+      top_timer: true
+      timeline: false
+      target_desc: true
+    target_desc:
+      title: "Ajax Bachor"
+      subtitle: "Stream Host"
+
   - id: host_solo
     name: "Host Solo"
     description: "Host camera"
@@ -73,7 +86,7 @@ presets:
       timeline: false
       target_desc: true
     target_desc:
-      title: "HOST NAME"
+      title: "Ajax Bachor"
       subtitle: "Stream Host"
 
   - id: mission_overview
@@ -83,11 +96,11 @@ presets:
     overlay_state:
       spot_overlay: false
       top_timer: true
-      target_desc: false
+      target_desc: true
       timeline: false
 
-  - id: interview
-    name: "Interview"
+  - id: interview1
+    name: "Thomas's Interview"
     description: "Split host + interviewee"
     scene: host_interviewee
     overlay_state:
@@ -96,21 +109,60 @@ presets:
       target_desc: true
       timeline: false
     target_desc:
-      title: "INTERVIEWEE"
-      subtitle: "Team Lead"
+      title: "Thomas McManamen"
+      subtitle: "Avionics Lead"
 
-  - id: slides1
-    name: "XYS's Slides"
-    description: "Split host + interviewee + slides"
-    scene: slides1
+  - id: interview2
+    name: "Seths's Interview"
+    description: "Split host + interviewee"
+    scene: host_interviewee
     overlay_state:
       spot_overlay: false
       top_timer: true
       target_desc: true
       timeline: false
     target_desc:
-      title: "INTERVIEWEE"
-      subtitle: "Team Lead"
+      title: "Seth Blumenthal"
+      subtitle: "Structural Design & Analysis Sublead"
+
+  - id: interview3
+    name: "Andrews's Interview"
+    description: "Split host + interviewee"
+    scene: host_interviewee
+    overlay_state:
+      spot_overlay: false
+      top_timer: true
+      target_desc: true
+      timeline: false
+    target_desc:
+      title: "Andrew Kern"
+      subtitle: "Recovery Lead"
+
+  - id: interview4
+    name: "Michael's Interview"
+    description: "Split host + interviewee"
+    scene: host_interviewee
+    overlay_state:
+      spot_overlay: false
+      top_timer: true
+      target_desc: true
+      timeline: false
+    target_desc:
+      title: "Michael Karpov"
+      subtitle: "Operations Lead"
+
+  - id: interview5
+    name: "Ashley's Interview"
+    description: "Split host + interviewee"
+    scene: host_interviewee
+    overlay_state:
+      spot_overlay: false
+      top_timer: true
+      target_desc: true
+      timeline: false
+    target_desc:
+      title: "Ashley Sawa"
+      subtitle: "Spaceshot Lead"
 
   - id: team_photo
     name: "Team Photo B-Roll"
@@ -123,8 +175,8 @@ presets:
       timeline: true
 
   - id: prelaunch_IP
-    name: "Prelaunch IPcam focus"
-    description: "Camera + host for pad operations"
+    name: "Prelaunch DLSR"
+    description: "DLSR for launch"
     scene: camera_host_pad1
     overlay_state:
       spot_overlay: false
@@ -134,8 +186,8 @@ presets:
       telemetry: true
 
   - id: prelaunch_Webcam
-    name: "Prelaunch Webcam focus"
-    description: "Camera + host for pad operations"
+    name: "Prelaunch Webcam"
+    description: "Webcam + DLSR for launch"
     scene: camera_host_pad2
     overlay_state:
       spot_overlay: false
