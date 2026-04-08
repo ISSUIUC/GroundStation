@@ -340,7 +340,7 @@ function getTelemetryRaw(snapshot=null, telem_code=undefined, metadata=false, de
         return defaultvalue // The data not being present is valid, but returns null here so that the caller can handle it by short circuiting.
     }
 
-    // Since telemetry packets are split into "metadata" and "data" we automatically target "data" here for ease of readibility, unless specified otherwise
+    // Since telemetry packets are split into "metadata" and "data" we automatically target "data" here for ease of readability, unless specified otherwise
     let r_valuetype = metadata ? "metadata" : "data";
 
     // The exception is for the "GSS" channel.
@@ -462,7 +462,7 @@ export function useTelemetry(telem_code=undefined, metadata=false, defaultvalue=
     
     if(telemetry_calculator_hooks[telem_code]) {
         // This telemetry data is translated
-        const [target_code, translator_func] = telemetry_calculator_hooks[telem_code]
+        const [target_code, translator_func] = telemetry_calculator_hooks[telem_code];
         const raw_telem = getTelemetryRaw(telemetry_snapshot, target_code, metadata, defaultvalue) || 0;
         return translator_func(raw_telem);
     }
