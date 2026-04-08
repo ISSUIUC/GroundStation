@@ -31,7 +31,12 @@ def feather_connection(port, ip, stage, should_log):
 
 
 def start_thread(port, ip, stage, should_log):
-    ...
+    if port in thread_pool:
+        if thread_pool[port].is_alive():
+            return False
+    t = threading.Thread(target=feather_connection, args=(port, ip, stage, should_log))
+    thread_pool[port] = t
+    return True
 
 CORS(app)
 
@@ -64,7 +69,8 @@ def connect_port():
         ip = request.json["ip"]
     else:
         ip = request.remote_addr
-    # Then we should load the other stuff
-    # standalone.TelemetryStandalone(ip, request.remote_addr, "Multistage", not no_log)
-    # Add to thread pool, etc etc
-    return jsonify({"address": ip})
+    # Assume feather duo
+    if start_thread(port, ip, "Multistage", not no_log):
+        return jsonify({"address": ip})
+    else:
+        return jsonify({"failure": "Feather is already connected to!"}), 400
