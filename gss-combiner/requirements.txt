@@ -1,2 +1,4 @@
 pyserial
-paho-mqtt
+flask
+flask-socketio
+flask-cors
