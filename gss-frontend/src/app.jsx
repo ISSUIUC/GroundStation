@@ -7,6 +7,7 @@ import { Navbar } from './components/reusable/Navbar.jsx';
 import { FullTelemetryView } from './components/views/FullTelemetryView.jsx';
 import { SystemHealthView } from './components/views/SystemHealthView.jsx';
 import { CommandingView } from './components/views/CommandingView.jsx';
+import { TestingView } from "./components/views/TestingView.jsx";
 import OverlayController from './components/streamoverlay/OverlayController.jsx';
 import { ShowIf, ShowPath, ShowPathExact } from './components/reusable/UtilityComponents.jsx';
 import { handle_unit_translation, SettingsView } from './components/views/SettingsView.jsx';
@@ -19,7 +20,7 @@ import { CommandFeedback } from './components/spec/CommandFeedback.jsx';
 
 export function App() {
   const [currentStream, setCurrentStream] = useState("sustainer");
-  const [currentTab, setCurrentTab] = useState("default");
+  const [currentTab, setCurrentTab] = useState("testing");
 
   const use_light_mode = getSetting("display_type") == "LIGHT"
   console.log(getSetting("display_type"))
@@ -63,6 +64,10 @@ export function App() {
 
             <ShowIf condition={currentTab === "settings"}>
               <SettingsView />
+            </ShowIf>
+
+            <ShowIf condition={currentTab === "testing"}>
+              <TestingView />
             </ShowIf>
           </div>
           

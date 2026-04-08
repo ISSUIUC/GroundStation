@@ -26,7 +26,8 @@ export function Navbar({ tabCallback, currentTab, streamCallback, currentStream 
         "map": "Map",
         // "video": "Video System",
         "sys_diag": "System",
-        "settings": "Settings"
+        "settings": "Settings",
+        "testing": "Testing"
     }
 
     return (
