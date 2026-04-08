@@ -26,11 +26,13 @@ def feather_connection(port, ip, stage, should_log):
         t = standalone.TelemetryStandalone(port, ip, stage, should_log)
         t.run()
     except:
+        print("Failed!")
         return False
     return True
 
 
 def start_thread(port, ip, stage, should_log):
+    print(port)
     if port in thread_pool:
         if thread_pool[port].is_alive():
             return False
@@ -55,7 +57,7 @@ def connect_port():
          # Then that is our comport
         if request.json["port"] not in get_feather_duo_ports():
             return jsonify({"failure": "Port does not exist"}), 503
-        port = request.json
+        port = request.json["port"]
     else:
         return jsonify({"failure": "Malformed request"}), 400
     
