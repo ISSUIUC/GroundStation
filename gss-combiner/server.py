@@ -48,7 +48,10 @@ def list_ports():
 
 @app.route('/feathers')
 def list_feathers():
-    ... # List all the data related to the feather
+    is_alive = {}
+    for port in thread_pool:
+        is_alive[port] = thread_pool[port].is_alive()
+    return jsonify(is_alive)
 
 @app.route('/connect_port', methods=["POST"])
 def connect_port():
