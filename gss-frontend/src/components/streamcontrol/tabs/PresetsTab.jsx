@@ -3,11 +3,12 @@ import { ValueGroup } from '../../reusable/ValueDisplay';
 import { listStreamFormats, loadStreamFormat } from '../../../services/streamFormatLoader';
 
 /*
- * Presets bundle: OBS scene(s) + overlay state + name tag text.
+ * Presets bundle: OBS scene(s) + overlay state + name tag text + optional audio.
  * Single-scene presets switch once. Cycling presets auto-rotate through
  * a list of scenes on a configurable timer (cycle_interval seconds).
  *
- * Audio is NOT controlled here — OBS handles audio per-scene.
+ * Audio is driven via an optional `audio` field that names an entry in the
+ * stream format's `audio_presets` block — same convention SequencerTab uses.
  */
 
 const DEFAULT_PRESETS = [
@@ -52,9 +53,11 @@ const DEFAULT_PRESETS = [
 ];
 
 function buildPresetsFromYaml(config) {
+    const audioPresets = config.audio_presets || {};
+
     // v2 format: has a top-level `presets` array
     if (config.presets) {
-        return config.presets.map((p) => {
+        const presets = config.presets.map((p) => {
             // Resolve scene keys to OBS scene names
             const resolveScene = (key) => config.scenes?.[key]?.obs_scene || key;
 
@@ -67,13 +70,15 @@ function buildPresetsFromYaml(config) {
                 cycle_interval: p.cycle_interval || null,
                 overlays: p.overlay_state || {},
                 target_desc: p.target_desc || null,
+                audio: p.audio || null,
             };
         });
+        return { presets, audioPresets };
     }
 
     // v1 fallback: convert segments to presets
     if (config.segments) {
-        return config.segments.map((seg) => {
+        const presets = config.segments.map((seg) => {
             const sceneDef = config.scenes?.[seg.scene];
             return {
                 id: seg.id,
@@ -84,8 +89,10 @@ function buildPresetsFromYaml(config) {
                 cycle_interval: null,
                 overlays: seg.overlay_state || {},
                 target_desc: seg.target_desc || null,
+                audio: seg.audio || null,
             };
         });
+        return { presets, audioPresets };
     }
 
     return null;
@@ -97,7 +104,59 @@ function getAllScenes(preset) {
     return [];
 }
 
-function validatePreset(preset, obsState) {
+/**
+ * Resolve a preset's `audio` field to a concrete list of input names that should be unmuted.
+ *   - undefined input  -> undefined  (preset has no audio directive)
+ *   - string reference -> list from audioPresets, or null if the reference is dangling
+ *   - inline array     -> the array itself
+ *   - anything else    -> null (malformed)
+ */
+function resolveAudioList(audio, audioPresets) {
+    if (audio == null) return undefined;
+    if (Array.isArray(audio)) return audio;
+    if (typeof audio === 'string') {
+        const resolved = audioPresets[audio];
+        return Array.isArray(resolved) ? resolved : null;
+    }
+    return null;
+}
+
+/**
+ * Build a multi-line hover string describing the audio state of a preset.
+ * Returns null if the preset has no audio field (so callers can skip attaching a title).
+ * Format:
+ *     Audio: launch_broadcast
+ *       ✓ RADIO_AUDIO
+ *       ✗ SHOTGUN_MIC_1 (not in OBS)
+ */
+function formatAudioHover(preset, audioPresets, obsInputs) {
+    if (preset.audio == null) return null;
+    const onList = resolveAudioList(preset.audio, audioPresets);
+
+    if (onList === null) {
+        return `Audio preset "${preset.audio}" is referenced but not defined`;
+    }
+    if (!Array.isArray(onList)) {
+        return `Audio field is malformed (expected string or list)`;
+    }
+
+    const header = Array.isArray(preset.audio)
+        ? `Audio (inline, ${onList.length} source${onList.length === 1 ? '' : 's'}):`
+        : `Audio: ${preset.audio}`;
+
+    if (onList.length === 0) {
+        return `${header}\n  (all sources muted)`;
+    }
+
+    const known = Object.keys(obsInputs || {});
+    const lines = onList.map(name => {
+        if (known.length === 0) return `  • ${name}`;        // OBS not enumerated yet — don't guess
+        return known.includes(name) ? `  ✓ ${name}` : `  ✗ ${name} (not in OBS)`;
+    });
+    return `${header}\n${lines.join('\n')}`;
+}
+
+function validatePreset(preset, obsState, audioPresets) {
     const warnings = [];
     if (obsState.sceneList.length === 0) return warnings;
 
@@ -106,6 +165,25 @@ function validatePreset(preset, obsState) {
             warnings.push(`Scene "${s}" not in OBS`);
         }
     }
+
+    if (preset.audio != null) {
+        const onList = resolveAudioList(preset.audio, audioPresets);
+        if (onList === null) {
+            warnings.push(`Audio preset "${preset.audio}" not defined`);
+        } else if (Array.isArray(onList)) {
+            const knownInputs = Object.keys(obsState.inputs || {});
+            // Only flag missing inputs once OBS has enumerated — otherwise we'd
+            // spam warnings before the first refresh completes.
+            if (knownInputs.length > 0) {
+                for (const input of onList) {
+                    if (!knownInputs.includes(input)) {
+                        warnings.push(`Audio input "${input}" not in OBS`);
+                    }
+                }
+            }
+        }
+    }
+
     return warnings;
 }
 
@@ -114,6 +192,7 @@ const STORAGE_KEY_FORMAT = 'gss_preset_format';
 export default function PresetsTab({ obsState, obsService, syncVars }) {
     const [activePresetId, setActivePresetId] = useState(null);
     const [presets, setPresets] = useState(DEFAULT_PRESETS);
+    const [audioPresets, setAudioPresets] = useState({});
     const [availableFormats, setAvailableFormats] = useState([]);
     const [selectedFormat, setSelectedFormat] = useState('');
     const [loadError, setLoadError] = useState(null);
@@ -148,6 +227,7 @@ export default function PresetsTab({ obsState, obsService, syncVars }) {
     const handleLoadFormat = async (name) => {
         if (!name) {
             setPresets(DEFAULT_PRESETS);
+            setAudioPresets({});
             setSelectedFormat('');
             localStorage.removeItem(STORAGE_KEY_FORMAT);
             return;
@@ -156,8 +236,9 @@ export default function PresetsTab({ obsState, obsService, syncVars }) {
         try {
             const config = await loadStreamFormat(name);
             const parsed = buildPresetsFromYaml(config);
-            if (parsed && parsed.length > 0) {
-                setPresets(parsed);
+            if (parsed && parsed.presets && parsed.presets.length > 0) {
+                setPresets(parsed.presets);
+                setAudioPresets(parsed.audioPresets || {});
             }
             setSelectedFormat(name);
             localStorage.setItem(STORAGE_KEY_FORMAT, name);
@@ -165,6 +246,7 @@ export default function PresetsTab({ obsState, obsService, syncVars }) {
             setLoadError(e.message);
             // If restoring a saved format that no longer exists, fall back silently
             setPresets(DEFAULT_PRESETS);
+            setAudioPresets({});
             setSelectedFormat('');
             localStorage.removeItem(STORAGE_KEY_FORMAT);
         }
@@ -206,6 +288,30 @@ export default function PresetsTab({ obsState, obsService, syncVars }) {
         }
 
         if (Object.keys(vars).length > 0) syncVars(vars);
+
+        // Audio — `preset.audio` may be either a string (refers to audio_presets) or an
+        // inline array of input names. Either way, it resolves to a list of inputs that
+        // should be ON; every other OBS-known input gets muted.
+        if (preset.audio != null) {
+            const onList = resolveAudioList(preset.audio, audioPresets);
+            if (onList === null) {
+                errors.push(`Audio preset "${preset.audio}" not defined in stream format`);
+            } else if (!Array.isArray(onList)) {
+                errors.push(`Audio field is malformed (expected string or list)`);
+            } else if (!obsState.connected) {
+                errors.push(`Audio not applied — OBS disconnected`);
+            } else {
+                const onSet = new Set(onList);
+                const allInputs = new Set([...Object.keys(obsState.inputs || {}), ...onList]);
+                for (const inputName of allInputs) {
+                    try {
+                        await obsService.setInputMute(inputName, !onSet.has(inputName));
+                    } catch (e) {
+                        errors.push(`Audio "${inputName}": ${e.message}`);
+                    }
+                }
+            }
+        }
 
         // Scene — cycling or single
         const isCycling = preset.scenes && preset.scenes.length > 1 && preset.cycle_interval;
@@ -288,17 +394,20 @@ export default function PresetsTab({ obsState, obsService, syncVars }) {
             <ValueGroup label="Presets">
                 <div className="sc-presets-grid">
                     {presets.map((preset) => {
-                        const warnings = obsState.connected ? validatePreset(preset, obsState) : [];
+                        const warnings = obsState.connected ? validatePreset(preset, obsState, audioPresets) : [];
                         const hasWarnings = warnings.length > 0;
                         const isActive = activePresetId === preset.id;
                         const allScenes = getAllScenes(preset);
                         const hasCycle = preset.scenes && preset.scenes.length > 1 && preset.cycle_interval;
+
+                        const audioHover = formatAudioHover(preset, audioPresets, obsState.inputs);
 
                         return (
                             <div
                                 key={preset.id}
                                 className={`sc-preset-card ${isActive ? 'sc-preset-active' : ''} ${hasWarnings ? 'sc-preset-warn' : ''}`}
                                 onClick={() => applyPreset(preset)}
+                                title={audioHover || undefined}
                             >
                                 <div className="sc-preset-header">
                                     <div className="sc-preset-name">{preset.name}</div>
@@ -312,7 +421,7 @@ export default function PresetsTab({ obsState, obsService, syncVars }) {
                                 </div>
                                 <div className="sc-preset-desc">{preset.description}</div>
 
-                                {/* Scene list with validation */}
+                                {/* Scene list with validation + audio badge */}
                                 <div className="sc-preset-scenes">
                                     {allScenes.map((s, i) => {
                                         const exists = !obsState.connected || obsState.sceneList.length === 0 || obsState.sceneList.includes(s);
@@ -323,6 +432,26 @@ export default function PresetsTab({ obsState, obsService, syncVars }) {
                                             </span>
                                         );
                                     })}
+                                    {preset.audio != null && (() => {
+                                        const onList = resolveAudioList(preset.audio, audioPresets);
+                                        const isInline = Array.isArray(preset.audio);
+                                        const knownInputs = Object.keys(obsState.inputs || {});
+                                        const missingInputs = Array.isArray(onList) && knownInputs.length > 0
+                                            ? onList.filter(n => !knownInputs.includes(n))
+                                            : [];
+                                        const isMissing = onList === null || missingInputs.length > 0;
+                                        const label = isInline
+                                            ? `(${preset.audio.length} src${preset.audio.length === 1 ? '' : 's'})`
+                                            : String(preset.audio);
+                                        return (
+                                            <span
+                                                className={`sc-preset-audio-tag ${isMissing ? 'sc-preset-audio-tag-missing' : ''}`}
+                                                title={audioHover || undefined}
+                                            >
+                                                ♪ {label}
+                                            </span>
+                                        );
+                                    })()}
                                 </div>
 
                                 {/* Overlay indicators */}

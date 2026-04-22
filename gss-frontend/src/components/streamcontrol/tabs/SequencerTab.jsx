@@ -52,11 +52,25 @@ export default function SequencerTab({
             await obsService.setScene(streamFormat.scenes[seg.scene].obs_scene);
         }
 
-        // Apply audio preset
-        if (seg.audio && streamFormat.audio_presets?.[seg.audio] && obsState.connected) {
-            const preset = streamFormat.audio_presets[seg.audio];
-            for (const [inputName, shouldBeOn] of Object.entries(preset)) {
-                await obsService.setInputMute(inputName, !shouldBeOn);
+        // Apply audio — `seg.audio` may be either a string (refers to audio_presets)
+        // or an inline array. Exclusive semantics: the resolved list is the set of
+        // inputs that should be ON; every other OBS-known input is muted.
+        if (seg.audio != null && obsState.connected) {
+            const onList = Array.isArray(seg.audio)
+                ? seg.audio
+                : (typeof seg.audio === 'string' ? streamFormat.audio_presets?.[seg.audio] : null);
+            if (Array.isArray(onList)) {
+                const onSet = new Set(onList);
+                const allInputs = new Set([...Object.keys(obsState.inputs || {}), ...onList]);
+                for (const inputName of allInputs) {
+                    try {
+                        await obsService.setInputMute(inputName, !onSet.has(inputName));
+                    } catch (e) {
+                        console.warn(`[Segment audio] ${inputName}: ${e.message}`);
+                    }
+                }
+            } else {
+                console.warn(`[Segment audio] audio field for segment "${seg.id}" did not resolve to a list:`, seg.audio);
             }
         }
 

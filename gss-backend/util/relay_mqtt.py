@@ -2,7 +2,20 @@ from flask_mqtt import Mqtt
 from flask_socketio import SocketIO, emit
 import configparser
 import json
+import os
 import time
+
+DS_PATH = '/app/config/data_source.json'
+DS_DEFAULT = {'host': 'localhost', 'port': 1884}
+
+# Module-level state used by the WS handlers. Set by main.py at startup and
+# by the on_connect / on_disconnect MQTT callbacks during runtime.
+DS_DEGRADED = False        # True if effective != configured (fallback active)
+MQTT_CONNECTED = False     # Live: is the paho client currently connected?
+CONFIGURED_HOST = 'localhost'
+CONFIGURED_PORT = 1884
+EFFECTIVE_HOST = 'mqtt'    # After resolve_broker() aliasing and fallback
+EFFECTIVE_PORT = 1884
 
 config = configparser.ConfigParser()
 config.read('./config.ini')
@@ -49,6 +62,40 @@ class RelayMqtt:
 
                 emit("sync_response", json.dumps(payload))
 
+        @socketio.on("get_datasource")
+        def handle_get_datasource(_=None):
+            emit("datasource_state", json.dumps({
+                "host": CONFIGURED_HOST,
+                "port": CONFIGURED_PORT,
+                "effective_host": EFFECTIVE_HOST,
+                "effective_port": EFFECTIVE_PORT,
+                "degraded": DS_DEGRADED,
+                "connected": MQTT_CONNECTED,
+            }))
+
+        @socketio.on("update_datasource")
+        def handle_update_datasource(payload):
+            # Writes the new data source to the mounted config volume, notifies the
+            # client, and exits so docker-compose's restart policy brings the backend
+            # back up with the new MQTT broker wired in. Hot-reconfiguring flask-mqtt
+            # is fragile; a clean restart is ~2s and deterministic.
+            try:
+                data = json.loads(payload)
+                ds = dict(DS_DEFAULT)
+                if 'host' in data: ds['host'] = str(data['host'])
+                if 'port' in data: ds['port'] = int(data['port'])
+                os.makedirs(os.path.dirname(DS_PATH), exist_ok=True)
+                with open(DS_PATH, 'w') as f:
+                    json.dump(ds, f)
+                emit("datasource_updated", json.dumps({"status": "restarting", "applied": ds}))
+                print(f"Datasource updated to {ds}; exiting for restart.", flush=True)
+                # Give socketio a moment to flush the ack to the client before we die.
+                socketio.sleep(0.5)
+                os._exit(0)
+            except (json.JSONDecodeError, KeyError, ValueError, OSError) as e:
+                print(f"update_datasource failed: {e}", flush=True)
+                emit("datasource_updated", json.dumps({"status": "error", "error": str(e)}))
+
         @socketio.on("gss")
         def handle_gss_comm(data):
             try:
@@ -84,11 +131,23 @@ class RelayMqtt:
                 socketio.start_background_task(target=emit_err_msg, message={"error": "Unable to decode JSON", "req": data})
                 
 
+        def emit_mqtt_status():
+            socketio.emit("mqtt_status", json.dumps({
+                "connected": MQTT_CONNECTED,
+                "configured_host": CONFIGURED_HOST,
+                "configured_port": CONFIGURED_PORT,
+                "effective_host": EFFECTIVE_HOST,
+                "effective_port": EFFECTIVE_PORT,
+                "degraded": DS_DEGRADED,
+            }))
+
         @mqtt.on_connect()
         def handle_connect(client, userdata, flags, rc):
-            print("Connecting to MQTT broker...", flush=True)
+            global MQTT_CONNECTED
+            broker = f"{app.config['MQTT_BROKER_URL']}:{app.config['MQTT_BROKER_PORT']}"
             if rc == 0:
-                print("Connected to MQTT broker, subscribing...", flush=True)
+                MQTT_CONNECTED = True
+                print(f"Connected to MQTT broker at {broker} (degraded={DS_DEGRADED}), subscribing...", flush=True)
 
                 # Subscribe to common channel
                 mqtt.subscribe(get_common_channel())
@@ -101,7 +160,17 @@ class RelayMqtt:
                     print(f"Subscribed to telemetry channel {channel['name']} ({channel['control_channel']}/{channel['data_channel']})", flush=True)
 
             else:
-                print(f"Failed to connect to MQTT broker, return code {rc}", flush=True)
+                MQTT_CONNECTED = False
+                print(f"Failed to connect to MQTT broker at {broker}, return code {rc}", flush=True)
+
+            socketio.start_background_task(target=emit_mqtt_status)
+
+        @mqtt.on_disconnect()
+        def handle_disconnect(client, userdata, rc):
+            global MQTT_CONNECTED
+            MQTT_CONNECTED = False
+            print(f"MQTT disconnected, rc={rc}", flush=True)
+            socketio.start_background_task(target=emit_mqtt_status)
 
         def emit_err_msg(message):
             socketio.emit('mqtt_message', json.dumps(message))

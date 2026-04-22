@@ -1,13 +1,25 @@
 name: "Cassie - March 2026 Launch"
 version: 2
 
+audio_presets:
+  p_a: 
+    - RADIO_AUDIO
+    - IPCAM_1
+    - IPCAM_2
+  p_b:
+    - IPCAM_3
+    - IPCAM_4
+
+
 scenes:
   starting:
     obs_scene: "STARTING"
     description: "Starting before B-Roll starts"
+    audio: p_a
   generic_host:
     obs_scene: "GENERIC_HOST"
     description: "Host camera (solo)"
+    audio: p_b
   mission_overview:
     obs_scene: "MISSION_OVERVIEW"
     description: "Mission overview graphics"
@@ -38,8 +50,43 @@ scenes:
   thank_you:
     obs_scene: "THANK_YOU"
     description: "Thank you / static"
+  i_live:
+    obs_scene: "INTEGRATION_LIVE"
+    description: "Test scene"
 
 presets:
+  - id: testA
+    name: "Test (A) backend"
+    description: "T(A)"
+    scene: i_live
+    audio: p_a
+    overlay_state:
+      spot_overlay: false
+      top_timer: false
+      timeline: false
+      target_desc: false
+  - id: testB
+    name: "Test (B) backend"
+    description: "T(B)"
+    scene: i_live
+    audio: p_b
+    overlay_state:
+      spot_overlay: false
+      top_timer: true
+      timeline: false
+      target_desc: true
+  - id: testC
+    name: "Test (C) backend"
+    description: "T(C)"
+    scene: i_live
+    audio:
+      - IPCAM_1
+      - IPCAM_4
+    overlay_state:
+      spot_overlay: true
+      top_timer: true
+      timeline: true
+      target_desc: true
   - id: starting
     name: "Stream starting soon landing page"
     description: "Prestream"

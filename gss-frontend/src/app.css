@@ -38,6 +38,11 @@
   overflow: hidden;
 }
 
+.main-content--scroll {
+  justify-content: flex-start;
+  overflow-y: auto;
+}
+
 .read-the-docs {
   color: #888;
 }

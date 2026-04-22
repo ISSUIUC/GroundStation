@@ -36,7 +36,7 @@ export function App() {
         {/* Main window */}
         <ShowPathExact path={"/"}>
           <Navbar streamCallback={setCurrentStream} currentStream={currentStream} tabCallback={setCurrentTab} currentTab={currentTab} />
-          <div className='main-content'>
+          <div className={`main-content${currentTab === 'map' ? '' : ' main-content--scroll'}`}>
             <ShowIf condition={currentTab === "default"}>
               <FullTelemetryView />
             </ShowIf>

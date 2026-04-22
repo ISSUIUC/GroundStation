@@ -454,6 +454,22 @@
     border-color: #446644;
 }
 
+/* Audio preset badge — lives next to scene tags, purple to distinguish from them */
+.sc-preset-audio-tag {
+    font-size: 0.7em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background-color: #2d2040;
+    color: #c8a0f0;
+    border: 1px solid #5a3d8a;
+}
+
+.sc-preset-audio-tag-missing {
+    background-color: #3a2020;
+    color: #ff8888;
+    border-color: #773333;
+}
+
 /* Format selector */
 .sc-format-selector {
     display: flex;

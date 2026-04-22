@@ -21,19 +21,21 @@ services:
     restart: unless-stopped
     networks:
       - gss_network
-  backend: 
+  backend:
     container_name: backend
     depends_on:
       - mqtt
+    restart: unless-stopped
     build:
      context: ./gss-backend
      dockerfile: ./Dockerfile
-    ports: 
+    ports:
       - '5001:5001'
     networks:
       - gss_network
     volumes:
       - ./config.ini:/app/config.ini
+      - ./config:/app/config
 
 networks:
   gss_network:

@@ -9,7 +9,11 @@ let GLOBAL_SETTINGS = {
     "global_sync": true, // Choices "ENABLED" -> true, "DISABLED" -> false
     "data_retention": 100, // Choices: "ALL" -> -1, LAST 100 -> 100, LAST 50 -> 50, LAST 15 -> 15
     "retain_on_reload": true, // Choices: "RETAIN" -> true, "DISCARD" -> false
-    "allow_no_cont_pyro": false // Choices "YES" -> true, "NO" -> false
+    "allow_no_cont_pyro": false, // Choices "YES" -> true, "NO" -> false
+    // UI-cached view of the backend's data_source.json. Source of truth lives on
+    // the local backend; these mirror it so the form renders before the backend responds.
+    "data_source_host": "localhost",
+    "data_source_port": 1884
 }
 
 // Maps unit types to the corresponding unit based on unit system

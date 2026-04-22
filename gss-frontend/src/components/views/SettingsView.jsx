@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { SingleValue, MultiValue, ValueGroup, SingleValueGroupRow, StatusDisplay, StatusDisplayWithValue } from '../reusable/ValueDisplay.jsx'
 import ChoiceSelect from '../reusable/ChoiceSelect.jsx';
-import { addRecalculator, CLEAR_T_DATA_FUNC, clearCalculators } from '../dataflow/gssdata.jsx';
+import { addRecalculator, CLEAR_T_DATA_FUNC, clearCalculators, useGSSWebsocket, useSocketEvent } from '../dataflow/gssdata.jsx';
 import { CONVERSIONS, getSetting, setSetting } from '../dataflow/settings.jsx';
 import GSSButton from '../reusable/Button.jsx';
 import { DataTestButton } from '../spec/DataTest.jsx';
@@ -34,6 +34,10 @@ export const handle_unit_translation = (set_units) => {
   })
 }
 
+const ds_field_style = { display: 'flex', alignItems: 'center', gap: 8, margin: '6px 0' };
+const ds_label_style = { minWidth: 60, fontSize: 13, opacity: 0.8 };
+const ds_input_style = { flex: 1, padding: '6px 8px', border: '1px solid #444', background: '#1a1a1a', color: '#eee', borderRadius: 3 };
+
 export function SettingsView() {
   // This view handles user settings
   const [unit_system, setUnitSystem] = useState(getSetting("unit_system"));
@@ -44,6 +48,64 @@ export function SettingsView() {
   const [data_retention, setDataRetention] = useState(getSetting("data_retention"));
   const [retain_on_reload, setRetainOnReload] = useState(getSetting("retain_on_reload"));
   const [allow_nocont_pyro, setAllownocontPyro] = useState(getSetting("allow_no_cont_pyro"));
+
+  // Data source — the local backend's MQTT broker. Source of truth is
+  // /app/config/data_source.json; we mirror to localStorage just so the form
+  // renders immediately on load before the WS response arrives.
+  const [ds_host, setDsHost] = useState(getSetting("data_source_host"));
+  const [ds_port, setDsPort] = useState(getSetting("data_source_port"));
+  const [ds_eff_host, setDsEffHost] = useState("");
+  const [ds_eff_port, setDsEffPort] = useState(1884);
+  const [ds_connected, setDsConnected] = useState(false);
+  const [ds_degraded, setDsDegraded] = useState(false);
+  const [ds_status, setDsStatus] = useState("idle"); // idle | applying | error
+
+  const send_get_ds = useGSSWebsocket("get_datasource");
+  const send_update_ds = useGSSWebsocket("update_datasource");
+
+  useSocketEvent("datasource_state", (payload) => {
+    try {
+      const ds = JSON.parse(payload);
+      setDsHost(ds.host || "localhost");
+      setDsPort(Number(ds.port) || 1884);
+      setDsEffHost(ds.effective_host || "");
+      setDsEffPort(Number(ds.effective_port) || 1884);
+      setDsConnected(!!ds.connected);
+      setDsDegraded(!!ds.degraded);
+      setDsStatus("idle");
+      setSetting("data_source_host", ds.host || "localhost");
+      setSetting("data_source_port", Number(ds.port) || 1884);
+    } catch (e) { /* ignore malformed */ }
+  });
+
+  useSocketEvent("mqtt_status", (payload) => {
+    try {
+      const s = JSON.parse(payload);
+      setDsConnected(!!s.connected);
+      setDsEffHost(s.effective_host || "");
+      setDsEffPort(Number(s.effective_port) || 1884);
+      setDsDegraded(!!s.degraded);
+    } catch (e) { /* ignore malformed */ }
+  });
+
+  useSocketEvent("datasource_updated", (payload) => {
+    try {
+      const r = JSON.parse(payload);
+      setDsStatus(r.status === "restarting" ? "applying" : "error");
+    } catch (e) {
+      setDsStatus("error");
+    }
+  });
+
+  // Re-fetch on every socket connect (including reconnect after backend restart).
+  // Mount-only useEffect wouldn't re-fire when the socket comes back up.
+  useSocketEvent("connect", () => {
+    send_get_ds("");
+  });
+
+  useEffect(() => {
+    send_get_ds("");
+  }, []);
 
   let selected_data_retention_choice = "ALL";
   switch(data_retention) {
@@ -135,6 +197,81 @@ export function SettingsView() {
 
           <GSSButton onClick={() => {CLEAR_T_DATA_FUNC()}} variant={"blue"} disabled={false}>Clear Data</GSSButton>
           <DataTestButton />
+        </ValueGroup>
+
+        <ValueGroup label={"Data Source"}>
+          {ds_degraded && (
+            <div style={{
+              padding: "8px 12px",
+              margin: "4px 0 10px 0",
+              border: "1px solid #c93",
+              background: "#3a2b0c",
+              color: "#fca",
+              borderRadius: 3,
+              fontSize: 13
+            }}>
+              Configured broker was unreachable at startup. Backend fell back to the
+              local broker. Fix the host/port and click Connect to retry.
+            </div>
+          )}
+
+          <div style={ds_field_style}>
+            <label style={ds_label_style}>Host</label>
+            <input
+              style={ds_input_style}
+              value={ds_host}
+              placeholder="localhost"
+              onChange={(e) => {
+                setDsHost(e.target.value);
+                setSetting("data_source_host", e.target.value);
+              }}
+            />
+          </div>
+          <div style={ds_field_style}>
+            <label style={ds_label_style}>Port</label>
+            <input
+              style={ds_input_style}
+              type="number"
+              value={ds_port}
+              onChange={(e) => {
+                const n = Number(e.target.value) || 1884;
+                setDsPort(n);
+                setSetting("data_source_port", n);
+              }}
+            />
+          </div>
+
+          <div style={ds_field_style}>
+            <label style={ds_label_style}>Status</label>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{
+                width: 10, height: 10, borderRadius: '50%',
+                background: ds_status === "applying"
+                  ? '#ca3'
+                  : ds_connected ? '#4c4' : '#c44',
+                flexShrink: 0
+              }}/>
+              <span style={{ fontSize: 13, opacity: 0.9 }}>
+                {ds_status === "applying"
+                  ? "Connecting..."
+                  : ds_connected
+                    ? `Connected to ${ds_eff_host}:${ds_eff_port}`
+                    : "Disconnected"}
+              </span>
+            </div>
+          </div>
+
+          <GSSButton
+            variant={"blue"}
+            disabled={ds_status === "applying"}
+            onClick={() => {
+              setDsStatus("applying");
+              send_update_ds(JSON.stringify({ host: ds_host, port: ds_port }));
+            }}
+          >
+            {ds_status === "applying" ? "Connecting..." : "Connect"}
+          </GSSButton>
+          {ds_status === "error" && <div style={{color: "#f55", marginTop: 8}}>Update failed — check backend logs.</div>}
         </ValueGroup>
 
       </div>
