@@ -7,7 +7,7 @@ const STAGE_CHANNELS = [
   { name: "Sustainer", channel: "sustainer", color: Cesium.Color.DODGERBLUE },
 ];
 
-const TRAIL_UPDATE_MS = 250;
+const TRAIL_UPDATE_MS = 100;
 const PULSE_CYCLE_MS = 2500;
 
 function createDiscTexture(cssColor) {
@@ -34,7 +34,7 @@ function formatCompact(stage) {
   return `${fmt(lat, 4)}  ${fmt(lon, 4)}  ${fmt(alt, 0)}m`;
 }
 
-export default function LivePlotter({ overlay = false, trackIndex = null, orbitSpeed = 0.0006, pitch = -45, distance = 10000, labelOverrides = {} }) {
+export default function LivePlotter({ overlay = false, trackIndex = null, orbitSpeed = 0.0006, pitch = -45, distance = 10000, adaptive = false, useKF = false, labelOverrides = {} }) {
   const containerRef = useRef(null);
   const viewerRef = useRef(null);
 
@@ -49,7 +49,10 @@ export default function LivePlotter({ overlay = false, trackIndex = null, orbitS
       lastTrailUpdate: 0,
       trailPositions: [],
       pointEntity: null,
-      trailEntity: null,
+      trailLine: null,
+      lastGpsLat: null,
+      lastGpsLon: null,
+      kfTailStart: 0,
     }))
   );
 
@@ -118,13 +121,13 @@ export default function LivePlotter({ overlay = false, trackIndex = null, orbitS
         },
       });
 
-      const trailEntity = viewer.entities.add({
-        polyline: {
-          positions: [],
-          width: 2,
-          material: pointColor.withAlpha(0.85),
-          clampToGround: false,
-        },
+      const trailCollection = viewer.scene.primitives.add(new Cesium.PolylineCollection());
+      const trailLine = trailCollection.add({
+        positions: [],
+        width: 2,
+        material: Cesium.Material.fromType('Color', {
+          color: pointColor.withAlpha(0.85),
+        }),
       });
 
       let pulseEntity = null;
@@ -149,12 +152,13 @@ export default function LivePlotter({ overlay = false, trackIndex = null, orbitS
       }
 
       stages[index].pointEntity = pointEntity;
-      stages[index].trailEntity = trailEntity;
+      stages[index].trailLine = trailLine;
       stages[index].pulseEntity = pulseEntity;
     });
 
     if (overlay) {
       let headingRad = 0;
+      let currentDistance = distance;
       const pitchRad = Cesium.Math.toRadians(pitch);
       const orbitCallback = () => {
         if (viewer.isDestroyed()) return;
@@ -164,7 +168,31 @@ export default function LivePlotter({ overlay = false, trackIndex = null, orbitS
           const s = stages[idx];
           const displayAlt = (s.latest.alt || 0) - (s.normAlt || 0);
           const target = Cesium.Cartesian3.fromDegrees(s.latest.lon, s.latest.lat, displayAlt);
-          viewer.camera.lookAt(target, new Cesium.HeadingPitchRange(headingRad, pitchRad, distance));
+
+          let targetDistance = distance;
+          if (adaptive) {
+            const fsm = s.latest.fsm;
+            const pts = s.trailPositions;
+            const bs = Cesium.BoundingSphere.fromPoints(pts);
+            if (fsm <= 2) { // before launch
+              targetDistance = 1500;
+            } else if (fsm <= 6) { // before apogee
+              
+              if (pts.length >= 2) {
+                targetDistance = Math.max(bs.radius * 5, 1500);
+              } else {
+                targetDistance = 1500;
+              }
+            } else if (fsm <= 8) { // drogue
+              targetDistance = targetDistance = Math.max(bs.radius * 3.5, 1500);;
+            } else if (fsm <= 10) {
+              targetDistance = 1000;
+            } else {
+              targetDistance = 500;
+            }
+          }
+          currentDistance += (targetDistance - currentDistance) * 0.04;
+          viewer.camera.lookAt(target, new Cesium.HeadingPitchRange(headingRad, pitchRad, currentDistance));
         }
       };
       viewer.scene.preRender.addEventListener(orbitCallback);
@@ -193,8 +221,10 @@ export default function LivePlotter({ overlay = false, trackIndex = null, orbitS
       const lat = Number(val.latitude);
       const lon = Number(val.longitude);
       if (isNaN(lat) || isNaN(lon)) return;
-      const alt = Number(val.altitude || 0);
       const fsm = Number(val.FSM_State || 0);
+      const kfAlt = Number(val.kf_positionX || 0);
+      const kfActive = useKF && kfAlt !== 0 && fsm <= 6;
+      const alt = kfActive ? kfAlt : Number(val.altitude || 0);
 
       const stage = stages[index];
       stage.latest = { lat, lon, alt, fsm, timestamp: now };
@@ -210,9 +240,35 @@ export default function LivePlotter({ overlay = false, trackIndex = null, orbitS
       if (stage.pulseEntity) stage.pulseEntity.position = pos;
 
       if (stage.fired && (now - stage.lastTrailUpdate > TRAIL_UPDATE_MS || stage.trailPositions.length === 0)) {
-        stage.trailPositions.push(pos);
         stage.lastTrailUpdate = now;
-        stage.trailEntity.polyline.positions = stage.trailPositions.slice();
+
+        if (kfActive) {
+          const gpsAlt = Number(val.altitude || 0) - (stage.normAlt || 0);
+          const gpsChanged = stage.lastGpsLat !== null &&
+            (lat !== stage.lastGpsLat || lon !== stage.lastGpsLon);
+
+          if (gpsChanged) {
+            // New GPS fix: discard KF tail, add GPS-only point as confirmed
+            stage.trailPositions.length = stage.kfTailStart;
+            stage.trailPositions.push(Cesium.Cartesian3.fromDegrees(lon, lat, gpsAlt));
+            stage.kfTailStart = stage.trailPositions.length;
+            stage.lastGpsLat = lat;
+            stage.lastGpsLon = lon;
+          } else if (stage.lastGpsLat === null) {
+            stage.lastGpsLat = lat;
+            stage.lastGpsLon = lon;
+          }
+          // Append KF tail point (stale GPS lat/lon + live KF altitude)
+          stage.trailPositions.push(Cesium.Cartesian3.fromDegrees(lon, lat, displayAlt));
+        } else {
+          // GPS-only mode: flush any leftover KF tail first
+          if (stage.kfTailStart < stage.trailPositions.length) {
+            stage.trailPositions.length = stage.kfTailStart;
+          }
+          stage.trailPositions.push(pos);
+          stage.kfTailStart = stage.trailPositions.length;
+        }
+        stage.trailLine.positions = stage.trailPositions.slice();
       }
     });
 
@@ -319,6 +375,8 @@ export function StreamMapOverlay() {
   const orbitSpeed = parseFloat(params.get("orbitspeed")) || 0.0006;
   const pitch = parseFloat(params.get("pitch")) || -45;
   const distance = parseFloat(params.get("distance")) || 10000;
+  const adaptive = params.get("adaptive") === "1";
+  const useKF = params.get("usekf") === "1";
 
   const labelOverrides = {};
   const labelName = params.get("labelname");
@@ -329,7 +387,7 @@ export function StreamMapOverlay() {
     if (labelColor) labelOverrides[trackIndex].color = labelColor.startsWith("#") ? labelColor : `#${labelColor}`;
   }
 
-  return <LivePlotter overlay trackIndex={trackIndex} orbitSpeed={orbitSpeed} pitch={pitch} distance={distance} labelOverrides={labelOverrides} />;
+  return <LivePlotter overlay trackIndex={trackIndex} orbitSpeed={orbitSpeed} pitch={pitch} distance={distance} adaptive={adaptive} useKF={useKF} labelOverrides={labelOverrides} />;
 }
 
 export function MapView() {
