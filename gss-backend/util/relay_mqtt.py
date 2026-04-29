@@ -1,6 +1,5 @@
 from flask_mqtt import Mqtt
 from flask_socketio import SocketIO, emit
-import configparser
 import json
 import os
 import time
@@ -17,26 +16,20 @@ CONFIGURED_PORT = 1884
 EFFECTIVE_HOST = 'mqtt'    # After resolve_broker() aliasing and fallback
 EFFECTIVE_PORT = 1884
 
-config = configparser.ConfigParser()
-config.read('./config.ini')
+# Wildcard MQTT topics. Telemetry streams are per-flight-computer (SN), so we
+# subscribe to a wildcard and parse the SN out of the topic at message time
+# rather than enumerating channels in config.
+FLIGHT_DATA_WILDCARD = 'FlightData/+'
+CONTROL_WILDCARD = 'Control/+'
+COMMON_WILDCARD = 'Common/#'
 
-def get_telemetry_channels():
-    all_channels = []
-    for section in config.sections():
-        if section.startswith('Telemetry:'):
-            channel = {}
-            channel['name'] = section.split(':')[1]
-            channel['control_channel'] = config[section]['control_channel']
-            channel['data_channel'] = config[section]['data_channel']
-            channel['default_rf'] = config[section]['default_rf']
-            all_channels.append(channel)
-    return all_channels
-
-def get_common_channel():
-    return config['default']['common_channel']
-
-ALL_CHANNELS = get_telemetry_channels()
 GSS_GLOBALS = {}
+
+# Last-seen serial_info envelope per source_id. Replayed to socket.io clients on
+# connect so the frontend's MIDAS roster survives a page reload (the broker
+# delivers retained payloads to *us* on subscribe, but socket.io clients that
+# join after that never see them).
+SERIAL_INFO_CACHE = {}
 
 def update_gss_globals(incoming):
     global GSS_GLOBALS
@@ -51,6 +44,18 @@ class RelayMqtt:
         socketio = SocketIO(app, cors_allowed_origins="*")
         self.__gss_globals = {}
 
+
+        @socketio.on("connect")
+        def handle_socket_connect():
+            # Replay the cached serial_info envelopes to the just-connected client.
+            # Without this, a page reload empties the MIDAS roster until the next
+            # standalone heartbeat lands.
+            count = 0
+            for src, envelope in SERIAL_INFO_CACHE.items():
+                emit('mqtt_message', json.dumps(envelope))
+                count += 1
+            if count:
+                print(f"[serial_info] replayed {count} cached envelopes to new client", flush=True)
 
         @socketio.on("sync")
         def handle_sync_ws(sync_type):
@@ -149,15 +154,10 @@ class RelayMqtt:
                 MQTT_CONNECTED = True
                 print(f"Connected to MQTT broker at {broker} (degraded={DS_DEGRADED}), subscribing...", flush=True)
 
-                # Subscribe to common channel
-                mqtt.subscribe(get_common_channel())
-                print(f"Subscribed to common channel {get_common_channel()}", flush=True)
-
-                # Subscribe to all telemetry channels
-                for channel in ALL_CHANNELS:
-                    mqtt.subscribe(channel['data_channel'])
-                    mqtt.subscribe(channel['control_channel'])
-                    print(f"Subscribed to telemetry channel {channel['name']} ({channel['control_channel']}/{channel['data_channel']})", flush=True)
+                mqtt.subscribe(FLIGHT_DATA_WILDCARD)
+                mqtt.subscribe(CONTROL_WILDCARD)
+                mqtt.subscribe(COMMON_WILDCARD)
+                print(f"Subscribed to {FLIGHT_DATA_WILDCARD}, {CONTROL_WILDCARD}, {COMMON_WILDCARD}", flush=True)
 
             else:
                 MQTT_CONNECTED = False
@@ -183,10 +183,38 @@ class RelayMqtt:
 
         @mqtt.on_message()
         def handle_mqtt_message(client, userdata, message):
-            # print('Received message on topic {}: {}'.format(message.topic, message.payload.decode()), flush=True)
+            # DEBUG: log every received message so we can see if Common/serial_info/+ is arriving at all.
+            try:
+                _payload_preview = message.payload.decode()[:200]
+            except Exception:
+                _payload_preview = "<binary>"
+            print(f"[MQTT RX] topic={message.topic} payload={_payload_preview}", flush=True)
+
+            # Empty retained payload on Common/serial_info/<source> → the standalone
+            # has gone away. This is the standalone's LWT firing (or a graceful
+            # shutdown sending the same tombstone). Empty payload + retain=true also
+            # clears the broker's retained record so a fresh subscribe won't see it.
+            if message.topic.startswith("Common/serial_info/") and len(message.payload) == 0:
+                source_id = message.topic[len("Common/serial_info/"):]
+                if source_id in SERIAL_INFO_CACHE:
+                    del SERIAL_INFO_CACHE[source_id]
+                envelope = {
+                    "metadata": {
+                        "type": "serial_info_remove",
+                        "time_republished": time.time(),
+                    },
+                    "source_id": source_id,
+                }
+                print(f"[serial_info] eviction source_id={source_id}", flush=True)
+                socketio.start_background_task(target=emit_mqtt_msg, message=envelope)
+                return
 
             # parse packet
-            msg_payload = json.loads(message.payload)
+            try:
+                msg_payload = json.loads(message.payload)
+            except json.JSONDecodeError as e:
+                print(f"[MQTT RX] JSON decode failed for topic={message.topic}: {e}", flush=True)
+                return
 
             if("type" in msg_payload):
                 # Ack / cmd status packets
@@ -194,7 +222,7 @@ class RelayMqtt:
                     print("Emitting packet (ack/bad)")
                     socketio.start_background_task(target=cmd_stat_msg, message=99)
                     return
-                
+
                 if(msg_payload["type"] == "acknowledge_combiner"):
                     print("Emitting packet (cmb ack)")
                     socketio.start_background_task(target=cmd_stat_msg, message=2)
@@ -204,10 +232,27 @@ class RelayMqtt:
                     print("Emitting packet (ack/sent)")
                     socketio.start_background_task(target=cmd_stat_msg, message=3)
                     return
-                
+
                 if(msg_payload["type"] == "command_acknowledge"):
                     print("Emitting packet (ack/good)")
                     socketio.start_background_task(target=cmd_stat_msg, message=4)
+                    return
+
+                # FC roster announcement from a standalone (Common/serial_info/+).
+                # Pass through with a metadata envelope so the frontend handler can
+                # route on metadata.type like other packet kinds. Cache the latest
+                # envelope per source_id so a freshly-connecting client gets the
+                # current roster without waiting for the next standalone heartbeat.
+                if(msg_payload["type"] == "serial_info"):
+                    msg_payload["metadata"] = {
+                        "type": "serial_info",
+                        "time_republished": time.time(),
+                    }
+                    src = msg_payload.get('source_id')
+                    if src is not None:
+                        SERIAL_INFO_CACHE[src] = msg_payload
+                    print(f"[serial_info] forwarding source_id={src} serials={msg_payload.get('serials')} time_published={msg_payload.get('time_published')}", flush=True)
+                    socketio.start_background_task(target=emit_mqtt_msg, message=msg_payload)
                     return
                 
 
@@ -241,13 +286,13 @@ class RelayMqtt:
                 return
 
             if(msg_payload["data"]["type"] == "data"):
-                # Is telemetry packet
-
-                # Determine which channel to interpret as
-                payload_channel = msg_payload["metadata"]["raw_stream"]
-                for channel in ALL_CHANNELS:
-                    if(channel["data_channel"] == payload_channel):
-                        msg_payload["metadata"]["stream"] = channel["name"]
+                # Telemetry packet. Topic format: FlightData/<serial>; the bare SN
+                # becomes the stream identity.
+                topic = message.topic
+                if "/" in topic:
+                    msg_payload["metadata"]["stream"] = topic.split("/", 1)[1]
+                else:
+                    msg_payload["metadata"]["stream"] = topic
 
                 msg_payload["metadata"]["time_republished"] = time.time()
                 msg_payload["metadata"]["type"] = "telemetry"
@@ -255,6 +300,9 @@ class RelayMqtt:
                 print(f"Emitting packet (telem)", flush=True)
                 socketio.start_background_task(target=emit_mqtt_msg, message=msg_payload)
                 return
+
+            # Fell off every branch — log so we can see what's getting dropped.
+            print(f"[MQTT RX] UNHANDLED topic={message.topic} keys={list(msg_payload.keys())} type={msg_payload.get('type')!r}", flush=True)
 
         mqtt.init_app(app)
 

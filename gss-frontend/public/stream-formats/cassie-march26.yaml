@@ -9,6 +9,7 @@ audio_presets:
   p_b:
     - IPCAM_3
     - IPCAM_4
+  mute_all: []
 
 
 scenes:

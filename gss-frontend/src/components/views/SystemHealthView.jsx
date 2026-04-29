@@ -1,8 +1,110 @@
-import React, { useContext, useEffect } from 'react';
-import { GSSDataProvider, useTelemetry } from '../dataflow/gssdata.jsx'
+import React, { useContext, useEffect, useState } from 'react';
+import { GSSDataProvider, useTelemetry, useFCRoster, useFCSources, useFCAliases, formatSN } from '../dataflow/gssdata.jsx'
 import { Timer } from '../reusable/Timer.jsx'
-import { SingleValue, MultiValue, ValueGroup, SingleValueGroupRow, StatusDisplay, StatusDisplayWithValue } from '../reusable/ValueDisplay.jsx'
+import { SingleValue, MultiValue, ValueGroup, SingleValueGroupRow, StatusDisplay, StatusDisplayWithValue, GenericDisplay } from '../reusable/ValueDisplay.jsx'
 import { AngleGauge } from '../spec/AngleGauge.jsx'
+
+// Tick once per second so the Reporting Sources "last seen" age stays current
+// even when no new packets land.
+function useNowTick(intervalMs = 1000) {
+    const [now, setNow] = useState(() => Date.now() / 1000);
+    useEffect(() => {
+        const iv = setInterval(() => setNow(Date.now() / 1000), intervalMs);
+        return () => clearInterval(iv);
+    }, [intervalMs]);
+    return now;
+}
+
+const SOURCE_STALE_S = 5;   // older than this and we caution-color the row
+const SOURCE_DEAD_S = 15;   // older than this and we error-color the row
+
+function FCAliasRow({ sn, alias, setAlias }) {
+    const [draft, setDraft] = useState(alias ?? "");
+    useEffect(() => { setDraft(alias ?? ""); }, [alias]);
+
+    const commit = () => {
+        if ((draft ?? "") !== (alias ?? "")) setAlias(sn, draft);
+    };
+
+    return (
+        <div style={{display: "flex", alignItems: "center", gap: 12, padding: "6px 10px"}}>
+            <span style={{fontFamily: "monospace", minWidth: 100}}>MIDAS {formatSN(sn)}</span>
+            <input
+                type="text"
+                placeholder="(no alias)"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                onBlur={commit}
+                onKeyDown={(e) => { if (e.key === "Enter") e.target.blur(); }}
+                style={{
+                    flex: 1,
+                    background: "rgba(255,255,255,0.05)",
+                    color: "#e0e0e0",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    borderRadius: 4,
+                    padding: "4px 8px",
+                    fontFamily: "monospace",
+                    fontSize: "0.9em",
+                }}
+            />
+        </div>
+    );
+}
+
+function FCSourceRow({ sourceId, info, now }) {
+    const safeInfo = (info && typeof info === 'object') ? info : {};
+    const age = safeInfo.time_published != null ? (now - safeInfo.time_published) : null;
+    let ageColor = "#888";
+    let ageText = "—";
+    if (age != null) {
+        if (age >= SOURCE_DEAD_S) ageColor = "#e06060";
+        else if (age >= SOURCE_STALE_S) ageColor = "#e0c060";
+        else ageColor = "#60c060";
+        ageText = `${age.toFixed(1)}s ago`;
+    }
+    const reported = (Array.isArray(safeInfo.serials) ? safeInfo.serials : []).filter(s => s != null).map(formatSN);
+    return (
+        <div style={{display: "flex", alignItems: "center", gap: 12, padding: "6px 10px", fontFamily: "monospace", fontSize: "0.9em"}}>
+            <span style={{flex: 1, overflow: "hidden", textOverflow: "ellipsis"}}>{sourceId}</span>
+            <span style={{color: "#aaa"}}>SNs: {reported.length ? reported.join(", ") : "(none)"}</span>
+            <span style={{color: ageColor, minWidth: 90, textAlign: "right"}}>{ageText}</span>
+        </div>
+    );
+}
+
+function FlightComputerSection() {
+    const rosterRaw = useFCRoster();
+    const sourcesRaw = useFCSources();
+    const [aliasesRaw, setAlias] = useFCAliases();
+    const now = useNowTick(1000);
+
+    const roster = Array.isArray(rosterRaw) ? rosterRaw : [];
+    const sources = (sourcesRaw && typeof sourcesRaw === 'object') ? sourcesRaw : {};
+    const aliases = (aliasesRaw && typeof aliasesRaw === 'object') ? aliasesRaw : {};
+
+    const sourceIds = Object.keys(sources).sort();
+
+    return (
+        <ValueGroup label={"MIDAS"}>
+            <ValueGroup label={"Active"} use_smaller_labels>
+                {roster.length === 0
+                    ? <div style={{padding: "8px 10px", color: "#888"}}>No MIDAS reported active.</div>
+                    : roster.map(sn => (
+                        <FCAliasRow key={sn} sn={sn} alias={aliases[sn]} setAlias={setAlias} />
+                    ))
+                }
+            </ValueGroup>
+            <ValueGroup label={"Reporting Sources"} use_smaller_labels>
+                {sourceIds.length === 0
+                    ? <div style={{padding: "8px 10px", color: "#888"}}>No standalone processes reporting.</div>
+                    : sourceIds.map(id => (
+                        <FCSourceRow key={id} sourceId={id} info={sources[id]} now={now} />
+                    ))
+                }
+            </ValueGroup>
+        </ValueGroup>
+    );
+}
 
 const health_to_percent = (health_telem) => {
   if(!health_telem) {
@@ -169,6 +271,8 @@ export function SystemHealthView() {
   return (
     <>
       <div className='telemetry-view'>
+
+        <FlightComputerSection />
 
         <ValueGroup label={"Communication"} hidden={booster_t_published === null && sustainer_t_published === null}>
 

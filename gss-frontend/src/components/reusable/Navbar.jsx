@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { DataTestButton } from '../spec/DataTest';
+import { useFCRoster, useFCAliases, formatSN } from '../dataflow/gssdata.jsx';
 import './Navbar.css';
 
 function NavbarItem({ tab_value, text, selected_tab, tabCallback }) {
@@ -7,11 +9,42 @@ function NavbarItem({ tab_value, text, selected_tab, tabCallback }) {
     </div>
 }
 
+function fcLabel(sn, alias) {
+    return alias ? `${alias} (${formatSN(sn)})` : `MIDAS ${formatSN(sn)}`;
+}
+
 function StreamSelect({ streamCallback, currentStream }) {
+    const rosterRaw = useFCRoster();
+    const [aliasesRaw] = useFCAliases();
+    // Belt-and-suspenders against malformed context values — render must never throw.
+    const roster = Array.isArray(rosterRaw) ? rosterRaw : [];
+    const aliases = (aliasesRaw && typeof aliasesRaw === 'object') ? aliasesRaw : {};
+
+    // Auto-select the first available SN once the roster lands, but only if the user
+    // hasn't explicitly chosen something already. We override the legacy default literals
+    // ("sustainer" / "booster" / "") on first roster arrival; if the user picked an SN
+    // that later drops off the roster (radio dip, etc.) we leave their selection alone.
+    useEffect(() => {
+        if (roster.length === 0) return;
+        if (roster.includes(currentStream)) return;
+        if (currentStream === "sustainer" || currentStream === "booster" || !currentStream) {
+            streamCallback(roster[0]);
+        }
+    }, [roster, currentStream, streamCallback]);
+
+    if (roster.length === 0) {
+        return <div className="stream-select">
+            <select className="stream-select-dropdown" disabled value="">
+                <option value="">No MIDAS reported</option>
+            </select>
+        </div>;
+    }
+
     return <div className="stream-select">
         <select className="stream-select-dropdown" value={currentStream} onChange={(e) => streamCallback(e.target.value)}>
-            <option value="sustainer">Sustainer</option>
-            <option value="booster">Booster</option>
+            {roster.map(sn => (
+                <option key={sn} value={sn}>{fcLabel(sn, aliases[sn])}</option>
+            ))}
         </select>
     </div>
 }

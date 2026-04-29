@@ -50,14 +50,9 @@ export function CommandingView() {
 
 
   const send_telem_cmd = (raw_cmd) => {
-    // Determine which channel to send it to
-    let channel = "_dump";
-    if(current_channel === "sustainer") {
-      channel = "Control-Sustainer";
-    } else if(current_channel === "booster") {
-      channel = "Control-Booster";
-    }
-
+    // current_channel is the FC serial number selected via the Navbar/GSSChannel context.
+    // Topology: Control/<serial>; payload's `ch` field uses the same slash form.
+    const channel = `Control/${current_channel}`;
     send_mqtt(channel, {"type": "telemetry_command", "raw": raw_cmd, "ch": channel})
   }
 

@@ -30,8 +30,9 @@ ws packet structure:
 
 {
     "metadata": {
-        "raw_stream": "FlightData-Sustainer",
-        "interpret_as": "sustainer", // valid values: "sustainer", "booster", "common"
+        "raw_stream": "FlightData/<serial>",
+        "stream": "<serial>",       // tagged by the relay from the topic suffix
+        "type": "telemetry",
         "time_published": ...,
         "time_recieved": ...,
     },
@@ -47,7 +48,7 @@ tx packet:
 ```json
 {
     "metadata": {
-        "sent_to": "sustainer",
+        "sent_to": "<serial>",
         "sent_time": ...
     },
     "data": {
@@ -57,8 +58,16 @@ tx packet:
 ```
 
 
-### config.ini:
-config.ini has shared configs between multiple containers and is mounted as a volume in relevant locations (root for backend, /public for frontend)
+### MQTT topology:
+Telemetry streams are now per-flight-computer, addressed by serial number:
 
-Config fields prefixed with `Telemetry:` (like `Telemetry:sustainer` define a single "telemetry channel" (a pair of data/control channels for a single data source, think: one stage of a rocket))
+- `FlightData/<serial>` — telemetry packets from a given FC
+- `Control/<serial>` — control commands to a given FC
+- `Common/serial_info/<serial>` — FC roster / metadata
+- `Common/#` — other shared globals
+
+The relay (`gss-backend/util/relay_mqtt.py`) wildcard-subscribes to `FlightData/+`, `Control/+`, and `Common/#`; it parses the SN from the topic suffix and tags it as `metadata.stream` on the relayed WS packet.
+
+### config.ini:
+config.ini has shared configs between multiple containers and is mounted as a volume in relevant locations (root for backend, /public for frontend). It currently has no active fields — the prior `Telemetry:` sections were removed when telemetry routing moved to MQTT wildcards.
 

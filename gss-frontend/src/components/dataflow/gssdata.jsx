@@ -19,28 +19,26 @@ const COMMAND_FEEDBACK_SETTINGS_DEFAULT = {
     last_event_t: Date.now()
 };
 
-// Per-channel contexts. A packet for channel X only changes X's slice identity,
-// so only consumers of that channel re-render. Consumers of sibling channels stay put.
-const GSSBoosterCtx = React.createContext(null);
-const GSSSustainerCtx = React.createContext(null);
+// Per-flight-computer telemetry lives in a single map context keyed by serial number.
+// The map identity changes per packet but un-updated SN slices keep their reference,
+// so a future re-render-isolation layer can be added without changing call sites.
+const GSSFCsCtx = React.createContext({});
 const GSSGlobalsCtx = React.createContext(null);
 const GSSCombinerCtx = React.createContext(null);
-const GSSBoosterHistCtx = React.createContext([]);
-const GSSSustainerHistCtx = React.createContext([]);
+const GSSFCsHistCtx = React.createContext({});
+const GSSRosterCtx = React.createContext([]);
+const GSSSourcesCtx = React.createContext({});
+const GSSAliasesCtx = React.createContext({ aliases: {}, setAlias: () => {}, removeAlias: () => {} });
 const CMDStat = React.createContext(COMMAND_FEEDBACK_SETTINGS_DEFAULT);
 const GSSChannel = React.createContext("sustainer");
 
-const VAL_CTX_BY_CHANNEL = {
-    booster: GSSBoosterCtx,
-    sustainer: GSSSustainerCtx,
-    GSS: GSSGlobalsCtx,
-    gss_combiner: GSSCombinerCtx,
-};
+// Channels reserved for non-FC slices. Anything else parsed off `@<channel>/...`
+// is treated as an FC serial and looked up in the FCs map.
+const GSS_CHANNEL = "GSS";
+const COMBINER_CHANNEL = "gss_combiner";
 
-const HIST_CTX_BY_CHANNEL = {
-    booster: GSSBoosterHistCtx,
-    sustainer: GSSSustainerHistCtx,
-};
+const FC_ALIASES_STORAGE_KEY = "fc_aliases";
+const FC_SOURCES_STORAGE_KEY = "fc_sources";
 
 export const useCommandFeedback = () => React.useContext(CMDStat);
 
@@ -83,34 +81,95 @@ export function addRecalculator(valuehook, func) {
 }
 
 export function GSSDataProvider({ children, default_stream }) {
-    // `value` is a combined dict so the sequencer still gets a merged snapshot,
-    // but each Provider below passes a stable per-channel slice. When a sustainer
-    // packet arrives we do {...prev, sustainer: new}; prev.booster reference is
-    // preserved, so GSSBoosterCtx consumers don't re-render.
-    const [value, setValue] = useState({ booster: null, sustainer: null, GSS: null, gss_combiner: null });
-    const [boosterHist, setBoosterHist] = useState([]);
-    const [sustainerHist, setSustainerHist] = useState([]);
+    // `value` carries the combined snapshot so sequencer callbacks see a merged view.
+    // Per-FC slices live in `value.fcs`; setting one SN reuses the references of the
+    // others, leaving room for re-render isolation if we add per-SN contexts later.
+    const [value, setValue] = useState({ fcs: {}, GSS: null, gss_combiner: null });
+    const [history, setHistory] = useState({}); // { "<sn>": [packets] }
+    // Sources are FC roster announcers, keyed by their source_id (typically a
+    // standalone-process identity like "<host>-<comport>"). Each entry tracks the
+    // serials it currently reports active and the unix time it last published.
+    const [sources, setSources] = useState({}); // { source_id: { serials: [int|null], time_published: number } }
+    const [aliases, setAliases] = useState({}); // { "<sn>": "<user-set name>" }
     const [cmd_stat, set_cmd_stat] = useState(COMMAND_FEEDBACK_SETTINGS_DEFAULT);
 
+    // Roster derives from the union of non-null serials reported across all live sources.
+    // We don't filter by staleness here — the System tab surfaces per-source freshness.
+    const roster = useMemo(() => {
+        const sns = new Set();
+        for (const source of Object.values(sources)) {
+            for (const sn of (source.serials || [])) {
+                if (sn != null) sns.add(String(sn));
+            }
+        }
+        return [...sns].sort();
+    }, [sources]);
+
     CLEAR_T_DATA_FUNC = () => {
-        setValue({ booster: null, sustainer: null, GSS: null, gss_combiner: null });
-        setBoosterHist([]);
-        setSustainerHist([]);
+        setValue({ fcs: {}, GSS: null, gss_combiner: null });
+        setHistory({});
+        setSources({});
     };
 
     useEffect(() => {
-        // Load previously persisted data
+        // Load previously persisted data. We guard the shapes carefully because
+        // we have a long enough rename history that stale localStorage from older
+        // builds is plausible — and a malformed entry will blow up consumers
+        // (e.g. useTelemetryHistory) deep in the render tree.
         if (getSetting("retain_on_reload")) {
             try {
                 const stored_value = JSON.parse(localStorage.getItem("telem_snapshot"));
-                const stored_bhist = JSON.parse(localStorage.getItem("telem_history_booster"));
-                const stored_shist = JSON.parse(localStorage.getItem("telem_history_sustainer"));
-                if (stored_value) setValue(stored_value);
-                if (stored_bhist) setBoosterHist(stored_bhist);
-                if (stored_shist) setSustainerHist(stored_shist);
-            } catch (e) {
-                // corrupted storage; ignore
+                if (
+                    stored_value &&
+                    typeof stored_value === 'object' &&
+                    !Array.isArray(stored_value) &&
+                    stored_value.fcs &&
+                    typeof stored_value.fcs === 'object' &&
+                    !Array.isArray(stored_value.fcs)
+                ) {
+                    setValue(stored_value);
+                }
+            } catch (e) { /* corrupted; ignore */ }
+
+            try {
+                const stored_history = JSON.parse(localStorage.getItem("telem_history"));
+                if (stored_history && typeof stored_history === 'object' && !Array.isArray(stored_history)) {
+                    const cleaned = {};
+                    for (const [k, v] of Object.entries(stored_history)) {
+                        if (Array.isArray(v)) cleaned[k] = v;
+                    }
+                    setHistory(cleaned);
+                }
+            } catch (e) { /* corrupted; ignore */ }
+        }
+
+        // FC aliases are user-set, persist independently of retain_on_reload.
+        try {
+            const stored_aliases = JSON.parse(localStorage.getItem(FC_ALIASES_STORAGE_KEY));
+            if (stored_aliases && typeof stored_aliases === 'object') setAliases(stored_aliases);
+        } catch (e) {
+            // corrupted storage; ignore
+        }
+
+        // Sources roster: persisted so a page reload doesn't blank the MIDAS dropdown
+        // before the backend replays / next heartbeat arrives. Stale entries get a visible
+        // "last seen Xs ago" age in the System tab so they aren't mistaken for live ones.
+        try {
+            const stored_sources = JSON.parse(localStorage.getItem(FC_SOURCES_STORAGE_KEY));
+            if (stored_sources && typeof stored_sources === 'object' && !Array.isArray(stored_sources)) {
+                const cleaned = {};
+                for (const [k, v] of Object.entries(stored_sources)) {
+                    if (v && typeof v === 'object') {
+                        cleaned[k] = {
+                            serials: Array.isArray(v.serials) ? v.serials : [],
+                            time_published: typeof v.time_published === 'number' ? v.time_published : null,
+                        };
+                    }
+                }
+                setSources(cleaned);
             }
+        } catch (e) {
+            // corrupted storage; ignore
         }
 
         socket.on("sync_response", (syncdata) => {
@@ -120,7 +179,7 @@ export function GSSDataProvider({ children, default_stream }) {
                 setValue(prev => {
                     const next = { ...prev, GSS: data };
                     global_state_callbacks.forEach(cb => cb());
-                    __SEQUENCER_UPDATE_EVENTS(next);
+                    __SEQUENCER_UPDATE_EVENTS({ ...next.fcs, GSS: next.GSS, gss_combiner: next.gss_combiner });
                     return next;
                 });
             }
@@ -140,28 +199,82 @@ export function GSSDataProvider({ children, default_stream }) {
             const json_data = JSON.parse(data);
             const type = json_data?.metadata?.type;
 
-            if (type === "telemetry" || type === "gss_health") {
-                const channel = json_data.metadata.stream;
+            // DEBUG: surface every relayed packet so we can confirm the frontend is seeing them.
+            // Trim the payload preview to keep the console scannable when telemetry is firing.
+            console.log(`[WS RX] type=${type}`, json_data?.metadata, json_data?.source_id ? `source_id=${json_data.source_id}` : "");
+
+            if (type === "telemetry") {
+                // FC telemetry: backend tags metadata.stream with the bare serial number.
+                const sn = json_data.metadata.stream;
                 const data_ret_policy = getSetting("data_retention");
 
                 setValue(prev => {
-                    const next = { ...prev, [channel]: json_data };
-                    __SEQUENCER_UPDATE_EVENTS(next);
+                    const next_fcs = { ...prev.fcs, [sn]: json_data };
+                    const next = { ...prev, fcs: next_fcs };
+                    // Sequencer expects a flat snapshot keyed by channel name.
+                    __SEQUENCER_UPDATE_EVENTS({ ...next_fcs, GSS: next.GSS, gss_combiner: next.gss_combiner });
                     return next;
                 });
 
-                if (type === "telemetry") {
-                    const append = prev => {
-                        const nh = [...prev, json_data];
-                        return (data_ret_policy >= 0 && nh.length > data_ret_policy)
-                            ? nh.slice(-data_ret_policy)
-                            : nh;
-                    };
-                    if (channel === "booster") setBoosterHist(append);
-                    else if (channel === "sustainer") setSustainerHist(append);
-                }
+                setHistory(prev => {
+                    const arr = prev[sn] ?? [];
+                    const nh = [...arr, json_data];
+                    const trimmed = (data_ret_policy >= 0 && nh.length > data_ret_policy)
+                        ? nh.slice(-data_ret_policy)
+                        : nh;
+                    return { ...prev, [sn]: trimmed };
+                });
 
                 telemetry_callbacks.forEach(cb => cb());
+                return;
+            }
+
+            if (type === "gss_health") {
+                setValue(prev => {
+                    const next = { ...prev, gss_combiner: json_data };
+                    __SEQUENCER_UPDATE_EVENTS({ ...next.fcs, GSS: next.GSS, gss_combiner: next.gss_combiner });
+                    return next;
+                });
+                telemetry_callbacks.forEach(cb => cb());
+                return;
+            }
+
+            if (type === "serial_info") {
+                // FC roster heartbeat from a standalone. Payload shape:
+                // { type, serials: [int|null,...], time_published, source_id }
+                const source_id = json_data?.source_id;
+                console.log(`[serial_info] source_id=${source_id} serials=${JSON.stringify(json_data?.serials)} time_published=${json_data?.time_published}`);
+                if (source_id != null) {
+                    setSources(prev => {
+                        const next = {
+                            ...prev,
+                            [source_id]: {
+                                serials: Array.isArray(json_data.serials) ? json_data.serials : [],
+                                time_published: json_data.time_published ?? null,
+                            },
+                        };
+                        console.log("[serial_info] sources now:", next);
+                        return next;
+                    });
+                } else {
+                    console.warn("[serial_info] dropped — missing source_id", json_data);
+                }
+                return;
+            }
+
+            if (type === "serial_info_remove") {
+                // Standalone LWT (or graceful shutdown tombstone): drop the source.
+                // Roster recomputes via useMemo and the dropdown updates.
+                const source_id = json_data?.source_id;
+                console.log(`[serial_info] removing source_id=${source_id}`);
+                if (source_id != null) {
+                    setSources(prev => {
+                        if (!(source_id in prev)) return prev;
+                        const next = { ...prev };
+                        delete next[source_id];
+                        return next;
+                    });
+                }
                 return;
             }
 
@@ -170,7 +283,7 @@ export function GSSDataProvider({ children, default_stream }) {
                     const merged = prev.GSS ? { ...prev.GSS, ...json_data.data } : json_data.data;
                     const next = { ...prev, GSS: merged };
                     global_state_callbacks.forEach(cb => cb());
-                    __SEQUENCER_UPDATE_EVENTS(next);
+                    __SEQUENCER_UPDATE_EVENTS({ ...next.fcs, GSS: next.GSS, gss_combiner: next.gss_combiner });
                     return next;
                 });
             }
@@ -204,21 +317,18 @@ export function GSSDataProvider({ children, default_stream }) {
     // Debounced localStorage persistence: write at most once per second, independent of packet rate.
     // The previous implementation JSON.stringify'd the entire history on every packet (~20 Hz).
     const valueRef = useRef(value);
-    const boosterHistRef = useRef(boosterHist);
-    const sustainerHistRef = useRef(sustainerHist);
+    const historyRef = useRef(history);
 
     useEffect(() => {
         valueRef.current = value;
-        boosterHistRef.current = boosterHist;
-        sustainerHistRef.current = sustainerHist;
-    }, [value, boosterHist, sustainerHist]);
+        historyRef.current = history;
+    }, [value, history]);
 
     useEffect(() => {
         const iv = setInterval(() => {
             try {
                 localStorage.setItem("telem_snapshot", JSON.stringify(valueRef.current));
-                localStorage.setItem("telem_history_booster", JSON.stringify(boosterHistRef.current));
-                localStorage.setItem("telem_history_sustainer", JSON.stringify(sustainerHistRef.current));
+                localStorage.setItem("telem_history", JSON.stringify(historyRef.current));
             } catch (e) {
                 // storage quota exceeded or serialization failure; skip this tick
             }
@@ -226,25 +336,98 @@ export function GSSDataProvider({ children, default_stream }) {
         return () => clearInterval(iv);
     }, []);
 
+    // Aliases: user-driven, low-volume — write synchronously on change.
+    useEffect(() => {
+        try {
+            localStorage.setItem(FC_ALIASES_STORAGE_KEY, JSON.stringify(aliases));
+        } catch (e) {
+            // ignore
+        }
+    }, [aliases]);
+
+    // Sources: low-volume (one heartbeat per standalone every few seconds) — write on change.
+    useEffect(() => {
+        try {
+            localStorage.setItem(FC_SOURCES_STORAGE_KEY, JSON.stringify(sources));
+        } catch (e) {
+            // ignore
+        }
+    }, [sources]);
+
+    // Stable callbacks for the aliases context. Defined inside Provider so they
+    // capture the current setter, but memoized so consumers don't re-render
+    // when only the alias map changes.
+    const aliasesCtxValue = useMemo(() => ({
+        aliases,
+        setAlias: (sn, name) => {
+            setAliases(prev => {
+                const trimmed = (name ?? "").trim();
+                if (!trimmed) {
+                    if (!(sn in prev)) return prev;
+                    const next = { ...prev };
+                    delete next[sn];
+                    return next;
+                }
+                if (prev[sn] === trimmed) return prev;
+                return { ...prev, [sn]: trimmed };
+            });
+        },
+        removeAlias: (sn) => {
+            setAliases(prev => {
+                if (!(sn in prev)) return prev;
+                const next = { ...prev };
+                delete next[sn];
+                return next;
+            });
+        },
+    }), [aliases]);
+
     return (
         <GSSChannel.Provider value={default_stream}>
-            <GSSBoosterCtx.Provider value={value.booster}>
-                <GSSSustainerCtx.Provider value={value.sustainer}>
-                    <GSSGlobalsCtx.Provider value={value.GSS}>
-                        <GSSCombinerCtx.Provider value={value.gss_combiner}>
-                            <GSSBoosterHistCtx.Provider value={boosterHist}>
-                                <GSSSustainerHistCtx.Provider value={sustainerHist}>
-                                    <CMDStat.Provider value={cmd_stat}>
-                                        {children}
-                                    </CMDStat.Provider>
-                                </GSSSustainerHistCtx.Provider>
-                            </GSSBoosterHistCtx.Provider>
-                        </GSSCombinerCtx.Provider>
-                    </GSSGlobalsCtx.Provider>
-                </GSSSustainerCtx.Provider>
-            </GSSBoosterCtx.Provider>
+            <GSSFCsCtx.Provider value={value.fcs}>
+                <GSSGlobalsCtx.Provider value={value.GSS}>
+                    <GSSCombinerCtx.Provider value={value.gss_combiner}>
+                        <GSSFCsHistCtx.Provider value={history}>
+                            <GSSRosterCtx.Provider value={roster}>
+                                <GSSSourcesCtx.Provider value={sources}>
+                                    <GSSAliasesCtx.Provider value={aliasesCtxValue}>
+                                        <CMDStat.Provider value={cmd_stat}>
+                                            {children}
+                                        </CMDStat.Provider>
+                                    </GSSAliasesCtx.Provider>
+                                </GSSSourcesCtx.Provider>
+                            </GSSRosterCtx.Provider>
+                        </GSSFCsHistCtx.Provider>
+                    </GSSCombinerCtx.Provider>
+                </GSSGlobalsCtx.Provider>
+            </GSSFCsCtx.Provider>
         </GSSChannel.Provider>
     );
+}
+
+/** Sorted list of currently-active FC serial numbers, unioned across all standalones'
+ *  serial_info heartbeats. Strings (since topic-derived stream IDs are strings). */
+export function useFCRoster() {
+    return React.useContext(GSSRosterCtx);
+}
+
+/** Display-format an SN as a zero-padded 3-digit string ("7" → "007", "13" → "013").
+ *  Internal channel keys stay unpadded — only the rendered label changes. */
+export function formatSN(sn) {
+    return String(sn ?? "").padStart(3, '0');
+}
+
+/** Map of source_id → { serials, time_published } reported on Common/serial_info/+.
+ *  Use for the System tab to show which standalones are reporting and how fresh. */
+export function useFCSources() {
+    return React.useContext(GSSSourcesCtx);
+}
+
+/** [aliases, setAlias, removeAlias] — user-set names for FCs, persisted to localStorage.
+ *  setAlias("8", "") removes the alias. */
+export function useFCAliases() {
+    const { aliases, setAlias, removeAlias } = React.useContext(GSSAliasesCtx);
+    return [aliases, setAlias, removeAlias];
 }
 
 // These "use*" helpers don't actually call any hooks — they're called both inside
@@ -296,15 +479,12 @@ export function useSocketEvent(event, handler) {
 }
 
 // --- Telemetry lookup ---
-// telemetry code system:
-// Passing in a telemetry code indicates what value you are trying to access from the telemetry system.
-// Since our telemetry is shared between booster/sustainer/common/etc networks, you need to specify which network.
-// This is done with the leading @prefix/, such as @booster/, @sustainer/, followed by the code for the given value.
-// For instance, to get sustainer highG_ax, you would pass "@sustainer/value.highG_ax".
-// If the packet structure is nested, then you can access further down values using the . separator.
+// Telemetry codes name a value by `@<channel>/<path>`, where <channel> is either a flight-computer
+// serial number (e.g. "8", "13"), the literal "GSS" for global state, or "gss_combiner" for combiner
+// health. <path> walks the slice with dots: "@8/value.highG_ax".
 //
-// Starting a telemetry code with '/' indicates to use the currently selected "default", set at the top level by the GSS provider.
-// I.E: Setting GSSChannel to "booster" will automatically transliterate "/value.highG_ax" to "@booster/value.highG_ax"
+// A code beginning with "/" uses the currently selected default channel set by the GSSChannel
+// context. Setting GSSChannel to "8" makes "/value.highG_ax" resolve to "@8/value.highG_ax".
 
 function parseChannelAndPath(telem_code, default_channel) {
     if (telem_code[0] === '/') {
@@ -334,7 +514,7 @@ function extractFromSlice(slice, path, metadata_flag, channel, defaultvalue) {
     return v;
 }
 
-// Extracts a value from a merged snapshot ({booster, sustainer, GSS, ...}).
+// Extracts a value from a flat snapshot keyed by channel (SN, "GSS", or "gss_combiner").
 function extractFromSnapshot(snapshot, telem_code, default_channel, metadata_flag, defaultvalue) {
     const parsed = parseChannelAndPath(telem_code, default_channel);
     if (!parsed) return defaultvalue;
@@ -365,47 +545,59 @@ export function useTelemetrySnapshot(snapshot, telem_code = undefined, metadata 
     return extractFromSnapshot(snapshot, telem_code, null, metadata, defaultvalue);
 }
 
+// Resolve a parsed channel name to its slice, walking the appropriate context.
+// `fcs`, `GSS`, `combiner` are all already subscribed via useContext at the call
+// site so hook ordering stays stable regardless of which channel we route to.
+function resolveSlice(channel, fcs, GSS, combiner) {
+    if (channel === GSS_CHANNEL) return GSS;
+    if (channel === COMBINER_CHANNEL) return combiner;
+    return fcs?.[channel];
+}
+
 export function useTelemetryRaw(telem_code = undefined, metadata = false, defaultvalue = null) {
     // All hook calls are unconditional and in stable order — safe even if telem_code
     // varies between renders.
     const default_channel = React.useContext(GSSChannel);
-    const parsed = telem_code !== undefined ? parseChannelAndPath(telem_code, default_channel) : null;
-    const ctx = VAL_CTX_BY_CHANNEL[parsed?.channel] ?? GSSBoosterCtx;
-    const slice = React.useContext(ctx);
+    const fcs = React.useContext(GSSFCsCtx);
+    const GSS = React.useContext(GSSGlobalsCtx);
+    const combiner = React.useContext(GSSCombinerCtx);
 
     if (telem_code === undefined) return undefined;
-    if (!parsed || !VAL_CTX_BY_CHANNEL[parsed.channel]) return defaultvalue;
+    const parsed = parseChannelAndPath(telem_code, default_channel);
+    if (!parsed) return defaultvalue;
+    const slice = resolveSlice(parsed.channel, fcs, GSS, combiner);
     return extractFromSlice(slice, parsed.path, metadata, parsed.channel, defaultvalue);
 }
 
 export function useTelemetry(telem_code = undefined, metadata = false, defaultvalue = null) {
     const default_channel = React.useContext(GSSChannel);
-    const parsed = telem_code !== undefined ? parseChannelAndPath(telem_code, default_channel) : null;
-    const ctx = VAL_CTX_BY_CHANNEL[parsed?.channel] ?? GSSBoosterCtx;
-    const slice = React.useContext(ctx);
+    const fcs = React.useContext(GSSFCsCtx);
+    const GSS = React.useContext(GSSGlobalsCtx);
+    const combiner = React.useContext(GSSCombinerCtx);
 
     if (telem_code === undefined) return undefined;
-    if (!parsed || !VAL_CTX_BY_CHANNEL[parsed.channel]) return defaultvalue;
+    const parsed = parseChannelAndPath(telem_code, default_channel);
+    if (!parsed) return defaultvalue;
+    const slice = resolveSlice(parsed.channel, fcs, GSS, combiner);
 
     const calc = telemetry_calculator_hooks[parsed.full_code];
     if (calc) {
         const [target_code, fn] = calc;
         const target_parsed = parseChannelAndPath(target_code, default_channel);
         if (!target_parsed) return defaultvalue;
-        // In practice translators are same-channel (see SettingsView.jsx callsites),
-        // so we reuse the already-subscribed slice rather than subscribing to a second context.
-        const raw = extractFromSlice(slice, target_parsed.path, metadata, parsed.channel, null) ?? 0;
+        const target_slice = resolveSlice(target_parsed.channel, fcs, GSS, combiner);
+        const raw = extractFromSlice(target_slice, target_parsed.path, metadata, target_parsed.channel, null) ?? 0;
         return fn(raw);
     }
     return extractFromSlice(slice, parsed.path, metadata, parsed.channel, defaultvalue);
 }
 
-/** Functionally equivalent to useTelemetry but returns historical values arranged oldest to newest. */
+/** Functionally equivalent to useTelemetry but returns historical values arranged oldest to newest.
+ *  History is only retained for FC telemetry channels — GSS / gss_combiner return []. */
 export function useTelemetryHistory(telem_code = undefined, metadata = false, defaultvalue = null) {
     const default_channel = React.useContext(GSSChannel);
+    const histMap = React.useContext(GSSFCsHistCtx);
 
-    // Parse channel up front — fall back to sustainer context for the no-code case
-    // so the hook call stays stable.
     let parsed = null;
     let channel = default_channel;
     if (telem_code !== undefined) {
@@ -413,16 +605,16 @@ export function useTelemetryHistory(telem_code = undefined, metadata = false, de
         if (parsed) channel = parsed.channel;
     }
 
-    const hist_ctx = HIST_CTX_BY_CHANNEL[channel] ?? GSSSustainerHistCtx;
-    const hist = React.useContext(hist_ctx);
-
+    // ?? alone wouldn't catch a non-array value (e.g. corrupted localStorage); be explicit.
+    const histRaw = histMap?.[channel];
+    const hist = Array.isArray(histRaw) ? histRaw : [];
     const full_code = parsed?.full_code;
     const path = parsed?.path;
     const calc = full_code ? telemetry_calculator_hooks[full_code] : null;
 
     return useMemo(() => {
         if (telem_code === undefined) return hist;
-        if (!parsed || !HIST_CTX_BY_CHANNEL[channel]) return [];
+        if (!parsed) return [];
 
         if (calc) {
             const [target_code, fn] = calc;

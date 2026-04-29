@@ -8,8 +8,8 @@ import in_telem2 from '../../assets/midas-booster-telem.txt'
 const generate_ref_packet = (start_t, t) => {
     let pkt = {
         "metadata": {
-            "raw_stream": "FlightData-Sustainer",
-            "interpret_as": "sustainer",
+            "raw_stream": "FlightData/8",
+            "interpret_as": "8",
             "time_published": start_t/1000 + t,
             "time_recieved": (start_t/1000) + t + 0.1
         },
@@ -28,7 +28,6 @@ const generate_ref_packet = (start_t, t) => {
                 "frequency": 425,
                 "RSSI": Math.abs(Math.cos(t/10)) * -100,
                 "sat_count": Math.abs(Math.sin(t/20)) * 14,
-                "is_sustainer": 0,
                 "kf_velocity": 3*t + (0.05*t**2),
                 "kf_position": t**2 + (0.1*t**3),
                 "c_valid": 0,
@@ -105,13 +104,13 @@ export const DataTestButton = () => {
             // console.log("Current time: ", t, "s");
             let initial_time = dat[START_L]["metadata"]["time_published"]
             
-            // send_mqtt("FlightData-Sustainer", generate_ref_packet(starttime, t));
+            // send_mqtt("FlightData/8", generate_ref_packet(starttime, t));
             // console.log(i);
             let rt = t + initial_time
             // console.log(rt, dat[i]["metadata"]["time_published"])
             while(dat[i]["metadata"]["time_published"] <= rt) {
                 i++;
-                send_mqtt("FlightData-Sustainer", dat[i]);
+                send_mqtt("FlightData/8", dat[i]);
             }
 
         }, 10)
@@ -128,7 +127,7 @@ export const DataTestButton = () => {
         //     // console.log(rt, dat[i]["metadata"]["time_published"])
         //     while(dat2[j]["metadata"]["time_published"] <= rt) {
         //         j++;
-        //         send_mqtt("FlightData-Booster", dat2[j]);
+        //         send_mqtt("FlightData/13", dat2[j]);
         //     }
 
         // }, 10)
