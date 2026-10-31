@@ -88,7 +88,6 @@ export function FullTelemetryView() {
   
   const rssi = data_num("RSSI")
   const freq = data_num("frequency")
-  const is_sus = data_num("is_sustainer")
 
   const dist_unit = getUnit("distance")
   const accel_unit = getUnit("acceleration")
@@ -107,6 +106,7 @@ export function FullTelemetryView() {
   const fix_type_name = fix_type_int_to_fix_type_name(fix_type);
 
   const accel_magnitude = Math.sqrt(accel[0]*accel[0] + accel[1]*accel[1] + accel[2]*accel[2])
+  const serial_num = useTelemetry("/value.serial")
 
   // Atmosphere calcs
   const altitude_baro_raw = useTelemetryRaw("/value.barometer_altitude") || 0;
@@ -233,8 +233,8 @@ export function FullTelemetryView() {
 
                 <MultiValue
                     label={"Comms"}
-                    titles={["RSSI", "Frequency", "SUSTAINER Flag"]}
-                    values={[rssi.toFixed(0), freq.toFixed(2), is_sus]}
+                    titles={["RSSI", "Frequency", "Serial Number"]}
+                    values={[rssi.toFixed(0), freq.toFixed(2), serial_num]}
                     units={[getUnit("power"), "MHz", ""]}
                 />
 
