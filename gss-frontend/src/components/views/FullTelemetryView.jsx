@@ -132,6 +132,8 @@ export function FullTelemetryView() {
   const vmux_state = (useTelemetry("/value.vmux_stat") || 0);
   const cam_ack = (useTelemetry("/value.cam_ack") || 0);
 
+  const err_flags = useTelemetry("/value.err_flags");
+
   const cam_batt_volt = useTelemetry("/value.cam_battery_voltage") || 0;
 
   const cam1_text = (cam1_on ? (cam1_rec ? "CAM REC" : "CAM ON") : "CAM OFF");
@@ -200,7 +202,12 @@ export function FullTelemetryView() {
 
           <div className='gss-horizontal-group-elem-25 gss-horizontal-group-elem-restack'>
             <ValueGroup label={"Telemetry Data"} hidden={false} use_smaller_labels={true}>
-                <SingleValue label={"Stage State"} value={fsm_state==null ? "NO_DATA" : state_int_to_state_name(fsm_state)} unit={""} />
+                <MultiValue 
+                    label={"State & Flags"}
+                    titles={["FSM State", "Error Flags"]}
+                    values={[fsm_state==null ? "NO_DATA" : state_int_to_state_name(fsm_state), err_flags]} 
+                    units={["",""]} 
+                />
 
                 <MultiValue
                     label={"Gyroscopic"}
